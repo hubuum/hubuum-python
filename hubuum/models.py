@@ -4,11 +4,18 @@ import re
 
 from django.apps import apps
 from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
 from hubuum.exceptions import MissingParam
 from hubuum.permissions import fully_qualified_operations, operation_exists
+
+
+def get_model(model):
+    """Return the model from a string. Raises ValueError on error."""
+    return apps.get_model("hubuum", model)
 
 
 def model_exists(model):
@@ -29,6 +36,14 @@ def model_is_open(model):
 def models_that_are_open():
     """Return a list of models open to all authenticated users."""
     return ("user", "group")
+
+
+def model_supports_extensions(model):
+    """Check if a model supports extensions."""
+    if isinstance(model, str):
+        model = get_model(model)
+
+    return issubclass(model, ExtensionsModel)
 
 
 class User(AbstractUser):
@@ -176,6 +191,20 @@ class HubuumModel(models.Model):
         abstract = True
 
 
+class ExtensionsModel(models.Model):  # pylint: disable=too-few-public-methods
+    """A model that supports extensions."""
+
+    #    def extensions(self):
+    #        """List all extensions registered for the model."""
+    #        model_name = self._meta.model_name  # pylint: disable=protected-access
+    #        return Extension.objects.filter(model=model_name)
+
+    class Meta:
+        """Meta data for the class."""
+
+        abstract = True
+
+
 class NamespacedHubuumModel(HubuumModel):
     """Base model for a namespaced Hubuum Objects."""
 
@@ -187,6 +216,15 @@ class NamespacedHubuumModel(HubuumModel):
         blank=False,
         null=False,
     )
+
+    class Meta:
+        """Meta data for the class."""
+
+        abstract = True
+
+
+class NamespacedHubuumModelWithExtensions(NamespacedHubuumModel, ExtensionsModel):
+    """An abstract model that provides Namespaces and Extensions."""
 
     class Meta:
         """Meta data for the class."""
@@ -254,13 +292,63 @@ class Permission(HubuumModel):
     class Meta:
         """Metadata permissions."""
 
-        unique_together = (
-            "namespace",
-            "group",
-        )
+        unique_together = ("namespace", "group")
 
 
-class Host(NamespacedHubuumModel):
+class Extension(NamespacedHubuumModel):
+    """An extension to a specific model.
+
+    For now, it is implied that the extension uses REST.
+    """
+
+    def validate_model(self, data):
+        """Validate that the textual name of the model is valid.
+
+        Requirements:
+         - Is a string.
+         - Resolves as the name of a Hubuum model.
+        """
+        if not isinstance(data["model"], str):
+            raise ValidationError({"model": "The model name must be a string."})
+
+        model_name = data["model"]
+        if not model_exists(model_name):
+            raise ValidationError({"model": "No such model"})
+
+        if not model_supports_extensions(model_name):
+            raise ValidationError({"model": "Model does not support extensions."})
+
+        return data
+
+    name = models.CharField(max_length=255, null=False)
+    model = models.CharField(max_length=255, null=False)
+    url = models.CharField(max_length=255, null=False)
+    header = models.CharField(max_length=255)
+    cache_time = models.PositiveSmallIntegerField(default=60)
+
+
+class ExtensionData(NamespacedHubuumModel):
+    """A model for the extensions data for objects.
+
+    Note that the object_id refers to an object of the appropriate model.
+    https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relations
+    """
+
+    extension = models.ForeignKey("Extension", on_delete=models.CASCADE, null=False)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    json_data = models.JSONField(null=True)
+
+    class Meta:
+        """Meta for the model."""
+
+        unique_together = ("extension", "content_type", "object_id")
+
+
+class Host(NamespacedHubuumModelWithExtensions):
     """Host model, a portal into hosts of any kind."""
 
     name = models.CharField(max_length=255)

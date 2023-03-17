@@ -1,9 +1,9 @@
 """Test module: Users and Groups."""
 import pytest
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
 from hubuum.exceptions import MissingParam
-from hubuum.models import Namespace, User
+from hubuum.models import Extension, Host, Namespace, User, model_supports_extensions
 from hubuum.tools import get_object
 
 from .base import HubuumModelTestCase
@@ -61,3 +61,38 @@ class InternalsTestCase(HubuumModelTestCase):
             test.has_namespace("rootnotfound.no.reallyno")
         with pytest.raises(NotFound):
             test.has_namespace(12)
+
+    def test_extensions_validation_errors(self):
+        """Test exceptions from the extensions."""
+        # Test that extension support checking works.
+        assert model_supports_extensions("Host") is True  # nosec
+        assert model_supports_extensions(Host) is True  # nosec
+
+        namespace, _ = Namespace.objects.get_or_create(name="Test")
+        extension, _ = Extension.objects.get_or_create(
+            name="Test", namespace=namespace, url="https://nope.tld/", model="host"
+        )
+        data = {}
+
+        # Test that we require data["model"] to be a string
+        data["model"] = {}
+        with pytest.raises(ValidationError):
+            extension.validate_model(data)
+
+        data["model"] = []
+        with pytest.raises(ValidationError):
+            extension.validate_model(data)
+
+        # Test that when we have a string, we have a model with that name.
+        data["model"] = "nosuchmodel"
+        with pytest.raises(ValidationError):
+            extension.validate_model(data)
+
+        # Test that when we have a string, and a model with the name, but it does
+        # not support extensions.
+        data["model"] = "User"
+        with pytest.raises(ValidationError):
+            extension.validate_model(data)
+
+        data["model"] = "Host"
+        assert (extension.validate_model(data) == data) is True  # nosec

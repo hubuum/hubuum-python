@@ -26,6 +26,18 @@ urlpatterns = [
     ),
     path("namespaces/", views.NamespaceList.as_view()),
     path("namespaces/<val>", views.NamespaceDetail.as_view(), name="namespace-detail"),
+    path("extensions/", views.ExtensionList.as_view()),
+    path(
+        "extensions/<val>",
+        views.ExtensionDetail.as_view(),
+        name="extension-data-detail",
+    ),
+    path("extension_data/", views.ExtensionDataList.as_view()),
+    path(
+        "extension_data/<val>",
+        views.ExtensionDataDetail.as_view(),
+        name="namespace-detail",
+    ),
     path(
         "namespaces/<val>/groups/",
         views.NamespaceMembers.as_view(),

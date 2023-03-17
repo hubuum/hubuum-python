@@ -2,6 +2,7 @@
 # from ipaddress import ip_address
 
 from django.contrib.auth.models import Group
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from rest_framework import generics, status
 from rest_framework.exceptions import (  # NotAuthenticated,
@@ -16,6 +17,8 @@ from rest_framework.views import Response
 from hubuum.exceptions import Conflict
 from hubuum.filters import HubuumObjectPermissionsFilter
 from hubuum.models import (
+    Extension,
+    ExtensionData,
     Host,
     HostType,
     Jack,
@@ -36,6 +39,8 @@ from hubuum.permissions import (
 from hubuum.tools import get_group, get_permission, get_user
 
 from .serializers import (
+    ExtensionDataSerializer,
+    ExtensionSerializer,
     GroupSerializer,
     HostSerializer,
     HostTypeSerializer,
@@ -246,6 +251,56 @@ class PermissionDetail(HubuumDetail):
 
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
+
+
+class ExtensionList(HubuumList):
+    """Get: List extensions. Post: Add extension."""
+
+    queryset = Extension.objects.all()
+    serializer_class = ExtensionSerializer
+
+
+class ExtensionDetail(HubuumDetail):
+    """Get, Patch, or Destroy an extension."""
+
+    queryset = Extension.objects.all()
+    serializer_class = ExtensionSerializer
+    lookup_fields = ("id", "name")
+
+
+class ExtensionDataList(HubuumList):
+    """Get: List extensiondata. Post: Add extensiondata."""
+
+    queryset = ExtensionData.objects.all()
+    serializer_class = ExtensionDataSerializer
+
+    def post(self, request, *args, **kwargs):
+        """Handle posting duplicates as a patch."""
+        extension = request.data["extension"]
+        object_id = request.data["object_id"]
+        model_name = request.data["content_type"]
+        content_type = ContentType.objects.get(model=model_name).id
+
+        existing_object_entry = ExtensionData.objects.filter(
+            extension=extension, object_id=object_id, content_type=content_type
+        ).first()
+
+        if existing_object_entry:
+            existing_object_entry.json_data = request.data["json_data"]
+            existing_object_entry.save()
+            return Response(
+                ExtensionDataSerializer(existing_object_entry).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return super().post(request, *args, **kwargs)
+
+
+class ExtensionDataDetail(HubuumDetail):
+    """Get, Patch, or Destroy an extensiondata object."""
+
+    queryset = ExtensionData.objects.all()
+    serializer_class = ExtensionDataSerializer
 
 
 class HostList(HubuumList):

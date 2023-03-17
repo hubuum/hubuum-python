@@ -1,11 +1,14 @@
 """Versioned (v1) serializers of the hubuum models."""
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
 from hubuum.models import (
+    Extension,
+    ExtensionData,
     Host,
     HostType,
     Jack,
@@ -96,6 +99,47 @@ class GroupSerializer(HubuumSerializer):
 
         model = Group
         fields = "__all__"
+
+
+class ExtensionSerializer(HubuumSerializer):
+    """Serialize an Extension object."""
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = Extension
+        fields = "__all__"
+
+
+class ExtensionDataSerializer(HubuumSerializer):
+    """Serialize an ExtensionData object."""
+
+    def validate(self, attrs):
+        """Validate that the data offered applies to the correct model.
+
+        This doesn't even get triggered unless we have a working extension object.
+        """
+        content_type = attrs["content_type"]
+        extension = attrs["extension"]
+        model_class = content_type.model_class()
+        model_name = model_class._meta.model_name  # pylint: disable=protected-access
+
+        if not extension.model == model_name:
+            raise ValidationError({"model": "Extension does not apply to this model."})
+
+        super().validate(self)
+        return attrs
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = ExtensionData
+        fields = "__all__"
+
+    content_type = serializers.SlugRelatedField(
+        queryset=ContentType.objects.all(),
+        slug_field="model",
+    )
 
 
 class HostSerializer(HubuumSerializer):
