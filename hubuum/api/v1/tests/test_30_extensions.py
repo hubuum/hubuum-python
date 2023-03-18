@@ -63,7 +63,7 @@ class APIExtensionsData(HubuumAPITestCase):
         exdid = exdblob.data["id"]
         self.assert_get(f"/extension_data/{exdid}")
 
-        assert (exdblob.data["json_data"]["key"] == "value") is True  # nosec
+        self.assertTrue(exdblob.data["json_data"]["key"] == "value")
 
         # Updating by using post
         exdblob = self.assert_post(
@@ -77,7 +77,7 @@ class APIExtensionsData(HubuumAPITestCase):
             },
         )
 
-        assert (exdblob.data["json_data"]["key"] == "newvalue") is True  # nosec
+        self.assertTrue(exdblob.data["json_data"]["key"] == "newvalue")
 
         # Posting with the wrong content_type (user vs host)
         exdblob = self.assert_post_and_400(

@@ -26,22 +26,18 @@ class InternalsTestCase(HubuumModelTestCase):
         with pytest.raises(MissingParam):
             self._test_has_identical_values(dictionary={})
 
-    # Using assert triggers bandit:
-    # https://bandit.readthedocs.io/en/latest/plugins/b101_assert_used.html
-    # However, producing a consistent configuration across workflows and
-    # external tools is proving annoying, so we mark out the lines directly.
     def test_get_object(self):
         """Test the get_object interface from tools."""
-        assert isinstance(get_object(User, "test"), User) is True  # nosec
-        assert get_object(User, "doesnotexist", raise_exception=False) is None  # nosec
+        self.assertTrue(isinstance(get_object(User, "test"), User))
+        self.assertTrue(get_object(User, "doesnotexist", raise_exception=False) is None)
         with pytest.raises(NotFound):
-            assert get_object(User, "doesnotexist")  # nosec
+            self.assertTrue(get_object(User, "doesnotexist"))
 
     def test_has_perm(self):
         """Test the internals of has_perm."""
         # These should never happen, but are handled.
         test = User.objects.get(username="test")
-        assert test.has_perm("hubuum.read_namespace", None) is False  # nosec
+        self.assertFalse(test.has_perm("hubuum.read_namespace", None))
         with pytest.raises(MissingParam):
             test.has_perm("nosuchperm", None)
         with pytest.raises(MissingParam):
@@ -54,7 +50,7 @@ class InternalsTestCase(HubuumModelTestCase):
             test.namespaced_can("nosuchperm", None)
 
         Namespace.objects.get_or_create(name="root")
-        assert test.has_namespace("root") is False  # nosec
+        self.assertFalse(test.has_namespace("root"))
         with pytest.raises(NotFound):
             test.has_namespace("rootnotfound.no")
         with pytest.raises(NotFound):
@@ -65,8 +61,8 @@ class InternalsTestCase(HubuumModelTestCase):
     def test_extensions_validation_errors(self):
         """Test exceptions from the extensions."""
         # Test that extension support checking works.
-        assert model_supports_extensions("Host") is True  # nosec
-        assert model_supports_extensions(Host) is True  # nosec
+        self.assertTrue(model_supports_extensions("Host"))
+        self.assertTrue(model_supports_extensions(Host))
 
         namespace, _ = Namespace.objects.get_or_create(name="Test")
         extension, _ = Extension.objects.get_or_create(
@@ -95,4 +91,4 @@ class InternalsTestCase(HubuumModelTestCase):
             extension.validate_model(data)
 
         data["model"] = "Host"
-        assert (extension.validate_model(data) == data) is True  # nosec
+        self.assertTrue(extension.validate_model(data) == data)
