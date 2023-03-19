@@ -18,7 +18,17 @@ class HubuumExtensionTestCase(HubuumAPITestCase):
             "url": "https://fleet.my.domain/api/v1/fleet/hosts/identifier/{fqdn}",
             "header": "Authorization: Bearer sh...==",
         }
+        self.extension_blob2 = {
+            "namespace": self.namespace.id,
+            "name": "ansible",
+            "model": "host",
+            "url": "https://ansible.data/{fqdn}",
+            "header": "Authorization: Bearer sh...==",
+        }
         self.host, _ = Host.objects.get_or_create(name="test", namespace=self.namespace)
+        self.host2, _ = Host.objects.get_or_create(
+            name="test2", namespace=self.namespace
+        )
 
     def tearDown(self) -> None:
         """Tear down the test environment for the class."""
@@ -78,3 +88,11 @@ class APIExtensionsData(HubuumExtensionTestCase):
             "/extension_data/",
             self._extension_data_blob(extension_id, content_type="user"),
         )
+        exdblob = self.assert_post("/extensions/", self.extension_blob2)
+
+        hblob = self.assert_get("/hosts/test")
+        self.assertTrue(hblob.data["extensions"]["fleet"]["key"] == newvalue)
+        self.assertTrue(hblob.data["extensions"]["ansible"] is None)
+        hblob = self.assert_get("/hosts/test2")
+        self.assertTrue(hblob.data["extensions"]["fleet"] is None)
+        self.assertTrue(hblob.data["extensions"]["ansible"] is None)

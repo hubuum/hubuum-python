@@ -20,6 +20,7 @@ from hubuum.models import (
     Room,
     User,
     Vendor,
+    object_supports_extensions,
 )
 
 
@@ -67,6 +68,15 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
 
 class HubuumSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
     """General Hubuum Serializer."""
+
+    extensions = serializers.SerializerMethodField()
+
+    def get_extensions(self, obj):
+        """Display extension data."""
+        if object_supports_extensions(obj):
+            return obj.extension_data()
+
+        return None
 
 
 class UserSerializer(HubuumSerializer):
@@ -167,7 +177,7 @@ class NamespaceSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class PermissionSerializer(HubuumSerializer):
+class PermissionSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
     """Serialize a Permission object."""
 
     class Meta:

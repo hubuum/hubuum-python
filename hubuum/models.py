@@ -46,6 +46,11 @@ def model_supports_extensions(model):
     return issubclass(model, ExtensionsModel)
 
 
+def object_supports_extensions(obj):
+    """Check if an object supports extensions."""
+    return isinstance(obj, NamespacedHubuumModelWithExtensions)
+
+
 class User(AbstractUser):
     """Extension to the default User class."""
 
@@ -191,13 +196,31 @@ class HubuumModel(models.Model):
         abstract = True
 
 
-class ExtensionsModel(models.Model):  # pylint: disable=too-few-public-methods
+class ExtensionsModel(models.Model):
     """A model that supports extensions."""
 
-    #    def extensions(self):
-    #        """List all extensions registered for the model."""
-    #        model_name = self._meta.model_name  # pylint: disable=protected-access
-    #        return Extension.objects.filter(model=model_name)
+    def extensions(self):
+        """List all extensions registered for the model."""
+        model_name = self._meta.model_name  # pylint: disable=protected-access
+        return Extension.objects.filter(model=model_name)
+
+    def extension_data(self):
+        """Return the data for each extension the object has."""
+        data = {}
+        for extension in self.extensions():
+            content_type = ContentType.objects.get(model=extension.model).id
+            extension_data = ExtensionData.objects.filter(
+                extension=extension.id,
+                object_id=self.id,
+                content_type=content_type,
+            ).first()
+
+            if extension_data:
+                data[extension.name] = extension_data.json_data
+            else:
+                data[extension.name] = None
+
+        return data
 
     class Meta:
         """Meta data for the class."""
@@ -502,7 +525,7 @@ class Jack(NamespacedHubuumModel):
         return self.name
 
 
-class Person(NamespacedHubuumModel):
+class Person(NamespacedHubuumModelWithExtensions):
     """A person.
 
     Persons have rooms. Computers may have people. It's all very cozy.
