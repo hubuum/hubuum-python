@@ -1,7 +1,7 @@
 """Filters for hubuum permissions."""
 from rest_framework import filters
 
-from hubuum.models import Permission, model_is_open
+from hubuum.models.base import Permission, model_is_open
 
 
 class HubuumObjectPermissionsFilter(filters.BaseFilterBackend):

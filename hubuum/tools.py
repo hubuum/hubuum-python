@@ -1,52 +1,18 @@
-"""Tools for huubum."""
+"""Tools for huubum.
 
-from django.contrib.auth.models import Group
+This package is NOT allowed to import anything from internally in hubuum.
+"""
+
+
+from django.apps import apps
 from rest_framework.exceptions import NotFound
 
-from hubuum.models import Namespace, Permission, User
 
-
-def get_user(user_identifier, raise_exception=True):
-    """Try to find a user based on the identifier.
-
-    Searches in User.lookup_fields
-    """
-    return get_object(User, user_identifier, raise_exception=raise_exception)
-
-
-def get_group(group_identifier, raise_exception=True):
-    """Try to find a group based on the identifier.
-
-    param: group_identifier
-
-    return: group object
-
-    raises: NotFound if no object found.
-    """
-    return get_object(
-        Group,
-        group_identifier,
-        lookup_fields=["id", "name"],
-        raise_exception=raise_exception,
-    )
-
-
-def get_permission(namespace: Namespace, group: Group, raise_exception=True):
-    """Try to find a permission object for the (namespace, group) touple.
-
-    param: namespace (Namespace instance)
-    param: group (Group instance)
-
-    returns: permission object
-
-    raises: NotFound if no object found.
-    """
+def get_model(model):
+    """Return the model from a string. Returns None if it fails.."""
     try:
-        obj = Permission.objects.get(namespace=namespace, group=group)
-        return obj
-    except Permission.DoesNotExist as exc:
-        if raise_exception:
-            raise NotFound() from exc
+        return apps.get_model("hubuum", model)
+    except LookupError:
         return None
 
 

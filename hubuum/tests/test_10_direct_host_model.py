@@ -1,5 +1,5 @@
 """Test module for the Host model."""
-from hubuum.models import Host
+from hubuum.models.base import Host
 
 from .base import HubuumModelTestCase
 

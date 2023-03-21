@@ -1,5 +1,5 @@
 """Test hubuum extensions."""
-from hubuum.models import Host, Namespace
+from hubuum.models.base import Host, Namespace
 
 from .base import HubuumAPITestCase
 
@@ -24,6 +24,7 @@ class HubuumExtensionTestCase(HubuumAPITestCase):
             "model": "host",
             "url": "https://ansible.data/{fqdn}",
             "header": "Authorization: Bearer sh...==",
+            "require_interpolation": True,
         }
         self.host, _ = Host.objects.get_or_create(name="test", namespace=self.namespace)
         self.host2, _ = Host.objects.get_or_create(
@@ -44,6 +45,80 @@ class HubuumExtensionTestCase(HubuumAPITestCase):
             "object_id": self.host.id,
             "json_data": {"key": value, "listkey": [1, 2, 3]},
         }
+
+
+class APIExtensionURLValidation(HubuumExtensionTestCase):
+    """Test URL validation extensions."""
+
+    def _make_extension_blob(self, url, model="host"):
+        """Make an extension blob with the given URL."""
+        return {
+            "namespace": self.namespace.id,
+            "name": "ansible",
+            "model": model,
+            "url": url,
+            "header": "Authorization: Bearer sh...==",
+        }
+
+    def test_url_must_be_string(self):
+        """Test that URL must be a string."""
+        self.assert_post_and_400("/extensions/", self._make_extension_blob([1, 2]))
+        self.assert_post_and_400(
+            "/extensions/", self._make_extension_blob({"key": "value "})
+        )
+        self.assert_post(
+            "/extensions/", self._make_extension_blob("https://www.foo.bar/{fqdn}")
+        )
+
+    def test_url_must_be_well_formed(self):
+        """Test that URL is well-formed."""
+        self.assert_post_and_400(
+            "/extensions/", self._make_extension_blob("httg://www.foo.bar/{fqdn}")
+        )
+        self.assert_post_and_400(
+            "/extensions/", self._make_extension_blob("http://foobar.d")
+        )
+        self.assert_post_and_400(
+            "/extensions/", self._make_extension_blob("www.foo.bar/{fqdn}")
+        )
+        self.assert_post(
+            "/extensions/", self._make_extension_blob("https://www.foo.bar/{fqdn}")
+        )
+
+    def test_url_interpolation(self):
+        """Test that URL interpolates as required."""
+        self.assert_post(
+            "/extensions/",
+            self._make_extension_blob("https://www.foo.bar/{fqdn}"),
+        )
+        self.assert_post(
+            "/extensions/",
+            self._make_extension_blob("https://www.foo.bar/{room_id}", model="room"),
+        )
+        # Field exists, but model doesn't support extensions.
+        self.assert_post_and_400(
+            "/extensions/",
+            self._make_extension_blob("https://www.foo.bar/{username}", model="user"),
+        )
+        # No interpolation required.
+        self.assert_post_and_400(
+            "/extensions/",
+            self._make_extension_blob("https://www.foo.bar/no/interpolation"),
+        )
+        self.assert_post_and_400(
+            "/extensions/",
+            self._make_extension_blob("https://www.foo.bar/{fqdn}", model="user"),
+        )
+        self.assert_post_and_400(
+            "/extensions/",
+            self._make_extension_blob(
+                "https://www.foo.bar/{fqdn}", model="nosuchmodel"
+            ),
+        )
+        self.assert_post_and_400(
+            "/extensions/",
+            self._make_extension_blob("https://www.foo.bar/{fqdnasd}"),
+        )
 
 
 class APIExtension(HubuumExtensionTestCase):

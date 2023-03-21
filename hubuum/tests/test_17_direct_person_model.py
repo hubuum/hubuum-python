@@ -1,5 +1,5 @@
 """Test module for the Person model."""
-from hubuum.models import Person
+from hubuum.models.base import Person
 
 from .base import HubuumModelTestCase
 

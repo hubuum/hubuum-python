@@ -16,7 +16,8 @@ from rest_framework.views import Response
 
 from hubuum.exceptions import Conflict
 from hubuum.filters import HubuumObjectPermissionsFilter
-from hubuum.models import (
+from hubuum.models.auth import User, get_group, get_user
+from hubuum.models.base import (
     Extension,
     ExtensionData,
     Host,
@@ -28,7 +29,6 @@ from hubuum.models import (
     PurchaseDocuments,
     PurchaseOrder,
     Room,
-    User,
     Vendor,
 )
 from hubuum.permissions import (
@@ -36,7 +36,6 @@ from hubuum.permissions import (
     NameSpace,
     fully_qualified_operations,
 )
-from hubuum.tools import get_group, get_permission, get_user
 
 from .serializers import (
     ExtensionDataSerializer,
@@ -421,7 +420,7 @@ class NamespaceMembersGroup(
         """Get a group that has access to a namespace."""
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        permission = get_permission(namespace, group)
+        permission = namespace.get_permissions_for_group(group)
 
         return Response(PermissionSerializer(permission).data)
 
@@ -430,7 +429,7 @@ class NamespaceMembersGroup(
         """Patch the permissions of an existing group for a namespace."""
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        instance = get_permission(namespace, group)
+        instance = namespace.get_permissions_for_group(group)
 
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -453,7 +452,7 @@ class NamespaceMembersGroup(
         """
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        instance = get_permission(namespace, group, raise_exception=False)
+        instance = namespace.get_permissions_for_group(group, raise_exception=False)
 
         if set(request.data.keys()).isdisjoint(fully_qualified_operations()):
             raise ParseError(
@@ -482,7 +481,7 @@ class NamespaceMembersGroup(
         """
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        permission = get_permission(namespace, group)
+        permission = namespace.get_permissions_for_group(group)
 
         permission.delete()
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)

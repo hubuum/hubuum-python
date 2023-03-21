@@ -1,5 +1,5 @@
 """Test module for the Vendor model."""
-from hubuum.models import Vendor
+from hubuum.models.base import Vendor
 
 from .base import HubuumModelTestCase
 

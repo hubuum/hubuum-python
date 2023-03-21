@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models import User
+from hubuum.models.auth import User
 
 
 class UserAndGroupTestCase(TestCase):

@@ -1,5 +1,5 @@
 """Test module for the Jack model."""
-from hubuum.models import Jack
+from hubuum.models.base import Jack
 
 from .base import HubuumModelTestCase
 

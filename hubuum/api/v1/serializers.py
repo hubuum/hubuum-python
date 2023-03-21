@@ -6,7 +6,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
-from hubuum.models import (
+from hubuum.models.auth import User
+from hubuum.models.base import (
     Extension,
     ExtensionData,
     Host,
@@ -18,10 +19,11 @@ from hubuum.models import (
     PurchaseDocuments,
     PurchaseOrder,
     Room,
-    User,
     Vendor,
     object_supports_extensions,
 )
+from hubuum.tools import get_model
+from hubuum.validators import url_interpolation_fields
 
 
 class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
@@ -113,6 +115,43 @@ class GroupSerializer(HubuumSerializer):
 
 class ExtensionSerializer(HubuumSerializer):
     """Serialize an Extension object."""
+
+    def validate(self, attrs):
+        """Validate that the data offered applies to the correct model.
+
+        This doesn't even get triggered unless we have a working extension object.
+        """
+        require_interpolation = True  # This should fetch the default for the field
+        if "require_interpolation" in attrs:
+            require_interpolation = attrs["require_interpolation"]
+
+        if require_interpolation:
+            fields = url_interpolation_fields(attrs["url"])
+            if not fields:
+                raise ValidationError(
+                    {
+                        "url": "Interpolation string ({fieldname}) required but not found."
+                    }
+                )
+
+            #            The model is already validated as existing via validate_model.
+            #            try:
+            #                cls = get_model(attrs["model"])
+            #            except ValueError as ex:
+            #                raise ValidationError({"model": "No such model."}) from ex
+
+            cls = get_model(attrs["model"])
+            failed_fields = []
+            for field in fields:
+                if not hasattr(cls, field):
+                    failed_fields.append(field)
+
+            if failed_fields:
+                errorstring = f"{attrs['model']} does not support interpolating"
+                errorstring += " on the field(s) {failed_fields}."
+                raise ValidationError({"url": errorstring})
+
+        return attrs
 
     class Meta:
         """How to serialize the object."""

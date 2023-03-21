@@ -1,31 +1,14 @@
 """Models for the hubuum project."""
 # from datetime import datetime
-import re
-
-from django.apps import apps
-from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 
-from hubuum.exceptions import MissingParam
-from hubuum.permissions import fully_qualified_operations, operation_exists
-
-
-def get_model(model):
-    """Return the model from a string. Raises ValueError on error."""
-    return apps.get_model("hubuum", model)
-
-
-def model_exists(model):
-    """Check if a given model exists by name."""
-    try:
-        apps.get_model("hubuum", model)
-    except LookupError:
-        return False
-
-    return True
+from hubuum.permissions import fully_qualified_operations
+from hubuum.tools import get_model
+from hubuum.validators import validate_model, validate_url
 
 
 def model_is_open(model):
@@ -51,139 +34,16 @@ def object_supports_extensions(obj):
     return isinstance(obj, NamespacedHubuumModelWithExtensions)
 
 
-class User(AbstractUser):
-    """Extension to the default User class."""
-
-    model_permissions_pattern = re.compile(
-        r"^hubuum.(create|read|update|delete|namespace)_(\w+)$"
-    )
-    lookup_fields = ["id", "username", "email"]
-
-    _group_list = None
-
-    def is_admin(self):
-        """Check if the user is any type of admin (staff/superadmin) (or in a similar group?)."""
-        return self.is_staff or self.is_superuser
-
-    @property
-    def group_list(self):
-        """List the names of all the groups the user is a member of."""
-        if self._group_list is None:
-            self._group_list = list(self.groups.values_list("name", flat=True))
-        return self._group_list
-
-    def group_count(self):
-        """Return the number of groups the user is a member of."""
-        return self.groups.count()
-
-    def has_only_one_group(self):
-        """Return true if the user is a member of only one group."""
-        return self.group_count() == 1
-
-    def is_member_of(self, group):
-        """Check if the user is a member of a specific group."""
-        return self.is_member_of_any([group])
-
-    def is_member_of_any(self, groups):
-        """Check to see if a user is a member of any of the groups in the list."""
-        return bool([i for i in groups if i in self.groups.all()])
-
-    def namespaced_can(self, perm, namespace) -> bool:
-        """Check to see if the user can perform perm for namespace.
-
-        param: perm (permission string, 'has_[create|read|update|delete|namespace])
-        param: namespace (namespace object)
-        return True|False
-        """
-        if not operation_exists(perm, fully_qualified=True):
-            raise MissingParam(f"Unknown permission '{perm}' passed to namespaced_can.")
-
-        # We need to check if the user is a member of a group
-        # that has the given permission the namespace.
-        groups = namespace.groups_that_can(perm)
-        return self.is_member_of_any(groups)
-
-    def has_namespace(
-        self,
-        namespace,
-        write_perm="has_namespace",
-    ):
-        """Check if the user has namespace permissions for the given namespace.
-
-        Only admin users can create or populate root namespaces.
-
-        For users, if the namespace isn't scoped (contains no dots), return False.
-        Otherwise, check if the user can:
-          - create the namespace (using has_namespace) or,
-          - create objects in the namespace (using has_create) on the last element.
-        """
-        if isinstance(namespace, int):
-            try:
-                namespace_obj = Namespace.objects.get(pk=namespace)
-                return self.namespaced_can(write_perm, namespace_obj)
-            except Namespace.DoesNotExist as exc:
-                raise NotFound from exc
-
-        scope = namespace.split(".")
-        if len(scope) == 1:
-            return False
-
-        if write_perm == "has_namespace":
-            target = scope[-2]
-
-        try:
-            namespace_obj = Namespace.objects.get(name=target)
-        except Namespace.DoesNotExist as exc:
-            raise NotFound from exc
-
-        return self.namespaced_can(write_perm, namespace_obj)
-
-    #        try:
-    #            parent = Namespace.objects.get(name=scope[-1])
-    #        except Namespace.DoesNotExist:
-    #            return False
-
-    #        return Permission.objects.filter(
-    #            namespace=parent.id, has_namespace=True, group__in=self.groups.all()
-    #        ).exists()
-
-    def has_perm(self, perm: str, obj: object = None) -> bool:
-        """
-        Model (?) permissions check for an object.
-
-        perm: see permissions.py
-        obj: Hubuum Object
-        """
-        field = None
-
-        try:
-            operation, model = re.match(User.model_permissions_pattern, perm).groups()
-        except AttributeError as exc:
-            raise MissingParam(
-                f"Unknown permission '{perm}' passed to has_perm"
-            ) from exc
-
-        if operation_exists(operation) and model_exists(model):
-            field = "has_" + operation
-        else:
-            raise MissingParam(
-                f"Unknown operation or model '{operation} / {model}' passed to has_perm"
-            )
-
-        # We should always get an object to test against.
-        if obj:
-            return Permission.objects.filter(
-                namespace=obj.namespace, **{field: True}, group__in=self.groups.all()
-            ).exists()
-
-        return False
-
-
 class HubuumModel(models.Model):
     """Base model for Hubuum Objects."""
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def supports_extensions(cls):
+        """Check if a class supports extensions."""
+        return issubclass(cls, ExtensionsModel)
 
     readonly_fields = (
         "created_at",
@@ -206,21 +66,30 @@ class ExtensionsModel(models.Model):
 
     def extension_data(self):
         """Return the data for each extension the object has."""
-        data = {}
-        for extension in self.extensions():
+        extension_data = {}
+        #        extensions_needing_updates = []
+        relevant_extensions = self.extensions()
+
+        for extension in relevant_extensions:
+            #            if self._extension_data_needs_updating(extension):
+            #                extensions_needing_updates.append(extension)
+
+            #        if extensions_needing_updates:
+            #            self._update_extension_data(extensions_needing_updates)
+
             content_type = ContentType.objects.get(model=extension.model).id
-            extension_data = ExtensionData.objects.filter(
+            extension_data_obj = ExtensionData.objects.filter(
                 extension=extension.id,
                 object_id=self.id,
                 content_type=content_type,
             ).first()
 
-            if extension_data:
-                data[extension.name] = extension_data.json_data
+            if extension_data_obj:
+                extension_data[extension.name] = extension_data_obj.json_data
             else:
-                data[extension.name] = None
+                extension_data[extension.name] = None
 
-        return data
+        return extension_data
 
     class Meta:
         """Meta data for the class."""
@@ -260,6 +129,25 @@ class Namespace(HubuumModel):
 
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
+
+    def get_permissions_for_group(self, group: Group, raise_exception=True):
+        """Try to find a permission object for the given group.
+
+        param: group (Group instance)
+        param: raise_exception (True)
+
+        returns: permission object
+
+        raises: NotFound if raise_exception is True and no object is found
+        """
+        try:
+            obj = Permission.objects.get(namespace=self, group=group)
+            return obj
+        except Permission.DoesNotExist as exc:
+            if raise_exception:
+                raise NotFound() from exc
+
+        return None
 
     def grant_all(self, group):
         """Grant all permissions to the namespace to the given group."""
@@ -324,29 +212,11 @@ class Extension(NamespacedHubuumModel):
     For now, it is implied that the extension uses REST.
     """
 
-    def validate_model(self, data):
-        """Validate that the textual name of the model is valid.
-
-        Requirements:
-         - Is a string.
-         - Resolves as the name of a Hubuum model.
-        """
-        if not isinstance(data["model"], str):
-            raise ValidationError({"model": "The model name must be a string."})
-
-        model_name = data["model"]
-        if not model_exists(model_name):
-            raise ValidationError({"model": "No such model"})
-
-        if not model_supports_extensions(model_name):
-            raise ValidationError({"model": "Model does not support extensions."})
-
-        return data
-
     name = models.CharField(max_length=255, null=False)
-    model = models.CharField(max_length=255, null=False)
-    url = models.CharField(max_length=255, null=False)
-    header = models.CharField(max_length=255)
+    model = models.CharField(max_length=255, null=False, validators=[validate_model])
+    url = models.CharField(max_length=255, null=False, validators=[validate_url])
+    require_interpolation = models.BooleanField(default=True, null=False)
+    header = models.CharField(max_length=512)
     cache_time = models.PositiveSmallIntegerField(default=60)
 
 
@@ -481,7 +351,7 @@ class Host(NamespacedHubuumModelWithExtensions):
 #         return DetectedHostData.objects.get(hostid=hostid)
 
 
-class HostType(NamespacedHubuumModel):
+class HostType(NamespacedHubuumModelWithExtensions):
     """The type of hosts supported.
 
     These are a touple of a short name and a description, ie:
@@ -503,7 +373,7 @@ class HostType(NamespacedHubuumModel):
         return self.name
 
 
-class Jack(NamespacedHubuumModel):
+class Jack(NamespacedHubuumModelWithExtensions):
     """The wall end of a network jack.
 
     Like the marking of power outlets, there are standards for such things.
@@ -546,7 +416,7 @@ class Person(NamespacedHubuumModelWithExtensions):
         return self.username
 
 
-class PurchaseDocuments(NamespacedHubuumModel):
+class PurchaseDocuments(NamespacedHubuumModelWithExtensions):
     """Accounting, the documents of an order.
 
     The documents that came with a given purchase order.
@@ -568,7 +438,7 @@ class PurchaseDocuments(NamespacedHubuumModel):
         return self.document_id
 
 
-class PurchaseOrder(NamespacedHubuumModel):
+class PurchaseOrder(NamespacedHubuumModelWithExtensions):
     """Accounting, the order.
 
     When something is bought there is typically some identifier for the purchase.
@@ -587,7 +457,7 @@ class PurchaseOrder(NamespacedHubuumModel):
         return str(self.po_number)
 
 
-class Room(NamespacedHubuumModel):
+class Room(NamespacedHubuumModelWithExtensions):
     """A room.
 
     Possibly with a view. If your room_id contains a floor or building identifier, feel free to
@@ -604,7 +474,7 @@ class Room(NamespacedHubuumModel):
         return self.building + "-" + self.floor.rjust(2, "0") + "-" + self.room_id
 
 
-class Vendor(NamespacedHubuumModel):
+class Vendor(NamespacedHubuumModelWithExtensions):
     """A vendor, they sell you things.
 
     Say thank you. Call your vendor today.
