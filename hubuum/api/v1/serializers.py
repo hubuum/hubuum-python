@@ -75,7 +75,14 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
         """For methods that are subclasses of ExtensionsModel, enable relevant fields."""
         super().__init__(*args, **kwargs)
 
-        if not ("request" in self.context and self.context["request"].method == "GET"):
+        if "request" not in self.context:
+            return
+
+        # Generating the openAPI specification can cause self.context["request"] to be None
+        if not self.context["request"]:
+            return
+
+        if not self.context["request"].method == "GET":
             return
 
         if issubclass(self.Meta.model, ExtensionsModel):
