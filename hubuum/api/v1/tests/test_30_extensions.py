@@ -15,7 +15,7 @@ class HubuumExtensionTestCase(HubuumAPITestCase):
             "namespace": self.namespace.id,
             "name": "fleet",
             "model": "host",
-            "url": "https://fleet.my.domain/api/v1/fleet/hosts/identifier/{fqdn}",
+            "url": "https://fleet.my.domain/api/v1/fleet/hosts/identifier/{name}",
             "header": "Authorization: Bearer sh...==",
         }
         self.extension_blob2 = {

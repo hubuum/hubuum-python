@@ -1,4 +1,6 @@
 """Models for the hubuum project."""
+import re
+
 # from datetime import datetime
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -8,7 +10,7 @@ from rest_framework.exceptions import NotFound
 
 from hubuum.permissions import fully_qualified_operations
 from hubuum.tools import get_model
-from hubuum.validators import validate_model, validate_url
+from hubuum.validators import url_interpolation_regexp, validate_model, validate_url
 
 
 def model_is_open(model):
@@ -27,11 +29,6 @@ def model_supports_extensions(model):
         model = get_model(model)
 
     return issubclass(model, ExtensionsModel)
-
-
-def object_supports_extensions(obj):
-    """Check if an object supports extensions."""
-    return isinstance(obj, NamespacedHubuumModelWithExtensions)
 
 
 class HubuumModel(models.Model):
@@ -90,6 +87,15 @@ class ExtensionsModel(models.Model):
                 extension_data[extension.name] = None
 
         return extension_data
+
+    def interpolate(self, string):
+        """Interpolate fields within {} to the values of those fields."""
+
+        def _get_value_from_match(matchobj):
+            """Interpolate the match object."""
+            return getattr(self, matchobj.group(1))
+
+        return re.sub(url_interpolation_regexp, _get_value_from_match, string)
 
     class Meta:
         """Meta data for the class."""

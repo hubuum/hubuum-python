@@ -10,6 +10,7 @@ from hubuum.models.auth import User
 from hubuum.models.base import (
     Extension,
     ExtensionData,
+    ExtensionsModel,
     Host,
     HostType,
     Jack,
@@ -20,7 +21,6 @@ from hubuum.models.base import (
     PurchaseOrder,
     Room,
     Vendor,
-    object_supports_extensions,
 )
 from hubuum.tools import get_model
 from hubuum.validators import url_interpolation_fields
@@ -68,20 +68,42 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
         return super().run_validation(data)
 
 
-class HubuumSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
+class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
     """General Hubuum Serializer."""
 
-    extensions = serializers.SerializerMethodField()
+    def __init__(self, *args, **kwargs):
+        """For methods that are subclasses of ExtensionsModel, enable relevant fields."""
+        super().__init__(*args, **kwargs)
+
+        if not ("request" in self.context and self.context["request"].method == "GET"):
+            return
+
+        if issubclass(self.Meta.model, ExtensionsModel):
+            self.fields["extensions"] = serializers.SerializerMethodField()
+            self.fields["extension_urls"] = serializers.SerializerMethodField()
+
+        return
+
+    def get_extension_urls(self, obj):
+        """Deliver the endpoint for the URL for this specific object."""
+        url_map = {}
+        for extension in obj.extensions():
+            url_map[extension.name] = obj.interpolate(extension.url)
+
+        return url_map
 
     def get_extensions(self, obj):
         """Display extension data."""
-        if object_supports_extensions(obj):
-            return obj.extension_data()
+        return obj.extension_data()
 
-        return None
+    class Meta:
+        """Meta class for HubuumMetaSerializer."""
+
+        abstract = True
+        model = None
 
 
-class UserSerializer(HubuumSerializer):
+class UserSerializer(HubuumMetaSerializer):
     """Serialize a User object."""
 
     password = serializers.CharField(
@@ -103,7 +125,7 @@ class UserSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class GroupSerializer(HubuumSerializer):
+class GroupSerializer(HubuumMetaSerializer):
     """Serialize a Group object."""
 
     class Meta:
@@ -113,7 +135,7 @@ class GroupSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class ExtensionSerializer(HubuumSerializer):
+class ExtensionSerializer(HubuumMetaSerializer):
     """Serialize an Extension object."""
 
     def validate(self, attrs):
@@ -160,8 +182,13 @@ class ExtensionSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class ExtensionDataSerializer(HubuumSerializer):
+class ExtensionDataSerializer(HubuumMetaSerializer):
     """Serialize an ExtensionData object."""
+
+    content_type = serializers.SlugRelatedField(
+        queryset=ContentType.objects.all(),
+        slug_field="model",
+    )
 
     def validate(self, attrs):
         """Validate that the data offered applies to the correct model.
@@ -185,13 +212,8 @@ class ExtensionDataSerializer(HubuumSerializer):
         model = ExtensionData
         fields = "__all__"
 
-    content_type = serializers.SlugRelatedField(
-        queryset=ContentType.objects.all(),
-        slug_field="model",
-    )
 
-
-class HostSerializer(HubuumSerializer):
+class HostSerializer(HubuumMetaSerializer):
     """Serialize a Host object."""
 
     # serializers.HyperlinkedModelSerializer
@@ -206,7 +228,7 @@ class HostSerializer(HubuumSerializer):
         # fields = ['id', 'name', '_mod_dns']
 
 
-class NamespaceSerializer(HubuumSerializer):
+class NamespaceSerializer(HubuumMetaSerializer):
     """Serialize a Namespace object."""
 
     class Meta:
@@ -226,7 +248,7 @@ class PermissionSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
         fields = "__all__"
 
 
-class HostTypeSerializer(HubuumSerializer):
+class HostTypeSerializer(HubuumMetaSerializer):
     """Serialize a HostType object."""
 
     class Meta:
@@ -236,7 +258,7 @@ class HostTypeSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class JackSerializer(HubuumSerializer):
+class JackSerializer(HubuumMetaSerializer):
     """Serialize a Jack object."""
 
     class Meta:
@@ -246,7 +268,7 @@ class JackSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class PersonSerializer(HubuumSerializer):
+class PersonSerializer(HubuumMetaSerializer):
     """Serialize a Person object."""
 
     class Meta:
@@ -256,7 +278,7 @@ class PersonSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class RoomSerializer(HubuumSerializer):
+class RoomSerializer(HubuumMetaSerializer):
     """Serialize a Room object."""
 
     class Meta:
@@ -266,7 +288,7 @@ class RoomSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class PurchaseDocumentsSerializer(HubuumSerializer):
+class PurchaseDocumentsSerializer(HubuumMetaSerializer):
     """Serialize a PurchaseDocument object."""
 
     class Meta:
@@ -276,7 +298,7 @@ class PurchaseDocumentsSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class PurchaseOrderSerializer(HubuumSerializer):
+class PurchaseOrderSerializer(HubuumMetaSerializer):
     """Serialize a PurchaseOrder object."""
 
     class Meta:
@@ -286,7 +308,7 @@ class PurchaseOrderSerializer(HubuumSerializer):
         fields = "__all__"
 
 
-class VendorSerializer(HubuumSerializer):
+class VendorSerializer(HubuumMetaSerializer):
     """Serialize a Vendor object."""
 
     class Meta:

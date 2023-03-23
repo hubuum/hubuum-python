@@ -50,6 +50,4 @@ def validate_url(url):
     if not validators.url(clean_url):
         raise ValidationError({"url": f"{url} is malformed."})
 
-    print()
-    print(url + " is OK")
     return True
