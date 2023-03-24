@@ -2,7 +2,8 @@
 from django.contrib.auth.models import Group
 from django.test import TestCase
 
-from hubuum.models import Host, Namespace, Permission, User
+from hubuum.models.auth import User
+from hubuum.models.base import Host, Namespace, Permission
 
 
 class PermissionsTestCase(TestCase):

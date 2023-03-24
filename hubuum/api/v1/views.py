@@ -2,6 +2,7 @@
 # from ipaddress import ip_address
 
 from django.contrib.auth.models import Group
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from rest_framework import generics, status
 from rest_framework.exceptions import (  # NotAuthenticated,
@@ -15,7 +16,10 @@ from rest_framework.views import Response
 
 from hubuum.exceptions import Conflict
 from hubuum.filters import HubuumObjectPermissionsFilter
-from hubuum.models import (
+from hubuum.models.auth import User, get_group, get_user
+from hubuum.models.base import (
+    Extension,
+    ExtensionData,
     Host,
     HostType,
     Jack,
@@ -25,7 +29,6 @@ from hubuum.models import (
     PurchaseDocuments,
     PurchaseOrder,
     Room,
-    User,
     Vendor,
 )
 from hubuum.permissions import (
@@ -33,9 +36,10 @@ from hubuum.permissions import (
     NameSpace,
     fully_qualified_operations,
 )
-from hubuum.tools import get_group, get_permission, get_user
 
 from .serializers import (
+    ExtensionDataSerializer,
+    ExtensionSerializer,
     GroupSerializer,
     HostSerializer,
     HostTypeSerializer,
@@ -248,6 +252,56 @@ class PermissionDetail(HubuumDetail):
     serializer_class = PermissionSerializer
 
 
+class ExtensionList(HubuumList):
+    """Get: List extensions. Post: Add extension."""
+
+    queryset = Extension.objects.all()
+    serializer_class = ExtensionSerializer
+
+
+class ExtensionDetail(HubuumDetail):
+    """Get, Patch, or Destroy an extension."""
+
+    queryset = Extension.objects.all()
+    serializer_class = ExtensionSerializer
+    lookup_fields = ("id", "name")
+
+
+class ExtensionDataList(HubuumList):
+    """Get: List extensiondata. Post: Add extensiondata."""
+
+    queryset = ExtensionData.objects.all()
+    serializer_class = ExtensionDataSerializer
+
+    def post(self, request, *args, **kwargs):
+        """Handle posting duplicates as a patch."""
+        extension = request.data["extension"]
+        object_id = request.data["object_id"]
+        model_name = request.data["content_type"]
+        content_type = ContentType.objects.get(model=model_name).id
+
+        existing_object_entry = ExtensionData.objects.filter(
+            extension=extension, object_id=object_id, content_type=content_type
+        ).first()
+
+        if existing_object_entry:
+            existing_object_entry.json_data = request.data["json_data"]
+            existing_object_entry.save()
+            return Response(
+                ExtensionDataSerializer(existing_object_entry).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return super().post(request, *args, **kwargs)
+
+
+class ExtensionDataDetail(HubuumDetail):
+    """Get, Patch, or Destroy an extensiondata object."""
+
+    queryset = ExtensionData.objects.all()
+    serializer_class = ExtensionDataSerializer
+
+
 class HostList(HubuumList):
     """Get: List hosts. Post: Add host."""
 
@@ -366,7 +420,7 @@ class NamespaceMembersGroup(
         """Get a group that has access to a namespace."""
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        permission = get_permission(namespace, group)
+        permission = namespace.get_permissions_for_group(group)
 
         return Response(PermissionSerializer(permission).data)
 
@@ -375,7 +429,7 @@ class NamespaceMembersGroup(
         """Patch the permissions of an existing group for a namespace."""
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        instance = get_permission(namespace, group)
+        instance = namespace.get_permissions_for_group(group)
 
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -398,7 +452,7 @@ class NamespaceMembersGroup(
         """
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        instance = get_permission(namespace, group, raise_exception=False)
+        instance = namespace.get_permissions_for_group(group, raise_exception=False)
 
         if set(request.data.keys()).isdisjoint(fully_qualified_operations()):
             raise ParseError(
@@ -427,7 +481,7 @@ class NamespaceMembersGroup(
         """
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
-        permission = get_permission(namespace, group)
+        permission = namespace.get_permissions_for_group(group)
 
         permission.delete()
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)

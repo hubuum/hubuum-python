@@ -156,6 +156,8 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         if client is None:
             client = self.client
         response = client.post(self._create_path(path), data)
+        #        if not response.status_code == status_code:
+        #            print(response.content)
         self.assertEqual(response.status_code, status_code)
         return response
 
