@@ -3,7 +3,7 @@ import re
 
 # from datetime import datetime
 from django.contrib.auth.models import Group
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from rest_framework.exceptions import NotFound
@@ -53,56 +53,6 @@ class HubuumModel(models.Model):
         abstract = True
 
 
-class ExtensionsModel(models.Model):
-    """A model that supports extensions."""
-
-    def extensions(self):
-        """List all extensions registered for the model."""
-        model_name = self._meta.model_name  # pylint: disable=protected-access
-        return Extension.objects.filter(model=model_name)
-
-    def extension_data(self):
-        """Return the data for each extension the object has."""
-        extension_data = {}
-        #        extensions_needing_updates = []
-        relevant_extensions = self.extensions()
-
-        for extension in relevant_extensions:
-            #            if self._extension_data_needs_updating(extension):
-            #                extensions_needing_updates.append(extension)
-
-            #        if extensions_needing_updates:
-            #            self._update_extension_data(extensions_needing_updates)
-
-            content_type = ContentType.objects.get(model=extension.model).id
-            extension_data_obj = ExtensionData.objects.filter(
-                extension=extension.id,
-                object_id=self.id,
-                content_type=content_type,
-            ).first()
-
-            if extension_data_obj:
-                extension_data[extension.name] = extension_data_obj.json_data
-            else:
-                extension_data[extension.name] = None
-
-        return extension_data
-
-    def interpolate(self, string):
-        """Interpolate fields within {} to the values of those fields."""
-
-        def _get_value_from_match(matchobj):
-            """Interpolate the match object."""
-            return getattr(self, matchobj.group(1))
-
-        return re.sub(url_interpolation_regexp, _get_value_from_match, string)
-
-    class Meta:
-        """Meta data for the class."""
-
-        abstract = True
-
-
 class NamespacedHubuumModel(HubuumModel):
     """Base model for a namespaced Hubuum Objects."""
 
@@ -114,6 +64,90 @@ class NamespacedHubuumModel(HubuumModel):
         blank=False,
         null=False,
     )
+
+    class Meta:
+        """Meta data for the class."""
+
+        abstract = True
+
+
+class Extension(NamespacedHubuumModel):
+    """An extension to a specific model.
+
+    For now, it is implied that the extension uses REST.
+    """
+
+    name = models.CharField(max_length=255, null=False)
+    model = models.CharField(max_length=255, null=False, validators=[validate_model])
+    url = models.CharField(max_length=255, null=False, validators=[validate_url])
+    require_interpolation = models.BooleanField(default=True, null=False)
+    header = models.CharField(max_length=512)
+    cache_time = models.PositiveSmallIntegerField(default=60)
+
+
+class ExtensionData(NamespacedHubuumModel):
+    """A model for the extensions data for objects.
+
+    Note that the object_id refers to an object of the appropriate model.
+    https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relations
+    """
+
+    extension = models.ForeignKey("Extension", on_delete=models.CASCADE, null=False)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    json_data = models.JSONField(null=True)
+
+    class Meta:
+        """Meta for the model."""
+
+        unique_together = ("extension", "content_type", "object_id")
+
+
+class ExtensionsModel(models.Model):
+    """A model that supports extensions."""
+
+    extension_data_objects = GenericRelation(
+        ExtensionData, related_query_name="ext_objects"
+    )
+
+    def extensions(self):
+        """List all extensions registered for the object."""
+        model = self.__class__.__name__.lower()
+        return Extension.objects.filter(model=model).order_by("name")
+
+    def extension_data(self):
+        """Return the data for each extension the object has."""
+        extension_data = {}
+
+        for extension in self.extensions():
+            extension_data[extension.name] = None
+
+        for extension_data_obj in self.extension_data_objects.all():
+            extension_data[
+                extension_data_obj.extension.name
+            ] = extension_data_obj.json_data
+
+        return extension_data
+
+    def extension_urls(self):
+        """Return the URLs for each extension the object has."""
+        url_map = {}
+        for extension in self.extensions():
+            url_map[extension.name] = self.interpolate(extension.url)
+
+        return url_map
+
+    def interpolate(self, string):
+        """Interpolate fields within {} to the values of those fields."""
+
+        def _get_value_from_match(matchobj):
+            """Interpolate the match object."""
+            return getattr(self, matchobj.group(1))
+
+        return re.sub(url_interpolation_regexp, _get_value_from_match, string)
 
     class Meta:
         """Meta data for the class."""
@@ -212,41 +246,6 @@ class Permission(HubuumModel):
         unique_together = ("namespace", "group")
 
 
-class Extension(NamespacedHubuumModel):
-    """An extension to a specific model.
-
-    For now, it is implied that the extension uses REST.
-    """
-
-    name = models.CharField(max_length=255, null=False)
-    model = models.CharField(max_length=255, null=False, validators=[validate_model])
-    url = models.CharField(max_length=255, null=False, validators=[validate_url])
-    require_interpolation = models.BooleanField(default=True, null=False)
-    header = models.CharField(max_length=512)
-    cache_time = models.PositiveSmallIntegerField(default=60)
-
-
-class ExtensionData(NamespacedHubuumModel):
-    """A model for the extensions data for objects.
-
-    Note that the object_id refers to an object of the appropriate model.
-    https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relations
-    """
-
-    extension = models.ForeignKey("Extension", on_delete=models.CASCADE, null=False)
-
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey("content_type", "object_id")
-
-    json_data = models.JSONField(null=True)
-
-    class Meta:
-        """Meta for the model."""
-
-        unique_together = ("extension", "content_type", "object_id")
-
-
 class Host(NamespacedHubuumModelWithExtensions):
     """Host model, a portal into hosts of any kind."""
 
@@ -286,75 +285,6 @@ class Host(NamespacedHubuumModelWithExtensions):
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
         return self.name
-
-
-# Unique names sounds like a good idea, but "bob's laptop" might happen repeatedly.
-# Serial numbers are also only vendor-unique...
-#    class Meta:
-#        constraints = [
-#            models.UniqueConstraint(
-#                fields=['name'], name="unique_hostname_constraint",
-#            )
-#        ]
-
-
-# class ExternalSource(models.Model):
-#     service_name = models.CharField(max_length=255)
-#     web_url = models.CharField(max_length=255, blank=True, null=True)
-#     api_url = models.CharField(max_length=255, blank=True, null=True)
-
-#     def __str__(self):
-#         """Stringify the object, used to represent the object towards users."""
-#         return self.service_name
-
-
-# class DetectedHostData(models.Model):
-#     host_id = models.OneToOneField(
-#         Host, verbose_name="Host identifier", on_delete=models.CASCADE
-#     )
-#     source = models.OneToOneField(ExternalSource, on_delete=models.CASCADE)
-#     fqdn = models.CharField(max_length=255, blank=True, null=True)
-#     serial_number = models.CharField(max_length=50, blank=True, null=True)
-#     mac = models.CharField(
-#         max_length=20, blank=True, null=True
-#     )  # https://github.com/django-macaddress/django-macaddress
-#     ipv4_address = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
-#     ipv6_address = models.GenericIPAddressField(blank=True, null=True, protocol="IPv6")
-#     memory = models.IntegerField(blank=True, null=True)
-#     cpu = models.CharField(max_length=50, blank=True, null=True)
-#     arch = models.CharField(max_length=10, blank=True, null=True)
-#     model = models.CharField(max_length=50, blank=True, null=True)
-#     vendor = models.CharField(max_length=50, blank=True, null=True)
-#     os = models.CharField(max_length=20, blank=True, null=True)
-#     os_major_version = models.SmallIntegerField(blank=True, null=True)
-#     os_minor_version = models.SmallIntegerField(blank=True, null=True)
-#     os_patch_version = models.SmallIntegerField(blank=True, null=True)
-#     last_fetched = models.DateTimeField(blank=True, null=True)
-#     switch = models.CharField(max_length=255, blank=True, null=True)
-#     port = models.CharField(max_length=30, blank=True, null=True)
-#     display = models.CharField(max_length=50, blank=True, null=True)
-#     primary_user = models.CharField(max_length=50, blank=True, null=True)
-
-#     class Meta:
-#         verbose_name_plural = "detected host Data"
-#         constraints = [
-#             models.UniqueConstraint(
-#                 fields=["host_id", "source"], name="host_id_and_source_combination"
-#             )
-#         ]
-
-#     def __str__(self):
-#         """Stringify the object, used to represent the object towards users."""
-#         return Host.objects.get(pk=self.id).name + "+" + self.source
-
-#     # Should also support other identifiers?
-#     @staticmethod
-#     def get_externals_for_host(hostid):
-#         try:
-#             objects = DetectedHostData.objects.get(hostid=hostid)
-#         except DetectedHostData.DoesNotExist:
-#             objects = []
-#         return DetectedHostData.objects.get(hostid=hostid)
 
 
 class HostType(NamespacedHubuumModelWithExtensions):

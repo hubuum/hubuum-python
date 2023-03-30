@@ -79,7 +79,8 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
             return
 
         # Generating the openAPI specification can cause self.context["request"] to be None
-        if not self.context["request"]:
+        # This is a very weird corner case.
+        if not self.context["request"]:  # pragma: no cover
             return
 
         if not self.context["request"].method == "GET":
@@ -87,21 +88,21 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
 
         if issubclass(self.Meta.model, ExtensionsModel):
             self.fields["extensions"] = serializers.SerializerMethodField()
+            self.fields["extension_data"] = serializers.SerializerMethodField()
             self.fields["extension_urls"] = serializers.SerializerMethodField()
-
         return
 
     def get_extension_urls(self, obj):
         """Deliver the endpoint for the URL for this specific object."""
-        url_map = {}
-        for extension in obj.extensions():
-            url_map[extension.name] = obj.interpolate(extension.url)
+        return obj.extension_urls()
 
-        return url_map
-
-    def get_extensions(self, obj):
+    def get_extension_data(self, obj):
         """Display extension data."""
         return obj.extension_data()
+
+    def get_extensions(self, obj):
+        """Display active extensions for the object."""
+        return sorted(o.name for o in obj.extensions())
 
     class Meta:
         """Meta class for HubuumMetaSerializer."""

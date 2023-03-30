@@ -15,7 +15,22 @@ from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.views import Response
 
 from hubuum.exceptions import Conflict
-from hubuum.filters import HubuumObjectPermissionsFilter
+from hubuum.filters import (
+    ExtensionDataFilterSet,
+    ExtensionFilterSet,
+    GroupFilterSet,
+    HostFilterSet,
+    HostTypeFilterSet,
+    JackFilterSet,
+    NamespaceFilterSet,
+    PermissionFilterSet,
+    PersonFilterSet,
+    PurchaseDocumentsFilterSet,
+    PurchaseOrderFilterSet,
+    RoomFilterSet,
+    UserFilterSet,
+    VendorFilterSet,
+)
 from hubuum.models.auth import User, get_group, get_user
 from hubuum.models.base import (
     Extension,
@@ -111,7 +126,6 @@ class HubuumList(generics.ListCreateAPIView):
     """Get: List objects. Post: Add object."""
 
     permission_classes = (NameSpace,)
-    filter_backends = [HubuumObjectPermissionsFilter]
 
 
 # NOTE: Order for the inheritance here is vital.
@@ -128,6 +142,7 @@ class UserList(HubuumList):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsSuperOrAdminOrReadOnly,)
+    filterset_class = UserFilterSet
 
 
 class UserDetail(HubuumDetail):
@@ -145,6 +160,7 @@ class GroupList(HubuumList):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = (IsSuperOrAdminOrReadOnly,)
+    filterset_class = GroupFilterSet
 
 
 class GroupDetail(HubuumDetail):
@@ -243,6 +259,7 @@ class PermissionList(HubuumList):
 
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
+    filterset_class = PermissionFilterSet
 
 
 class PermissionDetail(HubuumDetail):
@@ -257,6 +274,7 @@ class ExtensionList(HubuumList):
 
     queryset = Extension.objects.all()
     serializer_class = ExtensionSerializer
+    filterset_class = ExtensionFilterSet
 
 
 class ExtensionDetail(HubuumDetail):
@@ -272,6 +290,7 @@ class ExtensionDataList(HubuumList):
 
     queryset = ExtensionData.objects.all()
     serializer_class = ExtensionDataSerializer
+    filterset_class = ExtensionDataFilterSet
 
     def post(self, request, *args, **kwargs):
         """Handle posting duplicates as a patch."""
@@ -307,6 +326,7 @@ class HostList(HubuumList):
 
     queryset = Host.objects.all().order_by("id")
     serializer_class = HostSerializer
+    filterset_class = HostFilterSet
 
 
 class HostDetail(HubuumDetail):
@@ -324,6 +344,7 @@ class NamespaceList(HubuumList):
     serializer_class = NamespaceSerializer
     permission_classes = (NameSpace,)
     namespace_write_permission = "has_namespace"
+    filterset_class = NamespaceFilterSet
 
     def post(self, request, *args, **kwargs):
         """Process creation of new namespaces."""
@@ -492,6 +513,7 @@ class HostTypeList(HubuumList):
 
     queryset = HostType.objects.all().order_by("name")
     serializer_class = HostTypeSerializer
+    filterset_class = HostTypeFilterSet
 
 
 class HostTypeDetail(HubuumDetail):
@@ -506,6 +528,7 @@ class RoomList(HubuumList):
 
     queryset = Room.objects.all().order_by("id")
     serializer_class = RoomSerializer
+    filterset_class = RoomFilterSet
 
 
 class RoomDetail(HubuumDetail):
@@ -520,6 +543,7 @@ class JackList(HubuumList):
 
     queryset = Jack.objects.all().order_by("name")
     serializer_class = JackSerializer
+    filterset_class = JackFilterSet
 
 
 class JackDetail(HubuumDetail):
@@ -534,6 +558,7 @@ class PersonList(HubuumList):
 
     queryset = Person.objects.all().order_by("id")
     serializer_class = PersonSerializer
+    filterset_class = PersonFilterSet
 
 
 class PersonDetail(HubuumDetail):
@@ -548,6 +573,7 @@ class VendorList(HubuumList):
 
     queryset = Vendor.objects.all().order_by("vendor_name")
     serializer_class = VendorSerializer
+    filterset_class = VendorFilterSet
 
 
 class VendorDetail(HubuumDetail):
@@ -562,6 +588,7 @@ class PurchaseOrderList(HubuumList):
 
     queryset = PurchaseOrder.objects.all().order_by("id")
     serializer_class = PurchaseOrderSerializer
+    filterset_class = PurchaseOrderFilterSet
 
 
 class PurchaseOrderDetail(HubuumDetail):
@@ -576,6 +603,7 @@ class PurchaseDocumentList(HubuumList):
 
     queryset = PurchaseDocuments.objects.all().order_by("id")
     serializer_class = PurchaseDocumentsSerializer
+    filterset_class = PurchaseDocumentsFilterSet
 
 
 class PurchaseDocumentDetail(HubuumDetail):
