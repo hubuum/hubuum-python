@@ -1,6 +1,6 @@
 # Hubuum, a single pane of glass
 
-![](https://img.shields.io/badge/python-3.9+-blue.svg)
+![](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![Tox](https://github.com/terjekv/hubuum/actions/workflows/tox.yml/badge.svg)
 ![Flake8](https://github.com/terjekv/hubuum/actions/workflows/lint.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/terjekv/hubuum/badge.svg?branch=main)](https://coveralls.io/github/terjekv/hubuum?branch=main)
