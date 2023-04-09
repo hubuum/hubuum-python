@@ -99,7 +99,12 @@ class HubuumFilterTestCase(HubuumAPITestCase):
                     ext_host_blob.data["id"],
                     "host",
                     host.id,
-                    {"key": "value", "fqdn": host.fqdn, "id": host.id},
+                    {
+                        "key": "value",
+                        "fqdn": host.fqdn,
+                        "id": host.id,
+                        "dns": {"fqdn": host.fqdn},
+                    },
                 ),
             )
 
@@ -159,3 +164,9 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         self.assert_get_elements(
             f"/extension_data/?json_data_lookup=id,{host1id},gt", 2
         )
+
+        # Test scoping:
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=dns__fqdn,other,icontains", 2
+        )
+        self.assert_get_elements("/extension_data/?json_data_lookup=dns__fqdn,other", 0)

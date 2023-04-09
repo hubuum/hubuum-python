@@ -56,6 +56,60 @@ _namespace_fields = {"namespace": _key_lookups}
 _namespace_fields.update(_hubuum_fields)
 
 
+class JSONFieldLookupFilter(filters.CharFilter):
+    """Class to allow filtering on JSON fields.
+
+    Args:
+        field_name (str): The field name to filter on. Must be a JSON field.
+    """
+
+    def filter(self, qs, value):
+        """
+        Filter the queryset based on a JSON key, value, and optional
+        lookup type for the specified field.
+
+        Args:
+            qs (QuerySet): The queryset to filter.
+            value (str): The input value containing the key, value, and optional lookup type.
+
+        Returns:
+            QuerySet: The filtered queryset.
+
+        Raises:
+            ValidationError: If an invalid lookup type for the value is provided.
+        """
+        if not value:
+            return qs
+
+        try:
+            key, val, lookup_type = value.split(",")
+        except ValueError:
+            key, val = value.split(",")
+            lookup_type = "exact"
+
+        try:
+            val = float(val)
+        except ValueError:
+            pass
+
+        if isinstance(val, (float, int)):
+            val_type = "numeric"
+            allowed_lookups = _numeric_lookups
+        else:  # Assume string
+            val_type = "text"
+            allowed_lookups = _textual_lookups
+
+        if lookup_type not in allowed_lookups:
+            valid_lookups = ", ".join(allowed_lookups)
+            allowed_string = f"Allowed types for {val_type} are {valid_lookups}."
+            raise ValidationError(
+                f"Invalid lookup type '{lookup_type}'. {allowed_string}"
+            )
+
+        json_lookup = Q(**{f"{self.field_name}__{key}__{lookup_type}": val})
+        return qs.filter(json_lookup)
+
+
 class NamespacePermissionFilter(filters.FilterSet):
     """Return viewable objects for a user.
 
@@ -179,58 +233,13 @@ class ExtensionFilterSet(NamespacePermissionFilter):
 class ExtensionDataFilterSet(NamespacePermissionFilter):
     """FilterSet for the ExtensionData model with a custom json_data_lookup filter."""
 
-    json_data_lookup = filters.CharFilter(method="filter_json_lookup")
+    json_data_lookup = JSONFieldLookupFilter(field_name="json_data")
 
     class Meta:
         """Meta class for ExtensionDataFilterSet."""
 
         model = ExtensionData
         fields = ["extension", "content_type", "object_id"]
-
-    def filter_json_lookup(self, queryset, _, value):
-        """
-        Filter the queryset based on a JSON key, value, and optional lookup type.
-
-        Args:
-            queryset (QuerySet): The queryset to filter.
-            _ (name, str): The filter name, not used in this method.
-            value (str): The input value containing the key, value, and optional lookup type.
-
-        Returns:
-            QuerySet: The filtered queryset.
-
-        Raises:
-            ValidationError: If an invalid lookup type for the value is provided.
-        """
-        try:
-            key, val, lookup_type = value.split(",")
-        except ValueError:
-            key, val = value.split(",")
-            lookup_type = "exact"
-
-        try:
-            val = float(val)
-        except ValueError:
-            pass
-
-        # Validate the lookup type
-        if isinstance(val, (float, int)):
-            val_type = "numeric"
-            allowed_lookups = _numeric_lookups
-        else:  # Assume string, needs to be extended... type(val) == str:
-            val_type = "text"
-            allowed_lookups = _textual_lookups
-
-        if lookup_type not in allowed_lookups:
-            valid_lookups = ", ".join(allowed_lookups)
-            allowed_string = f"Allowed types for {val_type} are {valid_lookups}."
-            raise ValidationError(
-                f"Invalid lookup type '{lookup_type}'. {allowed_string}"
-            )
-
-        # Use a Q object to filter for JSONField key using the given lookup type
-        json_lookup = Q(**{f"json_data__{key}__{lookup_type}": val})
-        return queryset.filter(json_lookup)
 
 
 class HostFilterSet(NamespacePermissionFilter):
