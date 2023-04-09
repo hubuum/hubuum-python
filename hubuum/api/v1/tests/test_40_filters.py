@@ -47,6 +47,42 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         self._add_host("test2", "test2.other.com")
         self._add_host("test3", "test3.other.com")
 
+        ext_host_blob = self.assert_post("/extensions/", self._make_extension_blob())
+        for host in self.hosts:
+            self.assert_post(
+                "/extension_data/",
+                self._make_extension_data_blob(
+                    ext_host_blob.data["id"],
+                    "host",
+                    host.id,
+                    {
+                        "key": "value",
+                        "fqdn": host.fqdn,
+                        "id": host.id,
+                        "dns": {"fqdn": host.fqdn},
+                    },
+                ),
+            )
+
+        room = Room.objects.create(room_id="BL01-02-345", namespace=self.namespace)
+        ext_room_blob = self.assert_post(
+            "/extensions/",
+            self._make_extension_blob(
+                model="room",
+                name="pytagoras",
+                url="https://pythagoras.top.tld/room_data/{room_id}",
+            ),
+        )
+        self.assert_post(
+            "/extension_data/",
+            self._make_extension_data_blob(
+                ext_room_blob.data["id"],
+                "room",
+                room.id,
+                {"key": "value", "room_id": room.room_id},
+            ),
+        )
+
     def tearDown(self) -> None:
         """Tear down the test environment."""
         self.namespace.delete()
@@ -91,58 +127,9 @@ class HubuumFilterTestCase(HubuumAPITestCase):
 
     def test_extension_data_filtering(self):
         """Test that we can filter into the JSON blobs that extensions deliver."""
-        ext_host_blob = self.assert_post("/extensions/", self._make_extension_blob())
-        for host in self.hosts:
-            self.assert_post(
-                "/extension_data/",
-                self._make_extension_data_blob(
-                    ext_host_blob.data["id"],
-                    "host",
-                    host.id,
-                    {
-                        "key": "value",
-                        "fqdn": host.fqdn,
-                        "id": host.id,
-                        "dns": {"fqdn": host.fqdn},
-                    },
-                ),
-            )
-
-        room = Room.objects.create(room_id="BL01-02-345", namespace=self.namespace)
-        ext_room_blob = self.assert_post(
-            "/extensions/",
-            self._make_extension_blob(
-                model="room",
-                name="pytagoras",
-                url="https://pythagoras.top.tld/room_data/{room_id}",
-            ),
-        )
-        self.assert_post(
-            "/extension_data/",
-            self._make_extension_data_blob(
-                ext_room_blob.data["id"],
-                "room",
-                room.id,
-                {"key": "value", "room_id": room.room_id},
-            ),
-        )
-
         host = self.assert_get("/hosts/test1")
         host1id = host.data["id"]
-        #        print(host.data)
-        #        exdata = self.assert_get(f"/extension_data/{extblob.data['id']}")
-        #        print(exdata.data)
-        # base = f"extension={extblob.data['id']}"
-        #        jbase = f"{base}&json_data__"
         self.assert_get_elements("/extension_data/", 4)
-
-        #        self.assert_get_elements("/extension_data()")
-
-        #        self.assert_get_and_400("/extension_data/?extension__name__contains=nope")
-
-        # Right. JSON fields are not supported...
-        # https://github.com/miki725/django-url-filter/pull/82/commits/5221c484660470c322b01ddcfe6681b7729c81cb
-
         self.assert_get_elements(
             "/extension_data/?json_data_lookup=fqdn,other,icontains", 2
         )
