@@ -22,13 +22,14 @@ class HubuumFilterTestCase(HubuumAPITestCase):
 
     def _make_extension_data_blob(self, extension_id, content_type, host_id, json_data):
         """Create an extension data blob."""
-        return {
+        blob = {
             "namespace": self.namespace.id,
             "extension": extension_id,
             "content_type": content_type,
             "object_id": host_id,
             "json_data": json_data,
         }
+        return blob
 
     def _add_host(self, name, fqdn):
         """Add a host to our collection."""
@@ -98,7 +99,7 @@ class HubuumFilterTestCase(HubuumAPITestCase):
                     ext_host_blob.data["id"],
                     "host",
                     host.id,
-                    {"key": "value", "fqdn": host.fqdn},
+                    {"key": "value", "fqdn": host.fqdn, "id": host.id},
                 ),
             )
 
@@ -122,6 +123,7 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         )
 
         host = self.assert_get("/hosts/test1")
+        host1id = host.data["id"]
         #        print(host.data)
         #        exdata = self.assert_get(f"/extension_data/{extblob.data['id']}")
         #        print(exdata.data)
@@ -129,19 +131,31 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         #        jbase = f"{base}&json_data__"
         self.assert_get_elements("/extension_data/", 4)
 
+        #        self.assert_get_elements("/extension_data()")
 
-#        self.assert_get_elements("/extension_data()")
+        #        self.assert_get_and_400("/extension_data/?extension__name__contains=nope")
 
+        # Right. JSON fields are not supported...
+        # https://github.com/miki725/django-url-filter/pull/82/commits/5221c484660470c322b01ddcfe6681b7729c81cb
 
-#        self.assert_get_elements("/extension_data/?extension__name__contains=fleet", 3)
-#        self.assert_get_elements("/extension_data/?extension__name__contains=nope", 0)
-
-# Right. JSON fields are not supported...
-# https://github.com/miki725/django-url-filter/pull/82/commits/5221c484660470c322b01ddcfe6681b7729c81cb
-
-
-#        self.assert_get_elements(f"/extension_data/?{jbase}key=value", 3)
-#        self.assert_get_elements(f"/extension_data/?{jbase}fqdn__contains=other", 2)
-
-
-#        self.assert_get_elements("/hosts/?extension_data__fleet_key=notvalue", 0)
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=fqdn,other,icontains", 2
+        )
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=fqdn,other,exact", 0
+        )
+        # Implied exact
+        self.assert_get_elements("/extension_data/?json_data_lookup=fqdn,other", 0)
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=fqdn,test1.domain.tld,exact", 1
+        )
+        self.assert_get_and_400(
+            "/extension_data/?json_data_lookup=json_data_lookup,1,endswith"
+        )
+        #        self.assert_get_and_400(
+        #            "/extension_data/?json_data_lookup=json_data_lookup,[],endswith"
+        #        )
+        self.assert_get_elements(f"/extension_data/?json_data_lookup=id,{host1id}", 1)
+        self.assert_get_elements(
+            f"/extension_data/?json_data_lookup=id,{host1id},gt", 2
+        )

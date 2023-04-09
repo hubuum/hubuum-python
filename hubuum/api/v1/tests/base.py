@@ -203,9 +203,9 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         """Get and assert status as 301."""
         return self._assert_get_and_status(path, 301, **kwargs)
 
-    #    def assert_get_and_400(self, path, **kwargs):
-    #        """Get and assert status as 400."""
-    #        return self._assert_get_and_status(path, 400, **kwargs)
+    def assert_get_and_400(self, path, **kwargs):
+        """Get and assert status as 400."""
+        return self._assert_get_and_status(path, 400, **kwargs)
 
     def assert_get_and_401(self, path, **kwargs):
         """Get and assert status as 401."""

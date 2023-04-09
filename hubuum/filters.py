@@ -1,6 +1,8 @@
 """Filters for hubuum permissions."""
 from django.contrib.auth.models import Group
+from django.db.models import Q
 from django_filters import rest_framework as filters
+from rest_framework.exceptions import ValidationError
 
 from hubuum.models.auth import User
 from hubuum.models.base import (
@@ -54,10 +56,6 @@ _namespace_fields = {"namespace": _key_lookups}
 _namespace_fields.update(_hubuum_fields)
 
 
-class JSONFieldExactFilter(filters.CharFilter):
-    """Filter for JSON fields, needs testing."""
-
-
 class NamespacePermissionFilter(filters.FilterSet):
     """Return viewable objects for a user.
 
@@ -91,9 +89,6 @@ class NamespacePermissionFilter(filters.FilterSet):
         else:
             filtered = queryset.filter(namespace__in=res)
         return filtered
-
-
-#        return get_objects_for_user(user, permission, queryset, **self.shortcut_kwargs)
 
 
 class NamespaceFilterSet(NamespacePermissionFilter):
@@ -182,21 +177,60 @@ class ExtensionFilterSet(NamespacePermissionFilter):
 
 
 class ExtensionDataFilterSet(NamespacePermissionFilter):
-    """FilterSet class for ExtensionData."""
+    """FilterSet for the ExtensionData model with a custom json_data_lookup filter."""
 
-    json_data = JSONFieldExactFilter()
+    json_data_lookup = filters.CharFilter(method="filter_json_lookup")
 
     class Meta:
-        """Metadata for the class."""
+        """Meta class for ExtensionDataFilterSet."""
 
         model = ExtensionData
-        fields = {
-            "extension": _key_lookups,
-            "content_type": ["exact"],
-            "object_id": _numeric_lookups,
-            #            "json_data": _textual_lookups,
-        }
-        fields.update(_namespace_fields)
+        fields = ["extension", "content_type", "object_id"]
+
+    def filter_json_lookup(self, queryset, _, value):
+        """
+        Filter the queryset based on a JSON key, value, and optional lookup type.
+
+        Args:
+            queryset (QuerySet): The queryset to filter.
+            _ (name, str): The filter name, not used in this method.
+            value (str): The input value containing the key, value, and optional lookup type.
+
+        Returns:
+            QuerySet: The filtered queryset.
+
+        Raises:
+            ValidationError: If an invalid lookup type for the value is provided.
+        """
+        try:
+            key, val, lookup_type = value.split(",")
+        except ValueError:
+            key, val = value.split(",")
+            lookup_type = "exact"
+
+        try:
+            val = float(val)
+        except ValueError:
+            pass
+
+        # Validate the lookup type
+        if isinstance(val, (float, int)):
+            val_type = "numeric"
+            allowed_lookups = _numeric_lookups
+        else:  # Assume string, needs to be extended... type(val) == str:
+            val_type = "text"
+            allowed_lookups = _textual_lookups
+
+        if lookup_type not in allowed_lookups:
+            valid_lookups = ", ".join(allowed_lookups)
+            allowed_string = f"Allowed types for {val_type} are {valid_lookups}."
+            raise ValidationError(
+                f"Invalid lookup type '{lookup_type}'. {allowed_string}"
+            )
+
+        # Use a Q object to filter for JSONField key using the given lookup type
+        json_lookup = Q(**{f"json_data__{key}__{lookup_type}": val})
+        return queryset.filter(json_lookup)
 
 
 class HostFilterSet(NamespacePermissionFilter):
