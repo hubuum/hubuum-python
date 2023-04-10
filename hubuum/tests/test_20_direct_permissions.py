@@ -55,6 +55,11 @@ class PermissionsTestCase(TestCase):
 
         self.read_perm = "hubuum.read_host"
 
+    def test_str_of_object(self):
+        """Test that the stringify method performs as expected."""
+        self.assertEqual(str(self.onepermissions.id), str(self.onepermissions))
+        self.assertEqual(str(self.twopermissions.id), str(self.twopermissions))
+
     def test_access_to_host_belonging_to_one(self):
         """This object readable by one via onegroup, but not readable by two via twogroup."""
         self.assertTrue(self.one.has_perm(self.read_perm, self.onehost))

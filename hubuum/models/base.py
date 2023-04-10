@@ -77,7 +77,7 @@ class Extension(NamespacedHubuumModel):
     For now, it is implied that the extension uses REST.
     """
 
-    name = models.CharField(max_length=255, null=False)
+    name = models.CharField(max_length=255, null=False, unique=True)
     model = models.CharField(max_length=255, null=False, validators=[validate_model])
     url = models.CharField(max_length=255, null=False, validators=[validate_url])
     require_interpolation = models.BooleanField(default=True, null=False)
@@ -88,6 +88,10 @@ class Extension(NamespacedHubuumModel):
         """Meta for the model."""
 
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.name
 
 
 class ExtensionData(NamespacedHubuumModel):
@@ -110,6 +114,10 @@ class ExtensionData(NamespacedHubuumModel):
 
         unique_together = ("extension", "content_type", "object_id")
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return str(self.id)
 
 
 class ExtensionsModel(models.Model):
@@ -222,6 +230,10 @@ class Namespace(HubuumModel):
 
         ordering = ["id"]
 
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.name
+
 
 class Permission(HubuumModel):
     """
@@ -256,6 +268,10 @@ class Permission(HubuumModel):
 
         unique_together = ("namespace", "group")
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return str(self.id)
 
 
 class Host(NamespacedHubuumModelWithExtensions):
@@ -294,14 +310,14 @@ class Host(NamespacedHubuumModelWithExtensions):
         null=True,
     )
 
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return self.name
-
     class Meta:
         """Meta for the model."""
 
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.name
 
 
 class HostType(NamespacedHubuumModelWithExtensions):
@@ -321,14 +337,14 @@ class HostType(NamespacedHubuumModelWithExtensions):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
 
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return self.name
-
     class Meta:
         """Meta for the model."""
 
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.name
 
 
 class Jack(NamespacedHubuumModelWithExtensions):
@@ -396,15 +412,15 @@ class PurchaseDocuments(NamespacedHubuumModelWithExtensions):
     )
     document = models.BinaryField(blank=False, null=False)
 
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return self.document_id
-
     class Meta:
         """Set permissions and other metadata."""
 
         verbose_name_plural = "purchase documents"
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.document_id
 
 
 class PurchaseOrder(NamespacedHubuumModelWithExtensions):
@@ -421,14 +437,14 @@ class PurchaseOrder(NamespacedHubuumModelWithExtensions):
     order_date = models.DateTimeField(blank=True, null=True)
     po_number = models.CharField(max_length=255, blank=False, null=False)
 
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return str(self.po_number)
-
     class Meta:
         """Meta for the model."""
 
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return str(self.po_number)
 
 
 class Room(NamespacedHubuumModelWithExtensions):
@@ -443,14 +459,14 @@ class Room(NamespacedHubuumModelWithExtensions):
     building = models.CharField(max_length=255, blank=True, null=True)
     floor = models.CharField(max_length=255, blank=True, null=True)
 
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return self.building + "-" + self.floor.rjust(2, "0") + "-" + self.room_id
-
     class Meta:
         """Meta for the model."""
 
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.building + "-" + self.floor.rjust(2, "0") + "-" + self.room_id
 
 
 class Vendor(NamespacedHubuumModelWithExtensions):
@@ -466,11 +482,11 @@ class Vendor(NamespacedHubuumModelWithExtensions):
     contact_email = models.EmailField()
     contact_phone = models.CharField(max_length=255, blank=True, null=True)
 
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return self.vendor_name
-
     class Meta:
         """Meta for the model."""
 
         ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.vendor_name

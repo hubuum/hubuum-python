@@ -152,34 +152,41 @@ class ExtensionSerializer(HubuumMetaSerializer):
         This doesn't even get triggered unless we have a working extension object.
         """
         require_interpolation = True  # This should fetch the default for the field
+
+        if self.partial and self.instance:
+            require_interpolation = self.instance.require_interpolation
+            url = self.instance.url
+            model = self.instance.model
+
+        if "url" in attrs:
+            url = attrs["url"]
+
+        if "model" in attrs:
+            model = attrs["model"]
+
         if "require_interpolation" in attrs:
             require_interpolation = attrs["require_interpolation"]
 
-        if require_interpolation:
-            fields = url_interpolation_fields(attrs["url"])
-            if not fields:
-                raise ValidationError(
-                    {
-                        "url": "Interpolation string ({fieldname}) required but not found."
-                    }
-                )
+        fields = url_interpolation_fields(url)
+        if require_interpolation and not fields:
+            raise ValidationError({"url": "Interpolation required but none found."})
 
-            #            The model is already validated as existing via validate_model.
-            #            try:
-            #                cls = get_model(attrs["model"])
-            #            except ValueError as ex:
-            #                raise ValidationError({"model": "No such model."}) from ex
+        #            none model is already validated as existing via validate_model.
+        #            try:
+        #                cls = get_model(attrs["model"])
+        #            except ValueError as ex:
+        #                raise ValidationError({"model": "No such model."}) from ex
 
-            cls = get_model(attrs["model"])
-            failed_fields = []
-            for field in fields:
-                if not hasattr(cls, field):
-                    failed_fields.append(field)
+        cls = get_model(model)
+        failed_fields = []
+        for field in fields:
+            if not hasattr(cls, field):
+                failed_fields.append(field)
 
-            if failed_fields:
-                errorstring = f"{attrs['model']} does not support interpolating"
-                errorstring += " on the field(s) {failed_fields}."
-                raise ValidationError({"url": errorstring})
+        if failed_fields:
+            errorstring = f"{model} does not support interpolating"
+            errorstring += f" on the field(s) {failed_fields}."
+            raise ValidationError({"url": errorstring})
 
         return attrs
 

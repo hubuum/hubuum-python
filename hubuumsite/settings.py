@@ -202,6 +202,11 @@ LOGGING = {
             "level": LOGGING_LEVEL,
             "propagate": True,
         },
+        "hubuum.objects": {
+            "handlers": ["file", "console"],
+            "level": LOGGING_LEVEL,
+            "propagate": True,
+        },
         "django": {
             "handlers": ["file", "console"],
             "level": "CRITICAL",

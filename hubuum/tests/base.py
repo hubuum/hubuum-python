@@ -5,6 +5,7 @@ from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
 from hubuum.models.base import (  # Permissions,
+    Extension,
     Namespace,
     Person,
     PurchaseDocuments,
@@ -46,7 +47,7 @@ class HubuumModelTestCase(TestCase):
 
     def _test_can_create_object(self, model=None, **kwargs):
         """Create a generic object of any model."""
-        if "namespace" not in kwargs:
+        if "namespace" not in kwargs and model is not Namespace:
             kwargs["namespace"] = self.namespace
 
         return self._create_object(model=model, **kwargs)
@@ -63,6 +64,10 @@ class HubuumModelTestCase(TestCase):
         """Create an object with overridable default group ownership."""
         if not model:
             raise MissingParam
+
+        # Ick.
+        if model == Extension:
+            kwargs["model"] = "host"
 
         obj, _ = model.objects.get_or_create(**kwargs)
         self.assertIsNotNone(obj)
