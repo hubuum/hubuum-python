@@ -58,7 +58,7 @@ AUTH_USER_MODEL = "hubuum.User"
 
 
 MIDDLEWARE = [
-    "hubuum.middleware.logging.LogHttpResponseMiddleware",
+    "hubuum.middleware.logging_http.LogHttpResponseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
