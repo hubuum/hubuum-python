@@ -19,6 +19,8 @@ from pathlib import Path
 if len(sys.argv) > 1 and sys.argv[1] == "test":
     logging.disable(logging.CRITICAL)
 
+LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "CRITICAL").upper()
+
 # from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -196,7 +198,7 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["file", "console"],
-            "level": "DEBUG",
+            "level": LOGGING_LEVEL,
             "propagate": True,
         },
     },
