@@ -29,7 +29,6 @@ class LogHttpResponseMiddleware:
         :param request: The incoming request.
         :return: A response object
         """
-        url = request.path_info
         start_time = time.time()
         response = self.get_response(request)
         end_time = time.time()
@@ -57,12 +56,14 @@ class LogHttpResponseMiddleware:
         elif run_time_ms >= 2000:  # pragma: no cover
             log_level = logging.CRITICAL
 
-        msg = response.content.decode("utf-8")  # Decode the response content
-        timing = f"({run_time_ms:.2f}ms)"
-        method = request.method
         logger.log(
             log_level,
-            f"{method}: {url} ({status_code}/{status_label}) {msg} {timing}",
+            "%s: %s %s %s %s",
+            request.method,
+            f"({status_code}/{status_label})",
+            request.path_info,
+            response.content.decode("utf-8"),
+            f"({run_time_ms:.2f}ms)",
         )
 
         return response
