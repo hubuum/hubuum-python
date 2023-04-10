@@ -58,6 +58,7 @@ AUTH_USER_MODEL = "hubuum.User"
 
 
 MIDDLEWARE = [
+    "hubuum.middleware.logging.LogHttpResponseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -173,7 +174,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module}:{lineno} {message}",
+            "format": "{levelname} {asctime} {message}",
             "style": "{",
         },
         "simple": {
@@ -192,13 +193,18 @@ LOGGING = {
         "console": {
             "class": "rich.logging.RichHandler",
             "formatter": "rich",
-            "level": "INFO",
+            "level": LOGGING_LEVEL,
         },
     },
     "loggers": {
-        "django": {
+        "hubuum.middleware": {
             "handlers": ["file", "console"],
             "level": LOGGING_LEVEL,
+            "propagate": True,
+        },
+        "django": {
+            "handlers": ["file", "console"],
+            "level": "CRITICAL",
             "propagate": True,
         },
     },
