@@ -1,7 +1,7 @@
 Django>3
 django_rest_knox==4.2.0
-dj_url_filter==0.4.4
 djangorestframework==3.14.0
+django_filter==23.1
 knox==0.1.14
 six
 

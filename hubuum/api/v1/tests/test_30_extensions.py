@@ -163,11 +163,21 @@ class APIExtensionsData(HubuumExtensionTestCase):
             "/extension_data/",
             self._extension_data_blob(extension_id, content_type="user"),
         )
-        exdblob = self.assert_post("/extensions/", self.extension_blob2)
 
+        # Before we add the ansible extension itself, there is no such data entry.
         hblob = self.assert_get("/hosts/test")
-        self.assertTrue(hblob.data["extensions"]["fleet"]["key"] == newvalue)
-        self.assertTrue(hblob.data["extensions"]["ansible"] is None)
+        self.assertFalse("ansible" in hblob.data["extension_data"])
+
+        # We add the ansible extension and dig around a bit.
+        self.assert_post("/extensions/", self.extension_blob2)
+        hblob = self.assert_get("/hosts/test")
+        self.assertTrue(hblob.data["extension_data"]["fleet"]["key"] == newvalue)
+        self.assertIsNone(hblob.data["extension_data"]["ansible"])
+        self.assertEqual(hblob.data["extensions"], ["ansible", "fleet"])
+        self.assertEqual(
+            hblob.data["extension_urls"]["fleet"],
+            f"https://fleet.my.domain/api/v1/fleet/hosts/identifier/{hblob.data['name']}",
+        )
         hblob = self.assert_get("/hosts/test2")
-        self.assertTrue(hblob.data["extensions"]["fleet"] is None)
-        self.assertTrue(hblob.data["extensions"]["ansible"] is None)
+        self.assertIsNone(hblob.data["extension_data"]["fleet"])
+        self.assertIsNone(hblob.data["extension_data"]["ansible"])
