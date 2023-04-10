@@ -3,7 +3,8 @@ django_rest_knox
 django_filter
 djangorestframework
 knox
-six
+
+rich
 
 psycopg2-binary
 pyyaml

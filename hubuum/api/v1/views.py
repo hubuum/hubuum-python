@@ -1,5 +1,6 @@
 """Versioned (v1) views for the hubuum models."""
 # from ipaddress import ip_address
+import logging
 
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
@@ -70,6 +71,35 @@ from .serializers import (
 )
 
 
+class LoggingMixin:
+    """Mixin to log object modifications (create, update, and delete).
+
+    Also logs the user who performed the action.
+    """
+
+    def _log(self, operation, model, user, instance):
+        """Write the log string."""
+        logger = logging.getLogger("django")
+        logger.info(
+            f"Object modification: {operation} : {model} : {user}: {instance}",
+        )
+
+    def perform_create(self, serializer):
+        """Log creates."""
+        instance = serializer.save()
+        self._log("CREATE", instance.__class__.__name__, self.request.user, instance)
+
+    def perform_update(self, serializer):
+        """Log updates."""
+        instance = serializer.update()
+        self._log("UPDATE", instance.__class__.__name__, self.request.user, instance)
+
+    def perform_destroy(self, instance):
+        """Log deletes."""
+        self._log("DELETE", instance.__class__.__name__, self.request.user, instance)
+        instance.delete()
+
+
 class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     """A mixin to allow us to look up objects beyond just the primary key.
 
@@ -122,14 +152,16 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
         return obj
 
 
-class HubuumList(generics.ListCreateAPIView):
+class HubuumList(LoggingMixin, generics.ListCreateAPIView):
     """Get: List objects. Post: Add object."""
 
     permission_classes = (NameSpace,)
 
 
 # NOTE: Order for the inheritance here is vital.
-class HubuumDetail(MultipleFieldLookupORMixin, generics.RetrieveUpdateDestroyAPIView):
+class HubuumDetail(
+    MultipleFieldLookupORMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """Get, Patch, or Destroy an object."""
 
     permission_classes = (NameSpace,)
