@@ -81,20 +81,26 @@ class LoggingMixin:
         """Write the log string."""
         logger = logging.getLogger("django")
         logger.info(
-            f"Object modification: {operation} : {model} : {user}: {instance}",
+            "Object modification: %s : %s : %s : %s", operation, model, user, instance
         )
 
     def perform_create(self, serializer):
         """Log creates."""
-        instance = super().perform_create(serializer)
-        self._log("CREATE", instance.__class__.__name__, self.request.user, instance)
+        super().perform_create(serializer)
+        instance = serializer.instance
+        if instance:
+            self._log(
+                "CREATE", instance.__class__.__name__, self.request.user, instance
+            )
 
     def perform_update(self, serializer):
         """Log updates."""
-        instance = super().perform_update(
-            serializer
-        )  # Call super() to get the updated instance
-        self._log("UPDATE", instance.__class__.__name__, self.request.user, instance)
+        super().perform_update(serializer)
+        instance = serializer.instance
+        if instance:
+            self._log(
+                "UPDATE", instance.__class__.__name__, self.request.user, instance
+            )
 
     def perform_destroy(self, instance):
         """Log deletes."""
