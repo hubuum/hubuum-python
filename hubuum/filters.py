@@ -64,9 +64,7 @@ class JSONFieldLookupFilter(filters.CharFilter):
     """
 
     def filter(self, qs, value):
-        """
-        Filter the queryset based on a JSON key, value, and optional
-        lookup type for the specified field.
+        """Filter the queryset based on a JSON key, value, and optional lookup type.
 
         Args:
             qs (QuerySet): The queryset to filter.
@@ -82,10 +80,11 @@ class JSONFieldLookupFilter(filters.CharFilter):
             return qs
 
         try:
-            key, val, lookup_type = value.split(",")
-        except ValueError:
-            key, val = value.split(",")
-            lookup_type = "exact"
+            key, val = value.split("=")
+        except ValueError as ex:
+            raise ValidationError(
+                "Filtering requires both a key and a value, separated by '='"
+            ) from ex
 
         try:
             val = float(val)
@@ -99,6 +98,13 @@ class JSONFieldLookupFilter(filters.CharFilter):
             val_type = "text"
             allowed_lookups = _textual_lookups
 
+        parts = key.split("__")
+        if len(parts) > 1 and parts[-1] in _numeric_lookups + _textual_lookups:
+            lookup_type = parts[-1]
+        else:
+            lookup_type = "exact"
+            key = f"{key}__exact"
+
         if lookup_type not in allowed_lookups:
             valid_lookups = ", ".join(allowed_lookups)
             allowed_string = f"Allowed types for {val_type} are {valid_lookups}."
@@ -106,7 +112,7 @@ class JSONFieldLookupFilter(filters.CharFilter):
                 f"Invalid lookup type '{lookup_type}'. {allowed_string}"
             )
 
-        json_lookup = Q(**{f"{self.field_name}__{key}__{lookup_type}": val})
+        json_lookup = Q(**{f"{self.field_name}__{key}": val})
         return qs.filter(json_lookup)
 
 

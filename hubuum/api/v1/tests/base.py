@@ -127,12 +127,21 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             return f"/api/v1/{path[1:]}"
         return f"/api/v1/{path}"
 
+    def _assert_status_and_debug(self, response, expected_code):
+        """Print the response content if the status code is unexpected."""
+        # Note that as long as tests pass, this will never be called, so it's a little
+        if not response.status_code == expected_code:  # pragma: no cover
+            path = f"{response.request['PATH_INFO']}{response.request['QUERY_STRING']}"
+            fail = f"{response.status_code} {response.data}"
+            print(f"{path} FAILED: {fail}")
+        self.assertEqual(response.status_code, expected_code)
+
     def _assert_delete_and_status(self, path, status_code, client=None):
         """Delete and assert status."""
         if client is None:
             client = self.client
         response = client.delete(self._create_path(path))
-        self.assertEqual(response.status_code, status_code)
+        self._assert_status_and_debug(response, status_code)
         return response
 
     def _assert_get_and_status(self, path, status_code, client=None):
@@ -140,7 +149,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         if client is None:
             client = self.client
         response = client.get(self._create_path(path))
-        self.assertEqual(response.status_code, status_code)
+        self._assert_status_and_debug(response, status_code)
         return response
 
     def _assert_patch_and_status(self, path, status_code, data=None, client=None):
@@ -148,7 +157,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         if client is None:
             client = self.client
         response = client.patch(self._create_path(path), data)
-        self.assertEqual(response.status_code, status_code)
+        self._assert_status_and_debug(response, status_code)
         return response
 
     def _assert_post_and_status(self, path, status_code, data=None, client=None):
@@ -156,9 +165,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         if client is None:
             client = self.client
         response = client.post(self._create_path(path), data)
-        #        if not response.status_code == status_code:
-        #            print(response.content)
-        self.assertEqual(response.status_code, status_code)
+        self._assert_status_and_debug(response, status_code)
         return response
 
     def assert_delete(self, path, **kwargs):

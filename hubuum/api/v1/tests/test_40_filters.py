@@ -79,7 +79,12 @@ class HubuumFilterTestCase(HubuumAPITestCase):
                 ext_room_blob.data["id"],
                 "room",
                 room.id,
-                {"key": "value", "room_id": room.room_id},
+                {
+                    "key": "value",
+                    "room_id": room.room_id,
+                    "list": ["one", {"two": "twovalue"}],
+                    "weird": {"exact": "value"},
+                },
             ),
         )
 
@@ -125,35 +130,58 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         self.assert_get_elements(f"/hosts/?namespace={self.namespace.id}", 3)
         self.assert_get_elements("/hosts/?name__contains=test&fqdn__contains=domain", 1)
 
-    def test_extension_data_filtering(self):
+    def test_extension_data_basic_filtering(self):
+        """Test that we can filter into the JSON blobs that extensions deliver."""
+        self.assert_get_elements("/extension_data/", 4)
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=fqdn__icontains=other", 2
+        )
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=fqdn__exact=other", 0
+        )
+        # Implied exact
+        self.assert_get_elements("/extension_data/?json_data_lookup=fqdn=other", 0)
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=fqdn__exact=test1.domain.tld", 1
+        )
+
+    def test_extension_data_numeric_filtering(self):
         """Test that we can filter into the JSON blobs that extensions deliver."""
         host = self.assert_get("/hosts/test1")
         host1id = host.data["id"]
-        self.assert_get_elements("/extension_data/", 4)
+        self.assert_get_elements(f"/extension_data/?json_data_lookup=id={host1id}", 1)
         self.assert_get_elements(
-            "/extension_data/?json_data_lookup=fqdn,other,icontains", 2
-        )
-        self.assert_get_elements(
-            "/extension_data/?json_data_lookup=fqdn,other,exact", 0
-        )
-        # Implied exact
-        self.assert_get_elements("/extension_data/?json_data_lookup=fqdn,other", 0)
-        self.assert_get_elements(
-            "/extension_data/?json_data_lookup=fqdn,test1.domain.tld,exact", 1
-        )
-        self.assert_get_and_400(
-            "/extension_data/?json_data_lookup=json_data_lookup,1,endswith"
-        )
-        #        self.assert_get_and_400(
-        #            "/extension_data/?json_data_lookup=json_data_lookup,[],endswith"
-        #        )
-        self.assert_get_elements(f"/extension_data/?json_data_lookup=id,{host1id}", 1)
-        self.assert_get_elements(
-            f"/extension_data/?json_data_lookup=id,{host1id},gt", 2
+            f"/extension_data/?json_data_lookup=id__gt={host1id}", 2
         )
 
-        # Test scoping:
+    def test_extension_data_json_scoping(self):
+        """Test that we can parse JSON scopes correctly."""
         self.assert_get_elements(
-            "/extension_data/?json_data_lookup=dns__fqdn,other,icontains", 2
+            "/extension_data/?json_data_lookup=dns__fqdn__icontains=other", 2
         )
-        self.assert_get_elements("/extension_data/?json_data_lookup=dns__fqdn,other", 0)
+        self.assert_get_elements("/extension_data/?json_data_lookup=dns__fqdn=other", 0)
+
+    def test_extension_data_json_array_comprehension(self):
+        """Test that we can parse JSON arrays correctly."""
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=list__0__exact=one", 1
+        )
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=list__1__two__icontains=value", 1
+        )
+
+    def test_extension_data_filtering_mismatches(self):
+        """Test that we validate JSON lookups correctly."""
+        # Missing value
+        self.assert_get_and_400("/extension_data/?json_data_lookup=list")
+        # Using the wrong lookup
+        self.assert_get_and_400("/extension_data/?json_data_lookup=id__contains=2")
+
+    def test_extension_data_filtering_with_lookups_as_keys(self):
+        """Test that we validate JSON lookups correctly."""
+        # Here we have "weird": {"exact": "value"}, so weird__exact is valid,
+        # but tests against the list, so we get zero hits.
+        # See #76.
+        self.assert_get_elements(
+            "/extension_data/?json_data_lookup=weird__exact=value", 0
+        )
