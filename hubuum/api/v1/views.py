@@ -86,18 +86,20 @@ class LoggingMixin:
 
     def perform_create(self, serializer):
         """Log creates."""
-        instance = serializer.save()
+        instance = super().perform_create(serializer)
         self._log("CREATE", instance.__class__.__name__, self.request.user, instance)
 
     def perform_update(self, serializer):
         """Log updates."""
-        instance = serializer.update()
+        instance = super().perform_update(
+            serializer
+        )  # Call super() to get the updated instance
         self._log("UPDATE", instance.__class__.__name__, self.request.user, instance)
 
     def perform_destroy(self, instance):
         """Log deletes."""
         self._log("DELETE", instance.__class__.__name__, self.request.user, instance)
-        instance.delete()
+        super().perform_destroy(instance)
 
 
 class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
