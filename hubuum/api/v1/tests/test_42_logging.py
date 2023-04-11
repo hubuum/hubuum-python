@@ -65,21 +65,21 @@ class HubuumObjectLoggingTestCase(HubuumAPITestCase):
         logging.disable(logging.CRITICAL)  # Disable logging after the test
         super().tearDown()
 
-    def _create_expected_pattern(self, operation, id=None):
+    def _create_expected_pattern(self, operation, target_id=None):
         """Create an expected pattern string."""
         prefix = "INFO:hubuum.objects:OBJECT"
-        if not id:
-            id = self.host_data["name"]
-        target = f"Host:{id}"
+        if not target_id:
+            target_id = self.host_data["name"]
+        target = f"Host:{target_id}"
         return f"{prefix} \\[{operation}\\] {target} by superuser"
 
     def test_create_logging(self):
         """Test logging for object creation."""
-        with self.assertLogs("hubuum.objects", level="INFO") as cm:
+        with self.assertLogs("hubuum.objects", level="INFO") as log_context:
             self.host_data["namespace"] = self.namespace.id
             host = self.assert_post(self.url, self.host_data)
 
-        log_message = cm.output[0]
+        log_message = log_context.output[0]
         expected_pattern = self._create_expected_pattern("create")
 
         self.assertRegex(log_message, expected_pattern)
@@ -92,12 +92,12 @@ class HubuumObjectLoggingTestCase(HubuumAPITestCase):
         url = f"{self.url}{self.host_data['name']}"
         data = {"name": "updated", "fqdn": "updated.domain.tld"}
 
-        with self.assertLogs("hubuum.objects", level="INFO") as cm:
+        with self.assertLogs("hubuum.objects", level="INFO") as log_context:
             self.assert_patch(url, data)
 
-        log_message = cm.output[0]
+        log_message = log_context.output[0]
 
-        expected_pattern = self._create_expected_pattern("update", id="updated")
+        expected_pattern = self._create_expected_pattern("update", target_id="updated")
 
         self.assertRegex(log_message, expected_pattern)
         host.delete()
@@ -108,10 +108,10 @@ class HubuumObjectLoggingTestCase(HubuumAPITestCase):
         Host.objects.create(**self.host_data)
         url = f"{self.url}{self.host_data['name']}"
 
-        with self.assertLogs("hubuum.objects", level="INFO") as cm:
+        with self.assertLogs("hubuum.objects", level="INFO") as log_context:
             self.assert_delete(url)
 
-        log_message = cm.output[0]
+        log_message = log_context.output[0]
         expected_pattern = self._create_expected_pattern("delete")
 
         self.assertRegex(log_message, expected_pattern)
