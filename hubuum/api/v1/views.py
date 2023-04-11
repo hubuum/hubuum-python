@@ -157,7 +157,7 @@ class UserDetail(HubuumDetail):
 class GroupList(HubuumList):
     """Get: List groups. Post: Add group."""
 
-    queryset = Group.objects.all()
+    queryset = Group.objects.all().order_by("id")
     serializer_class = GroupSerializer
     permission_classes = (IsSuperOrAdminOrReadOnly,)
     filterset_class = GroupFilterSet
