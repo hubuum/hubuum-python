@@ -166,3 +166,8 @@ class User(AbstractUser):
             ).exists()
 
         return False
+
+    class Meta:
+        """Meta class for User."""
+
+        ordering = ["id"]

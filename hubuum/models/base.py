@@ -84,6 +84,11 @@ class Extension(NamespacedHubuumModel):
     header = models.CharField(max_length=512)
     cache_time = models.PositiveSmallIntegerField(default=60)
 
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
 
 class ExtensionData(NamespacedHubuumModel):
     """A model for the extensions data for objects.
@@ -104,6 +109,7 @@ class ExtensionData(NamespacedHubuumModel):
         """Meta for the model."""
 
         unique_together = ("extension", "content_type", "object_id")
+        ordering = ["id"]
 
 
 class ExtensionsModel(models.Model):
@@ -211,6 +217,11 @@ class Namespace(HubuumModel):
         groups = Group.objects.filter(id__in=qs)
         return groups
 
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
 
 class Permission(HubuumModel):
     """
@@ -244,6 +255,7 @@ class Permission(HubuumModel):
         """Metadata permissions."""
 
         unique_together = ("namespace", "group")
+        ordering = ["id"]
 
 
 class Host(NamespacedHubuumModelWithExtensions):
@@ -286,6 +298,11 @@ class Host(NamespacedHubuumModelWithExtensions):
         """Stringify the object, used to represent the object towards users."""
         return self.name
 
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
 
 class HostType(NamespacedHubuumModelWithExtensions):
     """The type of hosts supported.
@@ -307,6 +324,11 @@ class HostType(NamespacedHubuumModelWithExtensions):
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
         return self.name
+
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
 
 
 class Jack(NamespacedHubuumModelWithExtensions):
@@ -330,6 +352,11 @@ class Jack(NamespacedHubuumModelWithExtensions):
         """Stringify the object, used to represent the object towards users."""
         return self.name
 
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
 
 class Person(NamespacedHubuumModelWithExtensions):
     """A person.
@@ -351,6 +378,11 @@ class Person(NamespacedHubuumModelWithExtensions):
         """Stringify the object, used to represent the object towards users."""
         return self.username
 
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
 
 class PurchaseDocuments(NamespacedHubuumModelWithExtensions):
     """Accounting, the documents of an order.
@@ -364,14 +396,15 @@ class PurchaseDocuments(NamespacedHubuumModelWithExtensions):
     )
     document = models.BinaryField(blank=False, null=False)
 
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.document_id
+
     class Meta:
         """Set permissions and other metadata."""
 
         verbose_name_plural = "purchase documents"
-
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return self.document_id
+        ordering = ["id"]
 
 
 class PurchaseOrder(NamespacedHubuumModelWithExtensions):
@@ -392,6 +425,11 @@ class PurchaseOrder(NamespacedHubuumModelWithExtensions):
         """Stringify the object, used to represent the object towards users."""
         return str(self.po_number)
 
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
 
 class Room(NamespacedHubuumModelWithExtensions):
     """A room.
@@ -408,6 +446,11 @@ class Room(NamespacedHubuumModelWithExtensions):
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
         return self.building + "-" + self.floor.rjust(2, "0") + "-" + self.room_id
+
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
 
 
 class Vendor(NamespacedHubuumModelWithExtensions):
@@ -426,3 +469,8 @@ class Vendor(NamespacedHubuumModelWithExtensions):
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
         return self.vendor_name
+
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
