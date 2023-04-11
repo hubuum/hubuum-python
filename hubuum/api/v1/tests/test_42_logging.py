@@ -1,10 +1,22 @@
 """Test the logging in hubuum."""
 
+import logging
+
 from .base import HubuumAPITestCase
 
 
 class HubuumLoggingTestCase(HubuumAPITestCase):
     """Test class for logging."""
+
+    def setUp(self):
+        """Set up the test environment."""
+        super().setUp()
+        logging.disable(logging.NOTSET)  # Enable logging temporarily
+
+    def tearDown(self):
+        """Clean up after tests."""
+        logging.disable(logging.CRITICAL)  # Disable logging after the test
+        super().tearDown()
 
     def _test_logging_helper(self, url, status_code, status_name, level="DEBUG"):
         with self.assertLogs("hubuum.middleware", level=level) as log_context:

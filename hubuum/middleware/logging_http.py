@@ -57,7 +57,7 @@ class LogHttpResponseMiddleware:
             log_level = logging.CRITICAL
 
         content = "[]"
-        if response["Content-Type"] == "application/json":
+        if "application/json" in response.headers.get("Content-Type", ""):
             content = response.content.decode("utf-8")
 
         logger.log(
