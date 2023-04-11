@@ -56,13 +56,17 @@ class LogHttpResponseMiddleware:
         elif run_time_ms >= 2000:  # pragma: no cover
             log_level = logging.CRITICAL
 
+        content = "[]"
+        if response["Content-Type"] == "application/json":
+            content = response.content.decode("utf-8")
+
         logger.log(
             log_level,
             "%s: %s %s %s %s",
             request.method,
             f"({status_code}/{status_label})",
             request.path_info,
-            response.content.decode("utf-8"),
+            content,
             f"({run_time_ms:.2f}ms)",
         )
 

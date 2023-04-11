@@ -1,4 +1,4 @@
-"""Test the pagination."""
+"""Test the pagination in hubuum."""
 from urllib.parse import parse_qs, urlparse
 
 from hubuum.models.base import Host, Namespace
@@ -7,18 +7,17 @@ from .base import HubuumAPITestCase
 
 
 class HubuumPaginationTestCase(HubuumAPITestCase):
-    """
-    Test case for pagination in the Hubuum project, including testing
-    the page_size parameter.
-    """
+    """Test case for pagination in the Hubuum project."""
 
     def setUp(self):
+        """Set up the test environment."""
         super().setUp()
         self.namespace, _ = Namespace.objects.get_or_create(name="namespace1")
         self.hosts_url = "/hosts/"
         self._create_hosts(250)
 
     def tearDown(self) -> None:
+        """Tear down the test environment."""
         self.namespace.delete()
         return super().tearDown()
 
@@ -37,10 +36,7 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
             )
 
     def test_pagination(self):
-        """
-        Test the default pagination size, custom pagination size, and the maximum limit.
-        """
-
+        """Test the pagination sizes and limits."""
         # Test default pagination size
         self.assert_get_elements(self.hosts_url, 100)
 
@@ -57,10 +53,7 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         self.assert_get_elements(max_page_size_url, 200)
 
     def test_next_and_prev_links(self):
-        """
-        Test the next and prev links in the Link header of the paginated response.
-        """
-
+        """Test the next and prev links in the Link header."""
         # Test next and prev links when using the default page size
         response = self.assert_get(self.hosts_url)
         self.check_next_and_prev_links(response, expected_prev=None, expected_next=2)
@@ -135,7 +128,8 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
 
     def get_page_number_from_link(self, link):
         """
-        Get the page number from a paginated link
+        Get the page number from a paginated link.
+
         Args:
             link (str): The paginated link.
 
