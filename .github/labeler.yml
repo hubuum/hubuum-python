@@ -1,0 +1,14 @@
+documentation:
+  - any: ["docs/*"]
+
+migrations:
+  - any: ["hubuum/migrations/*"]
+
+dependencies:
+  - any: ["requirements*"]
+
+testing:
+  - any: ["hubuum/tests/*", "hubuum/api/*/tests/*", "tox.ini"]
+
+github_actions:
+  - any: [".github/actions/*"]
