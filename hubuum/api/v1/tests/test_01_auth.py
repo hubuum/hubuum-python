@@ -3,8 +3,11 @@
 from datetime import timedelta
 from unittest import mock
 
+from django.contrib.auth.hashers import make_password
 from knox.auth import AuthToken
 from rest_framework.test import APIClient
+
+from hubuum.models.auth import User
 
 from .base import HubuumAPITestCase
 
@@ -22,6 +25,19 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
         """Test unauthenticated user access."""
         self.client = APIClient()
         self.assert_get_and_401("/users/")
+
+    def test_login_with_correct_credentials(self):
+        """Test logging in."""
+        plaintext = "django"
+        user, _ = User.objects.get_or_create(
+            username="testuser", password=make_password(plaintext)
+        )  # nosec
+        auth = self.basic_auth("testuser", plaintext)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=auth)
+        self.assert_post_and_200("/api/auth/login/")
+
+        user.delete()
 
     def test_logout(self):
         """Test authenticated logout."""

@@ -3,6 +3,7 @@ import pytest
 from rest_framework.exceptions import NotFound, ValidationError
 
 from hubuum.exceptions import MissingParam
+from hubuum.log import filter_sensitive_data
 from hubuum.models.auth import User
 from hubuum.models.base import Host, Namespace, model_supports_extensions
 from hubuum.tools import get_object
@@ -86,3 +87,20 @@ class InternalsTestCase(HubuumModelTestCase):
             validate_model("permission")
 
         self.assertTrue(validate_model("host"))
+
+    def test_filtering_of_sensitive_data(self):
+        """Test that sensitive data is filtered from structlog records."""
+        # create test data and the expected result
+        test_data = [
+            ['"token":"1234567890abcdef1234567890"', '"token":"123...890"'],
+            [{"token": "1234567890abcdef1234567890"}, {"token": "123...890"}],
+            ['"token":"1234567890"', '"token":"..."'],
+            [{"token": "1234567890"}, {"token": "..."}],
+            [
+                {"content": '"token":"1234567890abcdef1234567890"'},
+                {"content": '"token":"123...890"'},
+            ],
+        ]
+
+        for data, expected in test_data:
+            self.assertEqual(filter_sensitive_data(None, None, data), expected)
