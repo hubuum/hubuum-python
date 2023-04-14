@@ -2,8 +2,15 @@ Django>3
 django_rest_knox
 django_filter
 djangorestframework
+django-structlog
 knox
-six
+
+rich
+
+sentry-sdk[django]
+structlog_sentry
+
+python-dateutil
 
 psycopg2-binary
 pyyaml

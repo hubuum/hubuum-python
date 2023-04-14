@@ -14,7 +14,9 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
 
     def test_redirect(self):
         """Test redirects of incomplete URLs."""
+        self.client = self.get_superuser_client()
         self.assert_get_and_301("/users")
+        self.assert_get_and_301("/hosts")
 
     def test_user_access_without_authentication(self):
         """Test unauthenticated user access."""

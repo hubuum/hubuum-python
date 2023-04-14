@@ -2,8 +2,15 @@ Django>3
 django_rest_knox==4.2.0
 djangorestframework==3.14.0
 django_filter==23.1
+ddjango-structlog==5.0.1
 knox==0.1.14
-six
+
+rich==13.3.3 # Used for console logging.
+
+sentry-sdk[django]==1.19.1
+structlog_sentry==2.0.0
+
+python-dateutil==2.8.2
 
 psycopg2==2.9.6
 pyyaml==6.0

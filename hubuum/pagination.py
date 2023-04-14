@@ -5,7 +5,8 @@ from rest_framework.response import Response
 
 
 class HubuumFlexiblePagination(PageNumberPagination):
-    """
+    """The default pagination class for hubuum.
+
     A custom pagination class that allows users to set their own pagination size
     with a maximum limit and a default value.
     """

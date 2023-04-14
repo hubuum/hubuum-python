@@ -1,6 +1,6 @@
 """Versioned (v1) views for the hubuum models."""
 # from ipaddress import ip_address
-
+import structlog
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
@@ -70,6 +70,47 @@ from .serializers import (
 )
 
 
+class LoggingMixin:
+    """Mixin to log object modifications (create, update, and delete).
+
+    Also logs the user who performed the action.
+    """
+
+    def _log(self, operation, model, user, instance):
+        """Write the log string."""
+        logger = structlog.get_logger("hubuum.object")
+        logger.info(
+            "object_change",
+            operation=operation,
+            model=model,
+            user=str(user),
+            instance=str(instance),
+        )
+
+    def perform_create(self, serializer):
+        """Log creates."""
+        super().perform_create(serializer)
+        instance = serializer.instance
+        if instance:
+            self._log(
+                "create", instance.__class__.__name__, self.request.user, instance
+            )
+
+    def perform_update(self, serializer):
+        """Log updates."""
+        super().perform_update(serializer)
+        instance = serializer.instance
+        if instance:
+            self._log(
+                "update", instance.__class__.__name__, self.request.user, instance
+            )
+
+    def perform_destroy(self, instance):
+        """Log deletes."""
+        self._log("delete", instance.__class__.__name__, self.request.user, instance)
+        super().perform_destroy(instance)
+
+
 class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     """A mixin to allow us to look up objects beyond just the primary key.
 
@@ -122,14 +163,16 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
         return obj
 
 
-class HubuumList(generics.ListCreateAPIView):
+class HubuumList(LoggingMixin, generics.ListCreateAPIView):
     """Get: List objects. Post: Add object."""
 
     permission_classes = (NameSpace,)
 
 
 # NOTE: Order for the inheritance here is vital.
-class HubuumDetail(MultipleFieldLookupORMixin, generics.RetrieveUpdateDestroyAPIView):
+class HubuumDetail(
+    MultipleFieldLookupORMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """Get, Patch, or Destroy an object."""
 
     permission_classes = (NameSpace,)

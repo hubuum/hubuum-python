@@ -1,5 +1,11 @@
 """Provide a base class for testing api/v1."""
 
+from base64 import b64encode
+
+# We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
+# because the latter only supportes Z for UTC in python 3.11.
+# https://github.com/python/cpython/issues/80010
+from dateutil.parser import isoparse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from knox.models import AuthToken
@@ -109,6 +115,11 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self.assert_post_and_204(f"/namespaces/{namespace}/groups/{group}", perms)
         self.client = oldclient
 
+    def basic_auth(self, username, password):
+        """Create a basic auth header for the given username and password."""
+        token = b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+        return f"Basic {token}"
+
     @staticmethod
     def _create_path(path):
         """Create a valid API path from the stub provided.
@@ -167,6 +178,18 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         response = client.post(self._create_path(path), data)
         self._assert_status_and_debug(response, status_code)
         return response
+
+    def _is_iso_date(self, value):
+        """Assert that a value is a valid date."""
+        try:
+            isoparse(value)
+            return True
+        except ValueError:
+            return False
+
+    def assert_is_iso_date(self, value):
+        """Assert that a value is a valid date."""
+        self.assertTrue(self._is_iso_date(value))
 
     def assert_delete(self, path, **kwargs):
         """Delete and assert status as 204."""

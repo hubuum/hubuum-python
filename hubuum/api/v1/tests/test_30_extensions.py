@@ -1,5 +1,5 @@
 """Test hubuum extensions."""
-from hubuum.models.base import Host, Namespace
+from hubuum.models.base import ExtensionData, Host, Namespace
 
 from .base import HubuumAPITestCase
 
@@ -87,13 +87,19 @@ class APIExtensionURLValidation(HubuumExtensionTestCase):
 
     def test_url_interpolation(self):
         """Test that URL interpolates as required."""
-        self.assert_post(
+        host = self.assert_post(
             "/extensions/",
             self._make_extension_blob("https://www.foo.bar/{fqdn}"),
         )
-        self.assert_post(
-            "/extensions/",
-            self._make_extension_blob("https://www.foo.bar/{room_id}", model="room"),
+        # Field doesn't exist in the model
+        self.assert_patch_and_400(
+            f"/extensions/{host.data['id']}",
+            {"url": "https://www.foo.bar/{has_create}"},
+        )
+        # Interpolation required, but we didn't provide one
+        self.assert_patch_and_400(
+            f"/extensions/{host.data['id']}",
+            {"url": "https://www.foo.bar/nothing/"},
         )
         # Field exists, but model doesn't support extensions.
         self.assert_post_and_400(
@@ -146,6 +152,8 @@ class APIExtensionsData(HubuumExtensionTestCase):
             "/extension_data/", self._extension_data_blob(extension_id)
         )
         exdid = exdblob.data["id"]
+        # Test the __str__ method. Due to dependecies, it's easiest done here.
+        self.assertEqual(str(exdid), str(ExtensionData.objects.get(id=exdid)))
         self.assert_get(f"/extension_data/{exdid}")
         self.assertTrue(exdblob.data["json_data"]["key"] == "value")
 

@@ -10,9 +10,35 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import logging
 import os
 from datetime import timedelta
 from pathlib import Path
+
+import sentry_sdk
+import structlog
+from structlog_sentry import SentryProcessor
+
+LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
+LOGGING_LEVEL_SOURCE = {}
+
+for source in ["DJANGO", "OBJECT", "REQUEST", "MANUAL", "AUTH"]:
+    LOGGING_LEVEL_SOURCE[source] = os.environ.get(
+        f"HUBUUM_LOGGING_LEVEL_{source}", LOGGING_LEVEL
+    ).upper()
+
+LOGGING_PRODUCTION = os.environ.get("HUBUUM_LOGGING_PRODUCTION", False)
+
+SENTRY_DSN = os.environ.get("HUBUUM_SENTRY_DSN", "")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production,
+        traces_sample_rate=1.0,
+    )
 
 # from rest_framework.settings import api_settings
 
@@ -43,6 +69,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
+    "django_structlog",
     "knox",
     "hubuum",
 ]
@@ -51,6 +78,8 @@ AUTH_USER_MODEL = "hubuum.User"
 
 
 MIDDLEWARE = [
+    "django_structlog.middlewares.RequestMiddleware",
+    "hubuum.middleware.logging_http.LogHttpResponseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -160,3 +189,93 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
+
+output_type = structlog.dev.ConsoleRenderer(colors=True)
+if LOGGING_PRODUCTION or not DEBUG:
+    output_type = structlog.processors.JSONRenderer()
+
+SENTRY_LEVEL = os.environ.get("HUBUUM_SENTRY_LEVEL", "critical").upper()
+if SENTRY_LEVEL not in [
+    "CRITICAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "DEBUG",
+]:  # pragma: no cover
+    raise ValueError("Invalid SENTRY_LEVEL")
+
+# set sentry_level to logger.level depending on the value of SENTRY_LEVEL
+if SENTRY_LEVEL == "DEBUG":
+    SENTRY_LOG_LEVEL = logging.DEBUG
+elif SENTRY_LEVEL == "INFO":
+    SENTRY_LOG_LEVEL = logging.INFO
+elif SENTRY_LEVEL == "WARNING":
+    SENTRY_LOG_LEVEL = logging.WARNING
+elif SENTRY_LEVEL == "ERROR":
+    SENTRY_LOG_LEVEL = logging.ERROR
+elif SENTRY_LEVEL == "CRITICAL":
+    SENTRY_LOG_LEVEL = logging.CRITICAL
+
+
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.UnicodeDecoder(),
+        SentryProcessor(event_level=SENTRY_LOG_LEVEL),
+        output_type,
+    ],
+    context_class=dict,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.dev.ConsoleRenderer(),
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+            "level": "DEBUG",
+        },
+    },
+    "loggers": {
+        "django_structlog": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["DJANGO"],
+        },
+        "hubuum.object": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["OBJECT"],
+            "propagate": False,
+        },
+        "hubuum.request": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["REQUEST"],
+            "propagate": False,
+        },
+        "hubuum.auth": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["AUTH"],
+            "propagate": False,
+        },
+        "hubuum.manual": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["MANUAL"],
+            "propagate": False,
+        },
+    },
+}
