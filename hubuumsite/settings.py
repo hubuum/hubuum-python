@@ -12,14 +12,39 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import logging
 import os
-import sys
 from datetime import timedelta
 from pathlib import Path
 
-if len(sys.argv) > 1 and sys.argv[1] == "test":
-    logging.disable(logging.CRITICAL)
+import sentry_sdk
+import structlog
+from structlog_sentry import SentryProcessor
 
-LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "CRITICAL").upper()
+LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
+LOGGING_LEVEL_SOURCE_DJANGO = os.environ.get(
+    "HUBUUM_LOGGING_LEVEL_SOURCE_DJANGO", LOGGING_LEVEL
+).upper()
+LOGGING_LEVEL_SOURCE_OBJECT = os.environ.get(
+    "HUBUUM_LOGGING_LEVEL_SOURCE_OBJECT", LOGGING_LEVEL
+).upper()
+LOGGING_LEVEL_SOURCE_REQUEST = os.environ.get(
+    "HUBUUM_LOGGING_LEVEL_SOURCE_REQUEST", LOGGING_LEVEL
+).upper()
+LOGGING_LEVEL_SOURCE_MANUAL = os.environ.get(
+    "HUBUUM_LOGGING_LEVEL_SOURCE_MANUAL", LOGGING_LEVEL
+).upper()
+
+LOGGING_PRODUCTION = os.environ.get("HUBUUM_LOGGING_PRODUCTION", False)
+
+SENTRY_DSN = os.environ.get("HUBUUM_SENTRY_DSN", "")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production,
+        traces_sample_rate=1.0,
+    )
 
 # from rest_framework.settings import api_settings
 
@@ -50,6 +75,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
+    "django_structlog",
     "knox",
     "hubuum",
 ]
@@ -58,6 +84,7 @@ AUTH_USER_MODEL = "hubuum.User"
 
 
 MIDDLEWARE = [
+    "django_structlog.middlewares.RequestMiddleware",
     "hubuum.middleware.logging_http.LogHttpResponseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -169,48 +196,87 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
+output_type = structlog.dev.ConsoleRenderer(colors=True)
+if LOGGING_PRODUCTION or not DEBUG:
+    output_type = structlog.processors.JSONRenderer()
+
+SENTRY_LEVEL = os.environ.get("HUBUUM_SENTRY_LEVEL", "critical").upper()
+if SENTRY_LEVEL not in [
+    "CRITICAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "DEBUG",
+]:  # pragma: no cover
+    raise ValueError("Invalid SENTRY_LEVEL")
+
+# set sentry_level to logger.level depending on the value of SENTRY_LEVEL
+if SENTRY_LEVEL == "DEBUG":
+    sentry_level = logging.DEBUG
+elif SENTRY_LEVEL == "INFO":
+    sentry_level = logging.INFO
+elif SENTRY_LEVEL == "WARNING":
+    sentry_level = logging.WARNING
+elif SENTRY_LEVEL == "ERROR":
+    sentry_level = logging.ERROR
+elif SENTRY_LEVEL == "CRITICAL":
+    sentry_level = logging.CRITICAL
+
+
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.UnicodeDecoder(),
+        SentryProcessor(event_level=sentry_level),
+        output_type,
+    ],
+    context_class=dict,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {message}",
-            "style": "{",
+        "console": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.dev.ConsoleRenderer(),
         },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
-        },
-        "rich": {"datefmt": "[%X]"},
     },
     "handlers": {
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "debug.log"),
-            "formatter": "verbose",
-        },
         "console": {
-            "class": "rich.logging.RichHandler",
-            "formatter": "rich",
-            "level": LOGGING_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+            "level": "DEBUG",
         },
     },
     "loggers": {
-        "hubuum.middleware": {
-            "handlers": ["file", "console"],
-            "level": LOGGING_LEVEL,
-            "propagate": True,
+        "django_structlog": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE_DJANGO,
         },
-        "hubuum.objects": {
-            "handlers": ["file", "console"],
-            "level": LOGGING_LEVEL,
-            "propagate": True,
+        "hubuum.object": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE_OBJECT,
+            "propagate": False,
         },
-        "django": {
-            "handlers": ["file", "console"],
-            "level": "CRITICAL",
-            "propagate": True,
+        "hubuum.request": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE_REQUEST,
+            "propagate": False,
+        },
+        "hubuum.manual": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE_MANUAL,
+            "propagate": False,
         },
     },
 }

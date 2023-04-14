@@ -1,8 +1,11 @@
 """Middleware to handle logging."""
+import http
 import logging
 import time
 
-logger = logging.getLogger("hubuum.middleware")
+import structlog
+
+logger = structlog.getLogger("hubuum.request")
 
 
 class LogHttpResponseMiddleware:
@@ -35,21 +38,20 @@ class LogHttpResponseMiddleware:
         status_code = response.status_code
         run_time_ms = (end_time - start_time) * 1000
 
-        if 200 <= status_code < 300:
+        status_label = http.client.responses[status_code]
+
+        if status_code == 201:
             log_level = logging.DEBUG
-            status_label = "Success"
+        elif 200 <= status_code < 300:
+            log_level = logging.DEBUG
         elif 300 <= status_code < 400:
-            log_level = logging.DEBUG
-            status_label = "Redirection"
+            log_level = logging.INFO
         elif status_code == 400:
-            log_level = logging.INFO
-            status_label = "Bad Request"
+            log_level = logging.WARNING
         elif 400 < status_code < 500:
-            log_level = logging.INFO
-            status_label = "Client Error"
+            log_level = logging.WARNING
         else:  # pragma: no cover
             log_level = logging.ERROR
-            status_label = "Server Error"
 
         if run_time_ms >= 1000:  # pragma: no cover
             log_level = logging.WARNING
@@ -60,14 +62,13 @@ class LogHttpResponseMiddleware:
         if "application/json" in response.headers.get("Content-Type", ""):
             content = response.content.decode("utf-8")
 
-        logger.log(
-            log_level,
-            "%s: %s %s %s %s",
-            request.method,
-            f"({status_code}/{status_label})",
-            request.path_info,
-            content,
-            f"({run_time_ms:.2f}ms)",
-        )
+        logger.bind(
+            method=request.method,
+            status_code=status_code,
+            status_label=status_label,
+            path=request.path_info,
+            content=content,
+            run_time_ms=round(run_time_ms, 2),
+        ).log(log_level, "HTTP response")
 
         return response

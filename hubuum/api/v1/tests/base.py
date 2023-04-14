@@ -1,5 +1,7 @@
 """Provide a base class for testing api/v1."""
 
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from knox.models import AuthToken
@@ -167,6 +169,18 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         response = client.post(self._create_path(path), data)
         self._assert_status_and_debug(response, status_code)
         return response
+
+    def _is_iso_date(self, value):
+        """Assert that a value is a valid date."""
+        try:
+            datetime.datetime.fromisoformat(value)
+            return True
+        except ValueError:
+            return False
+
+    def assert_is_iso_date(self, value):
+        """Assert that a value is a valid date."""
+        self.assertTrue(self._is_iso_date(value))
 
     def assert_delete(self, path, **kwargs):
         """Delete and assert status as 204."""

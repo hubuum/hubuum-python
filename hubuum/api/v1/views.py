@@ -1,7 +1,6 @@
 """Versioned (v1) views for the hubuum models."""
 # from ipaddress import ip_address
-import logging
-
+import structlog
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
@@ -79,8 +78,14 @@ class LoggingMixin:
 
     def _log(self, operation, model, user, instance):
         """Write the log string."""
-        logger = logging.getLogger("hubuum.objects")
-        logger.info("OBJECT [%s] %s:%s by %s", operation, model, instance, user)
+        logger = structlog.get_logger("hubuum.object")
+        logger.info(
+            "object_change",
+            operation=operation,
+            model=model,
+            user=str(user),
+            instance=str(instance),
+        )
 
     def perform_create(self, serializer):
         """Log creates."""
