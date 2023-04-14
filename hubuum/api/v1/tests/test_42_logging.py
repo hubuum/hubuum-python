@@ -235,7 +235,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         )
 
         # Check that we have the right users.
-        self.assertTrue(cap_logs[1]["user"] == user.id == cap_logs[5]["user"])
+        self.assertTrue(cap_logs[1]["id"] == user.id == cap_logs[5]["id"])
 
         json_data = json.loads(cap_logs[2]["content"])
         self.assertIn("token", json_data)
@@ -273,8 +273,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         )
         self._check_levels(cap_logs, ["info", "error", "warning", "info"])
 
-        self.assertTrue(cap_logs[1]["user"] == "")
-        self.assertTrue(cap_logs[1]["user_unknown"])
+        self.assertIsNone(cap_logs[1]["id"])
 
         json_data = json.loads(cap_logs[2]["content"])
         self.assertIn(json_data["detail"], "Invalid username/password.")

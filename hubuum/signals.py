@@ -1,5 +1,7 @@
 """Signals for the hubuum app."""
 
+import logging
+
 import structlog
 from django.contrib.auth.signals import (
     user_logged_in,
@@ -11,24 +13,30 @@ from django.dispatch import receiver
 user_logger = structlog.getLogger("hubuum.auth")
 
 
+def _log_user_event(
+    sender, user, event, level=logging.INFO, **kwargs
+):  # pylint: disable=unused-argument
+    """Log user events."""
+    user_label = None
+    if user:
+        user_label = user.id
+
+    user_logger.bind(id=user_label).log(level, event)
+
+
 @receiver(user_logged_in)
-def log_user_login(sender, user, **kwargs):  # pylint: disable=unused-argument
+def log_user_login(sender, user, **kwargs):
     """Log user logins."""
-    user_logger.info(event="login", user=user.id)
+    _log_user_event(sender, user, "login")
 
 
 @receiver(user_login_failed)
-def log_user_login_failed(
-    sender, user=None, **kwargs
-):  # pylint: disable=unused-argument
+def log_user_login_failed(sender, user=None, **kwargs):
     """Log user login failures."""
-    if user:  # pragma: no cover, not sure if this can ever happen.
-        user_logger.info(event="login failed", user=user.id)
-    else:
-        user_logger.error(event="login failed", user="", user_unknown=True)
+    _log_user_event(sender, user, "login failed", level=logging.ERROR)
 
 
 @receiver(user_logged_out)
-def log_user_logout(sender, user, **kwargs):  # pylint: disable=unused-argument
+def log_user_logout(sender, user, **kwargs):
     """Log logouts."""
-    user_logger.info(event="logout", user=user.id)
+    _log_user_event(sender, user, "logout")
