@@ -1,6 +1,7 @@
 """Provide a base class for testing api/v1."""
 
 import datetime
+from base64 import b64encode
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -110,6 +111,11 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             perms[perm] = True
         self.assert_post_and_204(f"/namespaces/{namespace}/groups/{group}", perms)
         self.client = oldclient
+
+    def basic_auth(self, username, password):
+        """Create a basic auth header for the given username and password."""
+        token = b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+        return f"Basic {token}"
 
     @staticmethod
     def _create_path(path):

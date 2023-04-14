@@ -20,18 +20,12 @@ import structlog
 from structlog_sentry import SentryProcessor
 
 LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
-LOGGING_LEVEL_SOURCE_DJANGO = os.environ.get(
-    "HUBUUM_LOGGING_LEVEL_SOURCE_DJANGO", LOGGING_LEVEL
-).upper()
-LOGGING_LEVEL_SOURCE_OBJECT = os.environ.get(
-    "HUBUUM_LOGGING_LEVEL_SOURCE_OBJECT", LOGGING_LEVEL
-).upper()
-LOGGING_LEVEL_SOURCE_REQUEST = os.environ.get(
-    "HUBUUM_LOGGING_LEVEL_SOURCE_REQUEST", LOGGING_LEVEL
-).upper()
-LOGGING_LEVEL_SOURCE_MANUAL = os.environ.get(
-    "HUBUUM_LOGGING_LEVEL_SOURCE_MANUAL", LOGGING_LEVEL
-).upper()
+LOGGING_LEVEL_SOURCE = {}
+
+for source in ["DJANGO", "OBJECT", "REQUEST", "MANUAL", "AUTH"]:
+    LOGGING_LEVEL_SOURCE[source] = os.environ.get(
+        f"HUBUUM_LOGGING_LEVEL_{source}", LOGGING_LEVEL
+    ).upper()
 
 LOGGING_PRODUCTION = os.environ.get("HUBUUM_LOGGING_PRODUCTION", False)
 
@@ -212,15 +206,15 @@ if SENTRY_LEVEL not in [
 
 # set sentry_level to logger.level depending on the value of SENTRY_LEVEL
 if SENTRY_LEVEL == "DEBUG":
-    sentry_level = logging.DEBUG
+    SENTRY_LOG_LEVEL = logging.DEBUG
 elif SENTRY_LEVEL == "INFO":
-    sentry_level = logging.INFO
+    SENTRY_LOG_LEVEL = logging.INFO
 elif SENTRY_LEVEL == "WARNING":
-    sentry_level = logging.WARNING
+    SENTRY_LOG_LEVEL = logging.WARNING
 elif SENTRY_LEVEL == "ERROR":
-    sentry_level = logging.ERROR
+    SENTRY_LOG_LEVEL = logging.ERROR
 elif SENTRY_LEVEL == "CRITICAL":
-    sentry_level = logging.CRITICAL
+    SENTRY_LOG_LEVEL = logging.CRITICAL
 
 
 structlog.configure(
@@ -233,7 +227,7 @@ structlog.configure(
         structlog.processors.format_exc_info,
         structlog.processors.StackInfoRenderer(),
         structlog.processors.UnicodeDecoder(),
-        SentryProcessor(event_level=sentry_level),
+        SentryProcessor(event_level=SENTRY_LOG_LEVEL),
         output_type,
     ],
     context_class=dict,
@@ -261,21 +255,26 @@ LOGGING = {
     "loggers": {
         "django_structlog": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE_DJANGO,
+            "level": LOGGING_LEVEL_SOURCE["DJANGO"],
         },
         "hubuum.object": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE_OBJECT,
+            "level": LOGGING_LEVEL_SOURCE["OBJECT"],
             "propagate": False,
         },
         "hubuum.request": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE_REQUEST,
+            "level": LOGGING_LEVEL_SOURCE["REQUEST"],
+            "propagate": False,
+        },
+        "hubuum.auth": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["AUTH"],
             "propagate": False,
         },
         "hubuum.manual": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE_MANUAL,
+            "level": LOGGING_LEVEL_SOURCE["MANUAL"],
             "propagate": False,
         },
     },

@@ -2,11 +2,14 @@
 
 import json
 
+from django.contrib.auth.hashers import make_password
+from rest_framework.test import APIClient
 from structlog import get_logger
 from structlog.testing import capture_logs
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.log import critical, debug, error, info, warning
+from hubuum.models.auth import User
 from hubuum.models.base import Host, HubuumModel, Namespace
 
 
@@ -28,12 +31,12 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.namespace.delete()
         super().tearDown()
 
-    def _check_levels(self, expected_levels, cap_logs):
+    def _check_levels(self, cap_logs, expected_levels):
         """Check the log levels in the log."""
         for i, level in enumerate(expected_levels):
             self.assertEqual(cap_logs[i]["log_level"], level)
 
-    def _check_events(self, expected_events, cap_logs):
+    def _check_events(self, cap_logs, expected_events):
         """Check the events in the log."""
         for i, event in enumerate(expected_events):
             self.assertEqual(cap_logs[i]["event"], event)
@@ -108,9 +111,9 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertEqual(len(cap_logs), 3)
 
         self._check_events(
-            ["request_started", "HTTP response", "request_finished"], cap_logs
+            cap_logs, ["request_started", "HTTP response", "request_finished"]
         )
-        self._check_levels(["info", "debug", "info"], cap_logs)
+        self._check_levels(cap_logs, ["info", "debug", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/namespaces/")
         self._check_response(cap_logs[1], "GET", "/api/v1/namespaces/", 200, "OK")
         self._check_json(
@@ -130,9 +133,9 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         self.assertEqual(len(cap_logs), 3)
         self._check_events(
-            ["request_started", "HTTP response", "request_finished"], cap_logs
+            cap_logs, ["request_started", "HTTP response", "request_finished"]
         )
-        self._check_levels(["info", "warning", "info"], cap_logs)
+        self._check_levels(cap_logs, ["info", "warning", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/namespaces/nope")
         self._check_response(
             cap_logs[1], "GET", "/api/v1/namespaces/nope", 404, "Not Found"
@@ -148,11 +151,11 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertEqual(len(cap_logs), 4)
 
         self._check_events(
-            ["request_started", "object_change", "HTTP response", "request_finished"],
             cap_logs,
+            ["request_started", "object_change", "HTTP response", "request_finished"],
         )
 
-        self._check_levels(["info", "info", "debug", "info"], cap_logs)
+        self._check_levels(cap_logs, ["info", "info", "debug", "info"])
 
         self._check_request_started(cap_logs[0], "POST /api/v1/hosts/")
         self._check_object_change(cap_logs[1], "create", "Host", "test", "superuser")
@@ -192,3 +195,90 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertTrue(cap_logs[2]["log_level"] == "warning")
         self.assertTrue(cap_logs[3]["log_level"] == "critical")
         self.assertTrue(cap_logs[4]["log_level"] == "error")
+
+    def test_successful_auth_logging(self):
+        """Test logging of successful authentication."""
+        plaintext = "django"
+        user, _ = User.objects.get_or_create(
+            username="testuser", password=make_password(plaintext)
+        )  # nosec
+        auth = self.basic_auth("testuser", plaintext)
+
+        with capture_logs() as cap_logs:
+            get_logger().bind()
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION=auth)
+            auth = self.client.post(
+                "/api/auth/login/",
+            )
+            self.client.credentials(HTTP_AUTHORIZATION="Token " + auth.data["token"])
+            self.client.post(
+                "/api/auth/logout/",
+            )
+
+        self.assertTrue(len(cap_logs) == 8)
+        self._check_events(
+            cap_logs,
+            [
+                "request_started",
+                "login",
+                "HTTP response",
+                "request_finished",
+                "request_started",
+                "logout",
+                "HTTP response",
+                "request_finished",
+            ],
+        )
+        self._check_levels(
+            cap_logs, ["info", "info", "debug", "info", "info", "info", "debug", "info"]
+        )
+
+        # Check that we have the right users.
+        self.assertTrue(cap_logs[1]["user"] == user.id == cap_logs[5]["user"])
+
+        json_data = json.loads(cap_logs[2]["content"])
+        self.assertIn("token", json_data)
+        self.assert_is_iso_date(json_data["expiry"])
+
+        self.assertEqual(cap_logs[2]["status_code"], 200)
+
+        user.delete()
+
+    def test_unsuccessful_auth_logging(self):
+        """Test logging of successful authentication."""
+        plaintext = "django"
+        user, _ = User.objects.get_or_create(
+            username="testuser", password=make_password("wrongpassword")
+        )  # nosec
+        auth = self.basic_auth("testuser", plaintext)
+
+        with capture_logs() as cap_logs:
+            get_logger().bind()
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION=auth)
+            auth = self.client.post(
+                "/api/auth/login/",
+            )
+
+        self.assertTrue(len(cap_logs) == 4)
+        self._check_events(
+            cap_logs,
+            [
+                "request_started",
+                "login failed",
+                "HTTP response",
+                "request_finished",
+            ],
+        )
+        self._check_levels(cap_logs, ["info", "error", "warning", "info"])
+
+        self.assertTrue(cap_logs[1]["user"] == "")
+        self.assertTrue(cap_logs[1]["user_unknown"])
+
+        json_data = json.loads(cap_logs[2]["content"])
+        self.assertIn(json_data["detail"], "Invalid username/password.")
+
+        self.assertEqual(cap_logs[2]["status_code"], 401)
+
+        user.delete()
