@@ -1,8 +1,11 @@
 """Provide a base class for testing api/v1."""
 
-import datetime
 from base64 import b64encode
 
+# We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
+# because the latter only supportes Z for UTC in python 3.11.
+# https://github.com/python/cpython/issues/80010
+from dateutil.parser import isoparse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from knox.models import AuthToken
@@ -179,7 +182,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
     def _is_iso_date(self, value):
         """Assert that a value is a valid date."""
         try:
-            datetime.datetime.fromisoformat(value)
+            isoparse(value)
             return True
         except ValueError:
             return False

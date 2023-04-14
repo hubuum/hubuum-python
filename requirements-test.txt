@@ -10,6 +10,8 @@ rich
 sentry-sdk[django]
 structlog_sentry
 
+python-dateutil
+
 psycopg2-binary
 pyyaml
 uritemplate
