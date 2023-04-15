@@ -19,6 +19,8 @@ import sentry_sdk
 import structlog
 from structlog_sentry import SentryProcessor
 
+import hubuum.log
+
 LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
 LOGGING_LEVEL_SOURCE = {}
 
@@ -219,6 +221,7 @@ elif SENTRY_LEVEL == "CRITICAL":
 
 structlog.configure(
     processors=[
+        hubuum.log.filter_sensitive_data,
         structlog.stdlib.filter_by_level,
         structlog.stdlib.add_log_level,
         structlog.stdlib.add_logger_name,

@@ -1,14 +1,14 @@
 documentation:
-  - any: ["docs/*"]
+- any: ["docs/*"]
 
 migrations:
-  - any: ["hubuum/migrations/*"]
+- any: ["hubuum/migrations/*"]
 
 dependencies:
-  - any: ["requirements*"]
+- any: ["requirements*"]
 
 testing:
-  - any: ["hubuum/tests/*", "hubuum/api/*/tests/*", "tox.ini"]
+- any: ["hubuum/tests/*", "hubuum/api/*/tests/*", "tox.ini"]
 
 github_actions:
-  - any: [".github/actions/*"]
+- any: [".github/actions/*"]

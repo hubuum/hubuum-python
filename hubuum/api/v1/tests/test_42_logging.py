@@ -216,6 +216,9 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/logout/",
             )
 
+        for i, log in enumerate(cap_logs):
+            print(i, log)
+
         self.assertTrue(len(cap_logs) == 8)
         self._check_events(
             cap_logs,
