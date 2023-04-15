@@ -19,11 +19,17 @@ def _filter_sensitive_data(record):
         return None
 
     if isinstance(record, dict):
+        if "model" in record and record["model"] == "AuthToken":
+            value = record["id"]
+            (token, username) = value.split(" : ")
+            record["id"] = _replace_token(token) + " : " + username
+
         for key, value in record.items():
             if key in ["token"]:
                 record[key] = _replace_token(value)
             else:
                 record[key] = _filter_sensitive_data(value)
+
     elif record and isinstance(record, str) and '"token":"' in record:
         token = record.split('"token":"')[1].split('"')[0]
         record = record.replace(token, _replace_token(token))

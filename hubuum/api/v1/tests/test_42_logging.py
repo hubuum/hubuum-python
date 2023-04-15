@@ -56,7 +56,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self, log, method, path, status_code, status_label
     ):  # pylint: disable=too-many-arguments
         """Check the HTTP response log entry."""
-        self.assertEqual(log["event"], "HTTP response")
+        self.assertEqual(log["event"], "response")
         self.assertEqual(log["method"], method)
         self.assertEqual(log["path"], path)
         self.assertEqual(log["status_label"], status_label)
@@ -96,8 +96,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self, log, operation, model, instance, user
     ):  # pylint: disable=too-many-arguments
         """Check the object change log entry."""
-        self.assertEqual(log["event"], "object_change")
-        self.assertEqual(log["operation"], operation)
+        self.assertEqual(log["event"], operation)
         self.assertEqual(log["model"], model)
         self.assertEqual(log["instance"], instance)
         self.assertEqual(log["user"], user)
@@ -111,7 +110,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertEqual(len(cap_logs), 3)
 
         self._check_events(
-            cap_logs, ["request_started", "HTTP response", "request_finished"]
+            cap_logs, ["request_started", "response", "request_finished"]
         )
         self._check_levels(cap_logs, ["info", "debug", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/namespaces/")
@@ -133,7 +132,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         self.assertEqual(len(cap_logs), 3)
         self._check_events(
-            cap_logs, ["request_started", "HTTP response", "request_finished"]
+            cap_logs, ["request_started", "response", "request_finished"]
         )
         self._check_levels(cap_logs, ["info", "warning", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/namespaces/nope")
@@ -147,30 +146,38 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         with capture_logs() as cap_logs:
             get_logger().bind()
             host_blob = self.assert_post("/hosts/", self.host_data)
+            host_id = host_blob.data["id"]
 
-        self.assertEqual(len(cap_logs), 4)
+        self.assertEqual(len(cap_logs), 5)
 
         self._check_events(
             cap_logs,
-            ["request_started", "object_change", "HTTP response", "request_finished"],
+            [
+                "request_started",
+                "created",
+                "created",
+                "response",
+                "request_finished",
+            ],
         )
 
-        self._check_levels(cap_logs, ["info", "info", "debug", "info"])
+        self._check_levels(cap_logs, ["info", "info", "info", "debug", "info"])
 
         self._check_request_started(cap_logs[0], "POST /api/v1/hosts/")
-        self._check_object_change(cap_logs[1], "create", "Host", "test", "superuser")
-        self._check_response(cap_logs[2], "POST", "/api/v1/hosts/", 201, "Created")
+        self.assertTrue(cap_logs[1]["id"] == host_id)
+        self._check_object_change(cap_logs[2], "created", "Host", host_id, "superuser")
+        self._check_response(cap_logs[3], "POST", "/api/v1/hosts/", 201, "Created")
         self._check_json(
             Host,
-            cap_logs[2]["content"],
+            cap_logs[3]["content"],
             {
-                "id": host_blob.data["id"],
+                "id": host_id,
                 "name": "test",
                 "fqdn": "test.domain.tld",
                 "namespace": self.namespace.id,
             },
         )
-        self._check_request_finished(cap_logs[3], "POST /api/v1/hosts/", 201)
+        self._check_request_finished(cap_logs[4], "POST /api/v1/hosts/", 201)
 
     def test_manual_logging(self):
         """Test manual logging."""
@@ -216,35 +223,51 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/logout/",
             )
 
-        for i, log in enumerate(cap_logs):
-            print(i, log)
-
-        self.assertTrue(len(cap_logs) == 8)
+        self.assertTrue(len(cap_logs) == 11)
         self._check_events(
             cap_logs,
             [
                 "request_started",
+                "created",
+                "updated",
                 "login",
-                "HTTP response",
+                "response",
                 "request_finished",
                 "request_started",
+                "deleted",
                 "logout",
-                "HTTP response",
+                "response",
                 "request_finished",
             ],
         )
         self._check_levels(
-            cap_logs, ["info", "info", "debug", "info", "info", "info", "debug", "info"]
+            cap_logs,
+            [
+                "info",
+                "info",
+                "info",
+                "info",
+                "debug",
+                "info",
+                "info",
+                "info",
+                "info",
+                "debug",
+                "info",
+            ],
         )
 
-        # Check that we have the right users.
-        self.assertTrue(cap_logs[1]["id"] == user.id == cap_logs[5]["id"])
+        # Check that we're deleting the right token
+        self.assertTrue(cap_logs[1]["id"] == cap_logs[7]["id"])
 
-        json_data = json.loads(cap_logs[2]["content"])
+        # Check that we have the right users.
+        self.assertTrue(cap_logs[2]["id"] == user.id == cap_logs[8]["id"])
+
+        json_data = json.loads(cap_logs[4]["content"])
         self.assertIn("token", json_data)
         self.assert_is_iso_date(json_data["expiry"])
 
-        self.assertEqual(cap_logs[2]["status_code"], 200)
+        self.assertEqual(cap_logs[4]["status_code"], 200)
 
         user.delete()
 
@@ -269,8 +292,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             cap_logs,
             [
                 "request_started",
-                "login failed",
-                "HTTP response",
+                "failure",
+                "response",
                 "request_finished",
             ],
         )

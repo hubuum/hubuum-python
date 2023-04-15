@@ -78,13 +78,12 @@ class LoggingMixin:
 
     def _log(self, operation, model, user, instance):
         """Write the log string."""
-        logger = structlog.get_logger("hubuum.object")
+        logger = structlog.get_logger("hubuum.api.object")
         logger.info(
-            "object_change",
-            operation=operation,
+            operation,
             model=model,
             user=str(user),
-            instance=str(instance),
+            instance=instance.id,
         )
 
     def perform_create(self, serializer):
@@ -93,7 +92,7 @@ class LoggingMixin:
         instance = serializer.instance
         if instance:
             self._log(
-                "create", instance.__class__.__name__, self.request.user, instance
+                "created", instance.__class__.__name__, self.request.user, instance
             )
 
     def perform_update(self, serializer):
@@ -102,12 +101,12 @@ class LoggingMixin:
         instance = serializer.instance
         if instance:
             self._log(
-                "update", instance.__class__.__name__, self.request.user, instance
+                "updated", instance.__class__.__name__, self.request.user, instance
             )
 
     def perform_destroy(self, instance):
         """Log deletes."""
-        self._log("delete", instance.__class__.__name__, self.request.user, instance)
+        self._log("deleted", instance.__class__.__name__, self.request.user, instance)
         super().perform_destroy(instance)
 
 

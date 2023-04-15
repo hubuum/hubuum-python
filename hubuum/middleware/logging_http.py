@@ -69,6 +69,6 @@ class LogHttpResponseMiddleware:
             path=request.path_info,
             content=content,
             run_time_ms=round(run_time_ms, 2),
-        ).log(log_level, "HTTP response")
+        ).log(log_level, "response")
 
         return response
