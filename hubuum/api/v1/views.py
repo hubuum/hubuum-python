@@ -162,8 +162,14 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
         return obj
 
 
+# Hubuum List and Detail Views include near empty get, post, patch, and delete methods
+# to allow the schema to be documented with the correct docstrings.
 class HubuumList(LoggingMixin, generics.ListCreateAPIView):
     """Get: List objects. Post: Add object."""
+
+    schema = AutoSchema(
+        tags=["Resources"],
+    )
 
     permission_classes = (NameSpace,)
 
@@ -174,12 +180,20 @@ class HubuumDetail(
 ):
     """Get, Patch, or Destroy an object."""
 
+    schema = AutoSchema(
+        tags=["Resources"],
+    )
+
     permission_classes = (NameSpace,)
     lookup_fields = ("id",)
 
 
 class UserList(HubuumList):
     """Get: List users. Post: Add user."""
+
+    schema = AutoSchema(
+        tags=["User"],
+    )
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -190,6 +204,10 @@ class UserList(HubuumList):
 class UserDetail(HubuumDetail):
     """Get, Patch, or Destroy a user."""
 
+    schema = AutoSchema(
+        tags=["User"],
+    )
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_fields = ("id", "username", "email")
@@ -199,6 +217,10 @@ class UserDetail(HubuumDetail):
 class GroupList(HubuumList):
     """Get: List groups. Post: Add group."""
 
+    schema = AutoSchema(
+        tags=["Group"],
+    )
+
     queryset = Group.objects.all().order_by("id")
     serializer_class = GroupSerializer
     permission_classes = (IsSuperOrAdminOrReadOnly,)
@@ -207,6 +229,10 @@ class GroupList(HubuumList):
 
 class GroupDetail(HubuumDetail):
     """Get, Patch, or Destroy a group."""
+
+    schema = AutoSchema(
+        tags=["Group"],
+    )
 
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
@@ -225,7 +251,7 @@ class GroupMembers(
     serializer_class = UserSerializer
     queryset = Group.objects.all()
     schema = AutoSchema(
-        tags=["LISTVIEW"],
+        tags=["Group"],
         component_name="Group memberships",
         operation_id_base="Groupmemberships",
     )
@@ -249,7 +275,7 @@ class GroupMembersUser(
     serializer_class = UserSerializer
     queryset = Group.objects.all()
     schema = AutoSchema(
-        tags=["LISTVIEW"],
+        tags=["Group", "User"],
         component_name="Group memberships users",
         operation_id_base="Groupmembershipsusers",
     )
@@ -299,6 +325,10 @@ class GroupMembersUser(
 class PermissionList(HubuumList):
     """Get: List permissions. Post: Add permission."""
 
+    schema = AutoSchema(
+        tags=["Permission"],
+    )
+
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
     filterset_class = PermissionFilterSet
@@ -307,12 +337,20 @@ class PermissionList(HubuumList):
 class PermissionDetail(HubuumDetail):
     """Get, Patch, or Destroy a permission."""
 
+    schema = AutoSchema(
+        tags=["Permission"],
+    )
+
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
 
 
 class ExtensionList(HubuumList):
     """Get: List extensions. Post: Add extension."""
+
+    schema = AutoSchema(
+        tags=["Extension"],
+    )
 
     queryset = Extension.objects.all()
     serializer_class = ExtensionSerializer
@@ -322,6 +360,10 @@ class ExtensionList(HubuumList):
 class ExtensionDetail(HubuumDetail):
     """Get, Patch, or Destroy an extension."""
 
+    schema = AutoSchema(
+        tags=["Extension"],
+    )
+
     queryset = Extension.objects.all()
     serializer_class = ExtensionSerializer
     lookup_fields = ("id", "name")
@@ -329,6 +371,10 @@ class ExtensionDetail(HubuumDetail):
 
 class ExtensionDataList(HubuumList):
     """Get: List extensiondata. Post: Add extensiondata."""
+
+    schema = AutoSchema(
+        tags=["Extension"],
+    )
 
     queryset = ExtensionData.objects.all()
     serializer_class = ExtensionDataSerializer
@@ -359,6 +405,10 @@ class ExtensionDataList(HubuumList):
 class ExtensionDataDetail(HubuumDetail):
     """Get, Patch, or Destroy an extensiondata object."""
 
+    schema = AutoSchema(
+        tags=["Extension"],
+    )
+
     queryset = ExtensionData.objects.all()
     serializer_class = ExtensionDataSerializer
 
@@ -381,6 +431,10 @@ class HostDetail(HubuumDetail):
 
 class NamespaceList(HubuumList):
     """Get: List Namespaces. Post: Add Namespace."""
+
+    schema = AutoSchema(
+        tags=["Namespace"],
+    )
 
     queryset = Namespace.objects.all()
     serializer_class = NamespaceSerializer
@@ -429,6 +483,10 @@ class NamespaceList(HubuumList):
 class NamespaceDetail(HubuumDetail):
     """Get, Patch, or Destroy a namespace."""
 
+    schema = AutoSchema(
+        tags=["Namespace"],
+    )
+
     queryset = Namespace.objects.all()
     serializer_class = NamespaceSerializer
     lookup_fields = ("id", "name")
@@ -448,7 +506,7 @@ class NamespaceMembers(
     serializer_class = GroupSerializer
     queryset = Namespace.objects.all()
     schema = AutoSchema(
-        tags=["LISTVIEW"],
+        tags=["Namespace"],
         component_name="Namespace members",
         operation_id_base="NamespaceMember",
     )
@@ -474,7 +532,7 @@ class NamespaceMembersGroup(
     serializer_class = PermissionSerializer
     queryset = Namespace.objects.all()
     schema = AutoSchema(
-        tags=["LISTVIEW"],
+        tags=["Namespace", "Group"],
         component_name="Namespace group permissions",
         operation_id_base="NamespaceMembersGroup",
     )

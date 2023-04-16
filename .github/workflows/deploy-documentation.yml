@@ -10,7 +10,7 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'hubuum'
+    if: github.repository_owner == 'hubuum' || github.repository_owner == 'terjekv'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -37,10 +37,10 @@ jobs:
           publish_dir: ./site
           publish_branch: gh-pages
           enable_jekyll: false
-          force_orphan: true
+          force_orphan: false
           #        cname: hubuum.example.com # Replace with your custom domain if desired
           user_name: "GitHub Actions"
           user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: "Deploy documentation to GitHub Pages"
           keep_files: true
-          destination_dir: ${{ github.ref == 'refs/heads/main' && 'main' || github.ref_name }}
+          destination_dir: ${{ github.repository_owner == 'hubuum' && (github.ref == 'refs/heads/main' && 'main' || github.ref_name) || ('hubuum/' + (github.ref == 'refs/heads/main' && 'main' || github.ref_name)) }}
