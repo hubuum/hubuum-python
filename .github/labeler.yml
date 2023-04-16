@@ -13,4 +13,4 @@ testing:
   - "tox.ini"
 
 github_actions:
-  - ".github/actions/*"
+  - ".github/workflows/*"
