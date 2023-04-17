@@ -3,6 +3,7 @@
 ![](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![Tox](https://github.com/terjekv/hubuum/actions/workflows/tox.yml/badge.svg)
 ![Flake8](https://github.com/terjekv/hubuum/actions/workflows/lint.yml/badge.svg)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3d9b2b09dbd6412fadc58c2e49f43c36)](https://app.codacy.com/gh/terjekv/hubuum?utm_source=github.com&utm_medium=referral&utm_content=terjekv/hubuum&utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/terjekv/hubuum/badge.svg?branch=main)](https://coveralls.io/github/terjekv/hubuum?branch=main)
 [![Code quality](https://api.codiga.io/project/35582/score/svg)](https://app.codiga.io/hub/project/35582/hubuum)
 [![Code grade](https://api.codiga.io/project/35582/status/svg)](https://app.codiga.io/hub/project/35582/hubuum)
