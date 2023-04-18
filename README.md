@@ -25,6 +25,4 @@ from all other systems and presents it in ways that are useful.
 ## Design
 
 Hubuum aims to have a small core of data models that track information gathered
-from Hubuum modules. For more information about the design, please see the
-documentation in the [documentation](docs/) folder.
-
+from Hubuum modules.
