@@ -8,7 +8,7 @@ knox==0.1.14
 rich==13.3.4 # Used for console logging.
 
 sentry-sdk[django]==1.19.1
-structlog_sentry==2.0.0
+structlog_sentry==2.0.2
 
 psycopg2==2.9.6
 pyyaml==6.0
