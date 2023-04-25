@@ -4,6 +4,8 @@ This document provides an overview of the environment variables that can be set 
 
 ## Logging
 
+For detailed information on logging, see the [logging documentation](logging.md).
+
 - `HUBUUM_LOGGING_LEVEL`: Sets the default logging level for all sources. Defaults to "critical".
 - `HUBUUM_LOGGING_LEVEL_DJANGO`: Sets the logging level for the default Django loggers. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
 - `HUBUUM_LOGGING_LEVEL_API`: Sets the logging level for API actions such as direct object manipulation through the API. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
