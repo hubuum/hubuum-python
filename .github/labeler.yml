@@ -4,6 +4,9 @@ documentation:
 migrations:
   - "hubuum/migrations/*"
 
+models:
+  - "hubuum/models/*"
+
 dependencies:
   - "requirements*"
 
