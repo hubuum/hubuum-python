@@ -43,4 +43,4 @@ jobs:
           user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: "Deploy documentation to GitHub Pages"
           keep_files: true
-          destination_dir: ${{ github.repository_owner == 'hubuum' && (github.ref == 'refs/heads/main' && 'main' || github.ref_name) || ('hubuum/' + (github.ref == 'refs/heads/main' && 'main' || github.ref_name)) }}
+          destination_dir: ${{ github.repository_owner == 'hubuum' && (github.ref == 'refs/heads/main' && 'main' || github.ref_name) || format('hubuum/{0}', (github.ref == 'refs/heads/main' && 'main' || github.ref_name)) }}
