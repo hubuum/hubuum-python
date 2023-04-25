@@ -12,13 +12,13 @@ nav:
       - Installation: installation.md
       - Configuration: configuration.md
   - Using Hubuum:
-      - Models: model.md
       - API: api.md
       - Examples: examples.md
   - For developers/contributors:
       - Code style: code-style.md
       - Contributing to Hubuum: contributing.md
       - Unit tests: unit-tests.md
+      - References: model.md
   - Contributing: contributing.md
   - About: about.md
 
