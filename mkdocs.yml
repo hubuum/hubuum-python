@@ -18,7 +18,7 @@ nav:
       - Code style: code-style.md
       - Contributing to Hubuum: contributing.md
       - Unit tests: unit-tests.md
-      - References: model.md
+      - Model references: model.md
   - Contributing: contributing.md
   - About: about.md
 
