@@ -48,6 +48,8 @@ theme:
 plugins:
   - search
   - git-revision-date-localized
+  - mkdocstrings
+  - autorefs
   - swagger-ui-tag:
       docExpansion: none
       syntaxHighlightTheme: monokai
@@ -64,5 +66,9 @@ markdown_extensions:
   - pymdownx.details
   # tabbed contents
   - pymdownx.tabbed
+  # Highlight code blocks
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
   - toc:
       permalink: true
