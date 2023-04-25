@@ -1,5 +1,7 @@
 """Test hubuum extensions."""
-from hubuum.models.base import ExtensionData, Host, Namespace
+from hubuum.models.core import ExtensionData
+from hubuum.models.permissions import Namespace
+from hubuum.models.resources import Host
 
 from .base import HubuumAPITestCase
 

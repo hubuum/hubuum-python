@@ -4,9 +4,9 @@ from django.contrib.auth.models import Group
 from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.base import (  # Permissions,
-    Extension,
-    Namespace,
+from hubuum.models.core import Extension
+from hubuum.models.permissions import Namespace
+from hubuum.models.resources import (
     Person,
     PurchaseDocuments,
     PurchaseOrder,

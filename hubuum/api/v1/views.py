@@ -32,14 +32,12 @@ from hubuum.filters import (
     VendorFilterSet,
 )
 from hubuum.models.auth import User, get_group, get_user
-from hubuum.models.base import (
-    Extension,
-    ExtensionData,
+from hubuum.models.core import Extension, ExtensionData
+from hubuum.models.permissions import Namespace, Permission
+from hubuum.models.resources import (
     Host,
     HostType,
     Jack,
-    Namespace,
-    Permission,
     Person,
     PurchaseDocuments,
     PurchaseOrder,

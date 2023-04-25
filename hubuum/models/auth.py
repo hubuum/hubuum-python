@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser, Group
 from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.base import Namespace, Permission
+from hubuum.models.permissions import Namespace, Permission
 from hubuum.permissions import operation_exists
 from hubuum.tools import get_model, get_object
 

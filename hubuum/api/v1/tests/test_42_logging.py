@@ -10,7 +10,8 @@ from structlog.testing import capture_logs
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.log import critical, debug, error, info, warning
 from hubuum.models.auth import User
-from hubuum.models.base import Host, HubuumModel, Namespace
+from hubuum.models.permissions import HubuumModel, Namespace
+from hubuum.models.resources import Host
 
 
 class HubuumLoggingTestCase(HubuumAPITestCase):

@@ -7,15 +7,12 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
 from hubuum.models.auth import User
-from hubuum.models.base import (
-    Extension,
-    ExtensionData,
-    ExtensionsModel,
+from hubuum.models.core import Extension, ExtensionData, ExtensionsModel
+from hubuum.models.permissions import Namespace, Permission
+from hubuum.models.resources import (
     Host,
     HostType,
     Jack,
-    Namespace,
-    Permission,
     Person,
     PurchaseDocuments,
     PurchaseOrder,
