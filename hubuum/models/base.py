@@ -190,9 +190,12 @@ class Namespace(HubuumModel):
         param: group (Group instance)
         param: raise_exception (True)
 
-        returns: permission object
+        returns:
+            success (Permission): Permission object
+            failure (None): None
 
-        raises: NotFound if raise_exception is True and no object is found
+        raises:
+            exception: NotFound if raise_exception is True and no permission object is found
         """
         try:
             obj = Permission.objects.get(namespace=self, group=group)

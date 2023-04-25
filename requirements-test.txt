@@ -12,6 +12,12 @@ structlog_sentry
 
 python-dateutil
 
+mkdocs
+mkdocs-material
+mkdocs-swagger-ui-tag
+mkdocs-git-revision-date-localized-plugin
+mkdocstrings[python]
+
 psycopg2-binary
 pyyaml
 uritemplate

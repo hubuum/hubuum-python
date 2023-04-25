@@ -1,0 +1,78 @@
+site_name: Hubuum
+repo_url: https://github.com/terjekv/hubuum
+docs_dir: docs
+site_description: "A single pane of glass."
+
+nav:
+  - Home: index.md
+  - Basic information:
+      - What is Hubuum?: what_is_hubuum.md
+      - Terminology: terminology.md
+  - Getting started with Hubuum:
+      - Installation: installation.md
+      - Configuration: configuration.md
+  - Using Hubuum:
+      - Permissions: permissions.md
+      - API: api.md
+      - Extensions: extensions.md
+      - Logging: logging.md
+      - Examples: examples.md
+      - Swagger: swagger.md
+  - For developers/contributors:
+      - Code style: code-style.md
+      - Contributing to Hubuum: contributing.md
+      - Unit tests: unit-tests.md
+      - Model references: model.md
+  - Contributing: contributing.md
+  - About: about.md
+
+theme:
+  name: "material"
+  features:
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/
+    - navigation.instant
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+    - toc.integrate
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search
+    - search.highlight
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+plugins:
+  - search
+  - git-revision-date-localized
+  - mkdocstrings
+  - autorefs
+  - swagger-ui-tag:
+      docExpansion: none
+      syntaxHighlightTheme: monokai
+      tryItOutEnabled: false
+
+markdown_extensions:
+  # add attributes to html elements
+  - attr_list
+  # notes, warnings, hints, ...
+  - admonition
+  # code blocks with syntax highlighting, graphs
+  - pymdownx.superfences
+  # clickable details
+  - pymdownx.details
+  # tabbed contents
+  - pymdownx.tabbed
+  # Highlight code blocks
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - toc:
+      permalink: true

@@ -1,0 +1,46 @@
+name: Deploy documentation
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'hubuum' || github.repository_owner == 'terjekv'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+
+      - name: Build documentation
+        run: tox -r -e docs
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          enable_jekyll: false
+          force_orphan: false
+          #        cname: hubuum.example.com # Replace with your custom domain if desired
+          user_name: "GitHub Actions"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "Deploy documentation to GitHub Pages"
+          keep_files: true
+          destination_dir: ${{ github.repository_owner == 'hubuum' && (github.ref == 'refs/heads/main' && 'main' || github.ref_name) || ('hubuum/' + (github.ref == 'refs/heads/main' && 'main' || github.ref_name)) }}
