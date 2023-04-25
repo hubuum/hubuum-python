@@ -5,7 +5,9 @@ from rest_framework.exceptions import NotFound, ValidationError
 from hubuum.exceptions import MissingParam
 from hubuum.log import filter_sensitive_data
 from hubuum.models.auth import User
-from hubuum.models.base import Host, Namespace, model_supports_extensions
+from hubuum.models.core import model_supports_extensions
+from hubuum.models.permissions import Namespace
+from hubuum.models.resources import Host
 from hubuum.tools import get_object
 from hubuum.validators import validate_model
 

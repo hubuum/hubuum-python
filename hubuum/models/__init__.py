@@ -1,7 +1,6 @@
 """The hubuum.models package.
 
 See https://stackoverflow.com/questions/6336664/split-models-py-into-several-files
-Sadly the imports are required.
+Sadly the import of the user model is required.
 """
-from .auth import *  # noqa
-from .base import *  # noqa
+from .auth import User  # noqa

@@ -5,20 +5,17 @@ from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
 from hubuum.models.auth import User
-from hubuum.models.base import (
-    Extension,
-    ExtensionData,
+from hubuum.models.core import Extension, ExtensionData, model_is_open
+from hubuum.models.permissions import Namespace, Permission
+from hubuum.models.resources import (
     Host,
     HostType,
     Jack,
-    Namespace,
-    Permission,
     Person,
     PurchaseDocuments,
     PurchaseOrder,
     Room,
     Vendor,
-    model_is_open,
 )
 
 _key_lookups = ["exact"]  # in?

@@ -1,7 +1,8 @@
 """Test the pagination in hubuum."""
 from urllib.parse import parse_qs, urlparse
 
-from hubuum.models.base import Host, Namespace
+from hubuum.models.permissions import Namespace
+from hubuum.models.resources import Host
 
 from .base import HubuumAPITestCase
 

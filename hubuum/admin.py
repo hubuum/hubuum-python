@@ -2,7 +2,9 @@
 
 from django.contrib import admin
 
-from hubuum.models.base import (
+from hubuum.models.core import Extension, ExtensionData
+from hubuum.models.permissions import Namespace, Permission
+from hubuum.models.resources import (
     Host,
     HostType,
     Jack,
@@ -22,5 +24,9 @@ models = [
     Vendor,
     PurchaseOrder,
     PurchaseDocuments,
+    Namespace,
+    Permission,
+    Extension,
+    ExtensionData,
 ]
 admin.site.register(models)

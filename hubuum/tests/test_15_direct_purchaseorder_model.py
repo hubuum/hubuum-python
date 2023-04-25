@@ -1,7 +1,7 @@
 """Test module for the PurchaseOrder model."""
 from datetime import datetime
 
-from hubuum.models.base import PurchaseOrder
+from hubuum.models.resources import PurchaseOrder
 
 from .base import HubuumModelTestCase
 

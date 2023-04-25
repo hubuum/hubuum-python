@@ -1,6 +1,7 @@
 """Test the filter interface."""
 from hubuum.models.auth import User
-from hubuum.models.base import Host, Namespace, Room
+from hubuum.models.permissions import Namespace
+from hubuum.models.resources import Host, Room
 
 from .base import HubuumAPITestCase
 
