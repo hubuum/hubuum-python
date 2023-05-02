@@ -5,7 +5,7 @@ django_filter==23.1
 django-structlog==5.1.0
 knox==0.1.14
 
-rich==13.3.4 # Used for console logging.
+rich==13.3.5 # Used for console logging.
 
 sentry-sdk[django]==1.20.0
 structlog_sentry==2.0.2
