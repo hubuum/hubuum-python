@@ -143,7 +143,9 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         # Note that as long as tests pass, this will never be called, so it's a little
         if not response.status_code == expected_code:  # pragma: no cover
             path = f"{response.request['PATH_INFO']}{response.request['QUERY_STRING']}"
-            fail = f"{response.status_code} {response.data}"
+            fail = f"{path} FAILED: {response.status_code}"
+            if hasattr(response, "data"):
+                fail = f"{fail} [{response.data}]"
             print(f"{path} FAILED: {fail}")
         self.assertEqual(response.status_code, expected_code)
 

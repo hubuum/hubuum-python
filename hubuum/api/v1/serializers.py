@@ -7,7 +7,13 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
 from hubuum.models.auth import User
-from hubuum.models.core import Extension, ExtensionData, ExtensionsModel
+from hubuum.models.core import (
+    Attachment,
+    AttachmentData,
+    Extension,
+    ExtensionData,
+    ExtensionsModel,
+)
 from hubuum.models.permissions import Namespace, Permission
 from hubuum.models.resources import (
     Host,
@@ -222,6 +228,45 @@ class ExtensionDataSerializer(HubuumMetaSerializer):
         """How to serialize the object."""
 
         model = ExtensionData
+        fields = "__all__"
+
+
+class AttachmentSerializer(HubuumMetaSerializer):
+    """Serialize an Attachment object."""
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = Attachment
+        fields = "__all__"
+
+    def validate(self, data):
+        """Validate that the the limits are sane."""
+        per_object_total_size_limit = data.get(
+            "per_object_total_size_limit",
+            self.instance.per_object_total_size_limit if self.instance else None,
+        )
+        per_object_individual_size_limit = data.get(
+            "per_object_individual_size_limit",
+            self.instance.per_object_individual_size_limit if self.instance else None,
+        )
+
+        if per_object_total_size_limit and per_object_individual_size_limit:
+            if per_object_total_size_limit < per_object_individual_size_limit:
+                raise serializers.ValidationError(
+                    "per_object_total_size_limit should be greater than or equal to "
+                    "per_object_individual_size_limit."
+                )
+        return data
+
+
+class AttachmentDataSerializer(HubuumMetaSerializer):
+    """Serialize an AttachmentData object."""
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = AttachmentData
         fields = "__all__"
 
 

@@ -47,6 +47,17 @@ urlpatterns = [
         "extension_data/<val>",
         views.ExtensionDataDetail.as_view(),
     ),
+    # Attachment API.
+    path("attachments/", views.AttachmentList.as_view()),
+    path(
+        "attachments/<val>",
+        views.AttachmentDetail.as_view(),
+    ),
+    path("attachment_data/", views.AttachmentDataList.as_view()),
+    path(
+        "attachment_data/<val>",
+        views.AttachmentDataDetail.as_view(),
+    ),
     # Object models and their endpoints.
     path("hosts/", views.HostList.as_view()),
     path("hosts/<val>", views.HostDetail.as_view()),

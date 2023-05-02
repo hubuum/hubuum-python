@@ -14,7 +14,16 @@ from rest_framework.exceptions import (  # NotAuthenticated,
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.views import Response
 
-from hubuum.exceptions import Conflict
+from hubuum.exceptions import (
+    AttachmentCountLimitExceededError,
+    AttachmentSizeLimitExceededError,
+    AttachmentsNotEnabledError,
+    AttachmentTooBig,
+    Conflict,
+    InvalidRequestDataError,
+    ObjectDoesNotExistError,
+    UnsupportedAttachmentModelError,
+)
 from hubuum.filters import (
     ExtensionDataFilterSet,
     ExtensionFilterSet,
@@ -32,7 +41,13 @@ from hubuum.filters import (
     VendorFilterSet,
 )
 from hubuum.models.auth import User, get_group, get_user
-from hubuum.models.core import Extension, ExtensionData
+from hubuum.models.core import (
+    Attachment,
+    AttachmentData,
+    Extension,
+    ExtensionData,
+    model_supports_attachments,
+)
 from hubuum.models.permissions import Namespace, Permission
 from hubuum.models.resources import (
     Host,
@@ -51,6 +66,8 @@ from hubuum.permissions import (
 )
 
 from .serializers import (
+    AttachmentDataSerializer,
+    AttachmentSerializer,
     ExtensionDataSerializer,
     ExtensionSerializer,
     GroupSerializer,
@@ -365,6 +382,80 @@ class ExtensionDetail(HubuumDetail):
     queryset = Extension.objects.all()
     serializer_class = ExtensionSerializer
     lookup_fields = ("id", "name")
+
+
+class AttachmentList(HubuumList):
+    """Get: List attachments. Post: Add attachment."""
+
+    schema = AutoSchema(
+        tags=["Attachment"],
+    )
+
+    queryset = Attachment.objects.all()
+    serializer_class = AttachmentSerializer
+
+
+class AttachmentDetail(HubuumDetail):
+    """Get, Patch, or Destroy an attachment."""
+
+    schema = AutoSchema(
+        tags=["Attachment"],
+    )
+
+    queryset = Attachment.objects.all()
+    serializer_class = AttachmentSerializer
+    lookup_fields = ("id", "model")
+
+
+class AttachmentDataList(HubuumList):
+    """Get: List attachment data. Post: Add attachment data."""
+
+    schema = AutoSchema(
+        tags=["Attachment"],
+    )
+
+    queryset = AttachmentData.objects.all()
+    serializer_class = AttachmentDataSerializer
+
+    def perform_create(self, serializer):
+        """Check that the object exists and that attachments are enabled."""
+        content_type = self.request.data.get("content_type")
+        object_id = self.request.data.get("object_id")
+
+        if content_type and object_id:
+            try:
+                model_class = ContentType.objects.get_for_id(content_type).model_class()
+                if not model_supports_attachments(model_class):
+                    raise UnsupportedAttachmentModelError()
+
+                obj = model_class.objects.get(pk=object_id)
+                if not obj.attachments_are_enabled():
+                    raise AttachmentsNotEnabledError()
+
+                if obj.attachment_count >= obj.attachment_count_limit():
+                    raise AttachmentCountLimitExceededError()
+
+                if obj.attachment_size > obj.attachment_individual_size_limit():
+                    raise AttachmentTooBig()
+
+                current_usage = obj.attachment_total_size()
+                new_usage = current_usage + serializer.validated_data["size"]
+
+                if new_usage > obj.attachment_total_size_limit():
+                    raise AttachmentSizeLimitExceededError()
+
+                serializer.save()
+            except (ContentType.DoesNotExist, model_class.DoesNotExist) as exc:
+                raise ObjectDoesNotExistError() from exc
+        else:
+            raise InvalidRequestDataError()
+
+
+class AttachmentDataDetail(HubuumDetail):
+    """Get, Patch, or Destroy an attachment data."""
+
+    queryset = AttachmentData.objects.all()
+    serializer_class = AttachmentDataSerializer
 
 
 class ExtensionDataList(HubuumList):

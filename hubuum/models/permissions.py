@@ -4,11 +4,18 @@ from django.contrib.auth.models import Group
 from django.db import models
 from rest_framework.exceptions import NotFound
 
-from hubuum.models.core import ExtensionsModel, HubuumModel, NamespacedHubuumModel
+from hubuum.models.core import (
+    AttachmentModel,
+    ExtensionsModel,
+    HubuumModel,
+    NamespacedHubuumModel,
+)
 from hubuum.permissions import fully_qualified_operations
 
 
-class NamespacedHubuumModelWithExtensions(NamespacedHubuumModel, ExtensionsModel):
+class NamespacedHubuumModelWithExtensions(
+    NamespacedHubuumModel, AttachmentModel, ExtensionsModel
+):
     """An abstract model that provides Namespaces and Extensions."""
 
     class Meta:
