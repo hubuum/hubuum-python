@@ -6,8 +6,8 @@ from rest_framework.exceptions import ValidationError
 
 from hubuum.models.auth import User
 from hubuum.models.core import (
-    Attachment,
-    AttachmentData,
+    AttachmentManager,
+    AttachmentMeta,
     Extension,
     ExtensionData,
     model_is_open,
@@ -223,13 +223,13 @@ class PermissionFilterSet(filters.FilterSet):
         fields.update(_hubuum_fields)
 
 
-class AttachmentFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Attachment."""
+class AttachmentManagerFilterSet(filters.FilterSet):
+    """FilterSet class for AttachmentManagers."""
 
     class Meta:
         """Metadata for the class."""
 
-        model = Attachment
+        model = AttachmentManager
         fields = {
             "model": _textual_lookups,
             "enabled": _boolean_lookups,
@@ -237,23 +237,23 @@ class AttachmentFilterSet(NamespacePermissionFilter):
             "per_object_individual_size_limit": _numeric_lookups,
             "per_object_total_size_limit": _numeric_lookups,
         }
-        fields.update(_namespace_fields)
 
 
-class AttachmentDataFilterSet(NamespacePermissionFilter):
-    """FilterSet for the AttachmentData model."""
+class AttachmentMetaFilterSet(NamespacePermissionFilter):
+    """FilterSet for the AttachmentMeta model."""
 
     class Meta:
-        """Meta class for AttachmentDataFilterSet."""
+        """Meta class for AttachmentMetaFilterSet."""
 
-        model = AttachmentData
+        model = AttachmentMeta
         fields = {
             "content_type": _key_lookups,
             "object_id": _numeric_lookups,
-            "sha256_hash": _textual_lookups,
+            "sha256": _textual_lookups,
             "size": _numeric_lookups,
             "original_filename": _textual_lookups,
         }
+        fields.update(_namespace_fields)
 
 
 class ExtensionFilterSet(NamespacePermissionFilter):

@@ -1,4 +1,6 @@
 """Versioned (v1) serializers of the hubuum models."""
+import hashlib
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
@@ -6,10 +8,11 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
+from hubuum.exceptions import Conflict
 from hubuum.models.auth import User
 from hubuum.models.core import (
-    Attachment,
-    AttachmentData,
+    AttachmentManager,
+    AttachmentMeta,
     Extension,
     ExtensionData,
     ExtensionsModel,
@@ -231,43 +234,58 @@ class ExtensionDataSerializer(HubuumMetaSerializer):
         fields = "__all__"
 
 
-class AttachmentSerializer(HubuumMetaSerializer):
-    """Serialize an Attachment object."""
+class AttachmentManagerSerializer(HubuumMetaSerializer):
+    """Serialize an AttachmentManager object."""
 
     class Meta:
         """How to serialize the object."""
 
-        model = Attachment
+        model = AttachmentManager
         fields = "__all__"
 
-    def validate(self, data):
+    def validate(self, attrs):
         """Validate that the the limits are sane."""
-        per_object_total_size_limit = data.get(
+        per_object_total_size_limit = attrs.get(
             "per_object_total_size_limit",
             self.instance.per_object_total_size_limit if self.instance else None,
         )
-        per_object_individual_size_limit = data.get(
+        per_object_individual_size_limit = attrs.get(
             "per_object_individual_size_limit",
             self.instance.per_object_individual_size_limit if self.instance else None,
         )
 
         if per_object_total_size_limit and per_object_individual_size_limit:
             if per_object_total_size_limit < per_object_individual_size_limit:
-                raise serializers.ValidationError(
+                raise ValidationError(
                     "per_object_total_size_limit should be greater than or equal to "
                     "per_object_individual_size_limit."
                 )
-        return data
+        return attrs
 
 
-class AttachmentDataSerializer(HubuumMetaSerializer):
-    """Serialize an AttachmentData object."""
+class AttachmentMetaSerializer(HubuumMetaSerializer):
+    """Serialize an AttachmentMeta object."""
 
     class Meta:
         """How to serialize the object."""
 
-        model = AttachmentData
+        model = AttachmentMeta
         fields = "__all__"
+
+    def validate_attachment(self, value):
+        """Validate attachment uniqueness."""
+        # Calculate the sha256 hash and size of the uploaded file
+        file_contents = value.read()
+        sha256 = hashlib.sha256(file_contents).hexdigest()
+
+        # Check if a file with the same sha256 hash already exists in the database
+        if AttachmentMeta.objects.filter(sha256=sha256).exists():
+            raise Conflict("Already uploaded.")
+
+        # Reset file pointer to the beginning of the file after reading
+        value.seek(0)
+
+        return value
 
 
 class HostSerializer(HubuumMetaSerializer):

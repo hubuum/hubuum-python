@@ -87,7 +87,7 @@ class NamespacedHubuumModel(HubuumModel):
         abstract = True
 
 
-class Attachment(NamespacedHubuumModel):
+class AttachmentManager(HubuumModel):
     """A model for attachments to objects."""
 
     model = models.CharField(
@@ -113,38 +113,36 @@ class Attachment(NamespacedHubuumModel):
         return str(self.id)
 
 
-def generate_sha256_filename(instance, filename):
-    """Generate a custom filename for the uploaded file using its sha256 hash."""
-    with instance.attachment.open("rb") as file:
-        file_contents = file.read()
-        sha256_hash = hashlib.sha256(file_contents).hexdigest()
-    return f"attachments/{sha256_hash}{filename[filename.rfind('.'):]}"
-
-
-class AttachmentData(models.Model):
+class AttachmentMeta(NamespacedHubuumModel):
     """A model for the attachments data for objects."""
 
-    attachment = models.FileField(upload_to=generate_sha256_filename, unique=True)
+    attachment = models.FileField(unique=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
-    sha256_hash = models.CharField(max_length=64, unique=True, editable=False)
+    sha256 = models.CharField(max_length=64, unique=True, editable=False)
     size = models.PositiveIntegerField(editable=False)
     original_filename = models.CharField(max_length=255, editable=False)
+
+    def generate_sha256_filename(self, sha256_hash):
+        """Generate a custom filename for the uploaded file using its sha256 hash."""
+        return f"attachments/file/{sha256_hash}"
 
     def save(self, *args, **kwargs):
         """Override the save method to compute the sha256 hash and size of the uploaded file."""
         with self.attachment.open("rb") as file:
             file_contents = file.read()
-            self.sha256_hash = hashlib.sha256(file_contents).hexdigest()
+            self.sha256 = hashlib.sha256(file_contents).hexdigest()
             self.size = self.attachment.size
             self.original_filename = self.attachment.name
-        super().save(*args, **kwargs)
+            self.attachment.name = self.generate_sha256_filename(self.sha256)
+            super().save(*args, **kwargs)
+
+        self.attachment.close()
 
     class Meta:
         """Meta for the model."""
 
-        unique_together = ("content_type", "object_id")
         ordering = ["id"]
 
     def __str__(self):
@@ -156,13 +154,13 @@ class AttachmentModel(models.Model):
     """A model that supports attachments."""
 
     attachment_data_objects = GenericRelation(
-        AttachmentData, related_query_name="att_objects"
+        AttachmentMeta, related_query_name="att_objects"
     )
 
     def attachments_are_enabled(self):
-        """Check if the object is ready to receive attachments."""
-        return Attachment.objects.filter(
-            model=self.__class__.__name__, enabled=True
+        """Check if the model is ready to receive attachments."""
+        return AttachmentManager.objects.filter(
+            model=self.__class__.__name__.lower(), enabled=True
         ).exists()
 
     def attachments(self):
@@ -179,20 +177,20 @@ class AttachmentModel(models.Model):
 
     def attachment_individual_size_limit(self):
         """Return the max size of an attachment for the object."""
-        return Attachment.objects.get(
-            model=self.__class__.__name__
+        return AttachmentManager.objects.get(
+            model=self.__class__.__name__.lower(), enabled=True
         ).per_object_individual_size_limit
 
     def attachment_total_size_limit(self):
         """Return the size limit of attachments for the object."""
-        return Attachment.objects.get(
-            model=self.__class__.__name__
+        return AttachmentManager.objects.get(
+            model=self.__class__.__name__.lower(), enabled=True
         ).per_object_total_size_limit
 
     def attachment_count_limit(self):
         """Return the count limit of attachments for the object."""
-        return Attachment.objects.get(
-            model=self.__class__.__name__
+        return AttachmentManager.objects.get(
+            model=self.__class__.__name__.lower(), enabled=True
         ).per_object_count_limit
 
     class Meta:

@@ -4,6 +4,7 @@ import structlog
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
+from django.urls import resolve
 from rest_framework import generics, status
 from rest_framework.exceptions import (  # NotAuthenticated,
     MethodNotAllowed,
@@ -11,6 +12,7 @@ from rest_framework.exceptions import (  # NotAuthenticated,
     ParseError,
     ValidationError,
 )
+from rest_framework.parsers import MultiPartParser
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.views import Response
 
@@ -20,8 +22,6 @@ from hubuum.exceptions import (
     AttachmentsNotEnabledError,
     AttachmentTooBig,
     Conflict,
-    InvalidRequestDataError,
-    ObjectDoesNotExistError,
     UnsupportedAttachmentModelError,
 )
 from hubuum.filters import (
@@ -42,10 +42,11 @@ from hubuum.filters import (
 )
 from hubuum.models.auth import User, get_group, get_user
 from hubuum.models.core import (
-    Attachment,
-    AttachmentData,
+    AttachmentManager,
+    AttachmentMeta,
     Extension,
     ExtensionData,
+    get_model,
     model_supports_attachments,
 )
 from hubuum.models.permissions import Namespace, Permission
@@ -66,8 +67,8 @@ from hubuum.permissions import (
 )
 
 from .serializers import (
-    AttachmentDataSerializer,
-    AttachmentSerializer,
+    AttachmentManagerSerializer,
+    AttachmentMetaSerializer,
     ExtensionDataSerializer,
     ExtensionSerializer,
     GroupSerializer,
@@ -84,6 +85,9 @@ from .serializers import (
     VendorSerializer,
 )
 
+object_logger = structlog.get_logger("hubuum.api.object")
+manual_logger = structlog.get_logger("hubuum.manual")
+
 
 class LoggingMixin:
     """Mixin to log object modifications (create, update, and delete).
@@ -93,8 +97,7 @@ class LoggingMixin:
 
     def _log(self, operation, model, user, instance):
         """Write the log string."""
-        logger = structlog.get_logger("hubuum.api.object")
-        logger.info(
+        object_logger.info(
             operation,
             model=model,
             user=str(user),
@@ -144,7 +147,7 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     If no matches are found, return 404.
     """
 
-    def get_object(self):
+    def get_object(self, lookup_identifier="val", model=None):
         """Perform the actual lookup based on the model's lookup_fields.
 
         raises: 404 if not found.
@@ -153,9 +156,14 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
         #        if self.request.user.is_anonymous:
         #            raise NotAuthenticated()
 
-        queryset = self.get_queryset()
+        #        queryset = self.get_queryset()
+        if model is None:
+            queryset = self.get_queryset()
+        else:
+            queryset = model.objects.all()
+
         obj = None
-        value = self.kwargs["val"]
+        value = self.kwargs[lookup_identifier]
         for field in self.lookup_fields:
             try:
                 # https://stackoverflow.com/questions/9122169/calling-filter-with-a-variable-for-field-name
@@ -384,78 +392,165 @@ class ExtensionDetail(HubuumDetail):
     lookup_fields = ("id", "name")
 
 
-class AttachmentList(HubuumList):
-    """Get: List attachments. Post: Add attachment."""
+class AttachmentManagerList(HubuumList):
+    """Get: List attachmentmanagers. Post: Add attachmentmanager."""
 
     schema = AutoSchema(
         tags=["Attachment"],
     )
 
-    queryset = Attachment.objects.all()
-    serializer_class = AttachmentSerializer
+    queryset = AttachmentManager.objects.all()
+    serializer_class = AttachmentManagerSerializer
 
 
-class AttachmentDetail(HubuumDetail):
+class AttachmentManagerDetail(HubuumDetail):
     """Get, Patch, or Destroy an attachment."""
 
     schema = AutoSchema(
         tags=["Attachment"],
     )
 
-    queryset = Attachment.objects.all()
-    serializer_class = AttachmentSerializer
+    queryset = AttachmentManager.objects.all()
+    serializer_class = AttachmentManagerSerializer
     lookup_fields = ("id", "model")
 
 
-class AttachmentDataList(HubuumList):
-    """Get: List attachment data. Post: Add attachment data."""
+class AttachmentMetaList(generics.CreateAPIView, LoggingMixin):
+    """Get: List attachment data for a model. Post: Add attachment data to a model."""
 
     schema = AutoSchema(
         tags=["Attachment"],
     )
 
-    queryset = AttachmentData.objects.all()
-    serializer_class = AttachmentDataSerializer
+    queryset = AttachmentMeta.objects.all()
+    serializer_class = AttachmentMetaSerializer
 
-    def perform_create(self, serializer):
-        """Check that the object exists and that attachments are enabled."""
-        content_type = self.request.data.get("content_type")
-        object_id = self.request.data.get("object_id")
 
-        if content_type and object_id:
+class AttachmentMetaDetail(HubuumDetail):
+    """Get, Patch, or Destroy an attachment metadata."""
+
+    parser_classes = (MultiPartParser,)
+    queryset = AttachmentMeta.objects.all()
+    serializer_class = AttachmentMetaSerializer
+
+    def get(self, request, *args, **kwargs):
+        """Get an attachment metadata."""
+        model_name = self.kwargs.get("model").lower()
+        obj = self.kwargs.get("instance")
+        attachment_id = self.kwargs.get("attachment")
+
+        download_request = False
+        if resolve(request.path).url_name == "download_attachment":
+            download_request = True
+
+        model = get_model(model_name)
+
+        if model is None:
+            raise NotFound(detail=f"Model {model_name} does not exist.")
+
+        if not model_supports_attachments(model):
+            raise UnsupportedAttachmentModelError()
+
+        content_type = ContentType.objects.get_for_model(model)
+
+        metaobj = None
+        for field in self.lookup_fields:
             try:
-                model_class = ContentType.objects.get_for_id(content_type).model_class()
-                if not model_supports_attachments(model_class):
-                    raise UnsupportedAttachmentModelError()
+                metaobj = self.queryset.get(
+                    content_type=content_type, object_id=obj, **{field: attachment_id}
+                )
+            except AttachmentMeta.DoesNotExist:
+                pass
 
-                obj = model_class.objects.get(pk=object_id)
-                if not obj.attachments_are_enabled():
-                    raise AttachmentsNotEnabledError()
+        if not metaobj:
+            raise NotFound(detail="Attachment not found.")
 
-                if obj.attachment_count >= obj.attachment_count_limit():
-                    raise AttachmentCountLimitExceededError()
+        if download_request:
+            try:
+                with open(metaobj.attachment.name, "rb") as file:
+                    response = HttpResponse(
+                        file, content_type="application/octet-stream"
+                    )
+                    response[
+                        "Content-Disposition"
+                    ] = f"attachment; filename={metaobj.original_filename}"
+                    return response
+            except FileNotFoundError as exc:  # pragma: no cover, we can't provoke this
+                manual_logger.error("File belonging to attachment not found.")
+                raise NotFound(detail="File not found.") from exc
+        return Response(
+            AttachmentMetaSerializer(metaobj).data, status=status.HTTP_200_OK
+        )
 
-                if obj.attachment_size > obj.attachment_individual_size_limit():
-                    raise AttachmentTooBig()
+    def post(self, request, *args, **kwargs):
+        """Add an attachment metadata."""
+        model_name = kwargs["model"]
 
-                current_usage = obj.attachment_total_size()
-                new_usage = current_usage + serializer.validated_data["size"]
+        model = get_model(model_name)
 
-                if new_usage > obj.attachment_total_size_limit():
-                    raise AttachmentSizeLimitExceededError()
+        if model is None:
+            raise NotFound(detail=f"Model {model_name} does not exist.")
 
-                serializer.save()
-            except (ContentType.DoesNotExist, model_class.DoesNotExist) as exc:
-                raise ObjectDoesNotExistError() from exc
-        else:
-            raise InvalidRequestDataError()
+        if not model_supports_attachments(model):
+            raise UnsupportedAttachmentModelError()
 
+        # Get ContentType for the dynamic model
+        content_type = ContentType.objects.get_for_model(model)
+        obj = self.get_object(model=model, lookup_identifier="instance")
 
-class AttachmentDataDetail(HubuumDetail):
-    """Get, Patch, or Destroy an attachment data."""
+        # Populate the request data with the content type and object id that
+        # we extrapolated got from the URL, then validate the data.
+        request.data["content_type"] = content_type.id
+        request.data["object_id"] = obj.id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    queryset = AttachmentData.objects.all()
-    serializer_class = AttachmentDataSerializer
+        if not obj.attachments_are_enabled():
+            raise AttachmentsNotEnabledError()
+
+        # Get the uploaded file from the request, get its size,
+        # and reset the file pointer
+        uploaded_file = request.data.get("attachment")
+        size = len(uploaded_file.read())
+        uploaded_file.seek(0)
+
+        # Check limits
+        if (
+            obj.attachment_count_limit()
+            and obj.attachment_count() >= obj.attachment_count_limit()
+        ):
+            raise AttachmentCountLimitExceededError()
+
+        if (
+            obj.attachment_individual_size_limit()
+            and size > obj.attachment_individual_size_limit()
+        ):
+            raise AttachmentTooBig()
+
+        if (
+            obj.attachment_total_size_limit()
+            and size + obj.attachments_size() > obj.attachment_total_size_limit()
+        ):
+            raise AttachmentSizeLimitExceededError()
+
+        namespace = Namespace.objects.get(id=request.data.get("namespace"))
+
+        # Create and save an AttachmentMeta object
+        attachment_data = AttachmentMeta(
+            namespace=namespace,
+            attachment=uploaded_file,
+            content_type=content_type,
+            object_id=obj.id,
+        )
+        attachment_data.save()
+
+        return Response(
+            {
+                "detail": "Attachment uploaded successfully.",
+                "id": attachment_data.id,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ExtensionDataList(HubuumList):
@@ -585,6 +680,7 @@ class NamespaceDetail(HubuumDetail):
 
 
 class NamespaceMembers(
+    LoggingMixin,
     MultipleFieldLookupORMixin,
     generics.RetrieveAPIView,
 ):
@@ -611,6 +707,7 @@ class NamespaceMembers(
 
 
 class NamespaceMembersGroup(
+    LoggingMixin,
     MultipleFieldLookupORMixin,
     generics.RetrieveUpdateDestroyAPIView,
 ):

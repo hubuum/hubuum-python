@@ -9,7 +9,11 @@ from hubuum.models.core import model_supports_extensions
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host
 from hubuum.tools import get_object
-from hubuum.validators import validate_model
+from hubuum.validators import (
+    validate_model,
+    validate_model_can_have_attachments,
+    validate_model_can_have_extensions,
+)
 
 from .base import HubuumModelTestCase
 
@@ -83,10 +87,18 @@ class InternalsTestCase(HubuumModelTestCase):
         # Test that when we have a string, and a model with the name, but it does
         # not support extensions.
         with pytest.raises(ValidationError):
-            validate_model("user")
+            validate_model_can_have_extensions("user")
 
         with pytest.raises(ValidationError):
-            validate_model("permission")
+            validate_model_can_have_extensions("permission")
+
+        # Test that when we have a string, and a model with the name, but it does
+        # not support attachments.
+        with pytest.raises(ValidationError):
+            validate_model_can_have_attachments("user")
+
+        with pytest.raises(ValidationError):
+            validate_model_can_have_attachments("permission")
 
         self.assertTrue(validate_model("host"))
 

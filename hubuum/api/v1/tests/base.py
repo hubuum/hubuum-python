@@ -146,7 +146,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             fail = f"{path} FAILED: {response.status_code}"
             if hasattr(response, "data"):
                 fail = f"{fail} [{response.data}]"
-            print(f"{path} FAILED: {fail}")
+            print(fail)
         self.assertEqual(response.status_code, expected_code)
 
     def _assert_delete_and_status(self, path, status_code, client=None):
@@ -173,11 +173,15 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self._assert_status_and_debug(response, status_code)
         return response
 
-    def _assert_post_and_status(self, path, status_code, data=None, client=None):
+    def _assert_post_and_status(
+        self, path, status_code, data=None, client=None, **kwargs
+    ):
         """Post and assert status."""
+        posting_format = kwargs.get("format", "json")
+
         if client is None:
             client = self.client
-        response = client.post(self._create_path(path), data)
+        response = client.post(self._create_path(path), data, format=posting_format)
         self._assert_status_and_debug(response, status_code)
         return response
 
@@ -326,6 +330,10 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
     def assert_post_and_409(self, path, *args, **kwargs):
         """Post and assert status as 409."""
         return self._assert_post_and_status(path, 409, *args, **kwargs)
+
+    def assert_post_and_415(self, path, *args, **kwargs):
+        """Post and assert status as 415."""
+        return self._assert_post_and_status(path, 415, *args, **kwargs)
 
 
 # def clean_and_save(entity):

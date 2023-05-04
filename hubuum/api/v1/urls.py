@@ -48,15 +48,30 @@ urlpatterns = [
         views.ExtensionDataDetail.as_view(),
     ),
     # Attachment API.
-    path("attachments/", views.AttachmentList.as_view()),
+    # List attachment setup for all models, or post a new setup for a model.
+    path("attachments/", views.AttachmentManagerList.as_view()),
+    # A specific attachment setup for a given model.
     path(
         "attachments/<val>",
-        views.AttachmentDetail.as_view(),
+        views.AttachmentManagerDetail.as_view(),
     ),
-    path("attachment_data/", views.AttachmentDataList.as_view()),
+    # Every attachment belonging to a given model.
+    path("attachments/<model>/", views.AttachmentMetaList.as_view()),
+    # Every attachment belonging to a given object in a given model.
     path(
-        "attachment_data/<val>",
-        views.AttachmentDataDetail.as_view(),
+        "attachments/<model>/<instance>",
+        views.AttachmentMetaDetail.as_view(),
+    ),
+    # A specific attachment object (ie, metadata) belonging to a given object in a given model.
+    path(
+        "attachments/<model>/<instance>/<attachment>",
+        views.AttachmentMetaDetail.as_view(),
+    ),
+    # The actual attachment file
+    path(
+        "attachments/<model>/<instance>/<attachment>/download",
+        views.AttachmentMetaDetail.as_view(),
+        name="download_attachment",
     ),
     # Object models and their endpoints.
     path("hosts/", views.HostList.as_view()),
