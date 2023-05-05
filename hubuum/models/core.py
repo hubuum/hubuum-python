@@ -113,7 +113,7 @@ class AttachmentManager(HubuumModel):
         return str(self.id)
 
 
-class AttachmentMeta(NamespacedHubuumModel):
+class Attachment(NamespacedHubuumModel):
     """A model for the attachments data for objects."""
 
     attachment = models.FileField(unique=True)
@@ -130,15 +130,12 @@ class AttachmentMeta(NamespacedHubuumModel):
 
     def save(self, *args, **kwargs):
         """Override the save method to compute the sha256 hash and size of the uploaded file."""
-        with self.attachment.open("rb") as file:
-            file_contents = file.read()
-            self.sha256 = hashlib.sha256(file_contents).hexdigest()
-            self.size = self.attachment.size
-            self.original_filename = self.attachment.name
-            self.attachment.name = self.generate_sha256_filename(self.sha256)
-            super().save(*args, **kwargs)
-
-        self.attachment.close()
+        file_contents = self.attachment.read()
+        self.sha256 = hashlib.sha256(file_contents).hexdigest()
+        self.size = self.attachment.size
+        self.original_filename = self.attachment.name
+        self.attachment.name = self.generate_sha256_filename(self.sha256)
+        super().save(*args, **kwargs)
 
     class Meta:
         """Meta for the model."""
@@ -154,7 +151,7 @@ class AttachmentModel(models.Model):
     """A model that supports attachments."""
 
     attachment_data_objects = GenericRelation(
-        AttachmentMeta, related_query_name="att_objects"
+        Attachment, related_query_name="att_objects"
     )
 
     def attachments_are_enabled(self):
@@ -197,10 +194,6 @@ class AttachmentModel(models.Model):
         """Meta for the model."""
 
         abstract = True
-
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return str(self.id)
 
 
 class Extension(NamespacedHubuumModel):

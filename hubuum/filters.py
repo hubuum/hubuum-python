@@ -6,8 +6,8 @@ from rest_framework.exceptions import ValidationError
 
 from hubuum.models.auth import User
 from hubuum.models.core import (
+    Attachment,
     AttachmentManager,
-    AttachmentMeta,
     Extension,
     ExtensionData,
     model_is_open,
@@ -239,13 +239,13 @@ class AttachmentManagerFilterSet(filters.FilterSet):
         }
 
 
-class AttachmentMetaFilterSet(NamespacePermissionFilter):
-    """FilterSet for the AttachmentMeta model."""
+class AttachmentFilterSet(NamespacePermissionFilter):
+    """FilterSet for the Attachment model."""
 
     class Meta:
-        """Meta class for AttachmentMetaFilterSet."""
+        """Meta class for AttachmentFilterSet."""
 
-        model = AttachmentMeta
+        model = Attachment
         fields = {
             "content_type": _key_lookups,
             "object_id": _numeric_lookups,

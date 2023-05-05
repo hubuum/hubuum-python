@@ -11,8 +11,8 @@ from rest_framework.fields import empty
 from hubuum.exceptions import Conflict
 from hubuum.models.auth import User
 from hubuum.models.core import (
+    Attachment,
     AttachmentManager,
-    AttachmentMeta,
     Extension,
     ExtensionData,
     ExtensionsModel,
@@ -263,13 +263,13 @@ class AttachmentManagerSerializer(HubuumMetaSerializer):
         return attrs
 
 
-class AttachmentMetaSerializer(HubuumMetaSerializer):
-    """Serialize an AttachmentMeta object."""
+class AttachmentSerializer(HubuumMetaSerializer):
+    """Serialize an Attachment object."""
 
     class Meta:
         """How to serialize the object."""
 
-        model = AttachmentMeta
+        model = Attachment
         fields = "__all__"
 
     def validate_attachment(self, value):
@@ -279,7 +279,7 @@ class AttachmentMetaSerializer(HubuumMetaSerializer):
         sha256 = hashlib.sha256(file_contents).hexdigest()
 
         # Check if a file with the same sha256 hash already exists in the database
-        if AttachmentMeta.objects.filter(sha256=sha256).exists():
+        if Attachment.objects.filter(sha256=sha256).exists():
             raise Conflict("Already uploaded.")
 
         # Reset file pointer to the beginning of the file after reading

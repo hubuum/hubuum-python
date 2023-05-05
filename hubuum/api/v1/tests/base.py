@@ -12,8 +12,7 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient, APITestCase
 
 from hubuum.exceptions import MissingParam
-
-# from hubuum.models import Namespace
+from hubuum.log import debug, info
 
 
 # This testsuite design is based on the testsuite for MREG:
@@ -25,8 +24,15 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         """By default setUp sets up an APIClient for the superuser with a token."""
         self.user = None
         self.namespace = None
-
         self.client = self.get_superuser_client()
+
+    def info(self, message="test", **kwargs):  # pragma: no cover
+        """Log an informational message."""
+        info(message=message, **kwargs)
+
+    def debug(self, message="test", **kwargs):  # pragma: no cover
+        """Log a debug message."""
+        debug(message=message, **kwargs)
 
     def get_superuser_client(self):
         """Get a client for a superuser."""

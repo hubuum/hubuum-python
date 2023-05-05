@@ -56,21 +56,21 @@ urlpatterns = [
         views.AttachmentManagerDetail.as_view(),
     ),
     # Every attachment belonging to a given model.
-    path("attachments/<model>/", views.AttachmentMetaList.as_view()),
+    path("attachments/<model>/", views.AttachmentList.as_view()),
     # Every attachment belonging to a given object in a given model.
     path(
         "attachments/<model>/<instance>",
-        views.AttachmentMetaDetail.as_view(),
+        views.AttachmentDetail.as_view(),
     ),
     # A specific attachment object (ie, metadata) belonging to a given object in a given model.
     path(
         "attachments/<model>/<instance>/<attachment>",
-        views.AttachmentMetaDetail.as_view(),
+        views.AttachmentDetail.as_view(),
     ),
     # The actual attachment file
     path(
         "attachments/<model>/<instance>/<attachment>/download",
-        views.AttachmentMetaDetail.as_view(),
+        views.AttachmentDetail.as_view(),
         name="download_attachment",
     ),
     # Object models and their endpoints.

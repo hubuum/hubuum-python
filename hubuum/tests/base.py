@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.core import Extension
+from hubuum.models.core import Attachment, AttachmentManager, Extension
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import (
     Person,
@@ -41,6 +41,16 @@ class HubuumModelTestCase(TestCase):
         self.attributes = {}
         self.obj = None
 
+    def tearDown(self):
+        """Clean up after each test."""
+        self.user.delete()
+        self.group.delete()
+
+        if self.obj:
+            self.obj.delete()
+
+        self.namespace.delete()
+
     def attribute(self, key):
         """Fetch attributes from the attribute dictionary."""
         return self.attributes[key]
@@ -66,7 +76,7 @@ class HubuumModelTestCase(TestCase):
             raise MissingParam
 
         # Ick.
-        if model == Extension:
+        if model == Extension or model == AttachmentManager:
             kwargs["model"] = "host"
 
         obj, _ = model.objects.get_or_create(**kwargs)
@@ -91,5 +101,7 @@ class HubuumModelTestCase(TestCase):
             self.assertEqual(str(obj), string)
         elif isinstance(obj, Vendor):
             self.assertEqual(str(obj), self.attribute("vendor_name"))
+        elif isinstance(obj, (Attachment, AttachmentManager)):
+            self.assertEqual(str(obj), str(obj.id))
         else:
             self.assertEqual(str(obj), self.attribute("name"))

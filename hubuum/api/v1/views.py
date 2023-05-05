@@ -42,8 +42,8 @@ from hubuum.filters import (
 )
 from hubuum.models.auth import User, get_group, get_user
 from hubuum.models.core import (
+    Attachment,
     AttachmentManager,
-    AttachmentMeta,
     Extension,
     ExtensionData,
     get_model,
@@ -68,7 +68,7 @@ from hubuum.permissions import (
 
 from .serializers import (
     AttachmentManagerSerializer,
-    AttachmentMetaSerializer,
+    AttachmentSerializer,
     ExtensionDataSerializer,
     ExtensionSerializer,
     GroupSerializer,
@@ -177,11 +177,11 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
             except Exception:  # nosec pylint: disable=broad-except
                 pass
 
-        if obj is None:
+        if obj:
+            self.check_object_permissions(self.request, obj)
+        else:
             raise NotFound()
 
-        # As we overload get_object, we need to manually check permissions.
-        self.check_object_permissions(self.request, obj)
         return obj
 
 
@@ -209,6 +209,15 @@ class HubuumDetail(
 
     permission_classes = (NameSpace,)
     lookup_fields = ("id",)
+
+    def file_response(self, filename, original_filename):
+        """Return a HTTPresponse with the file in question."""
+        with open(filename, "rb") as file:
+            response = HttpResponse(file, content_type="application/octet-stream")
+            response[
+                "Content-Disposition"
+            ] = f"attachment; filename={original_filename}"
+            return response
 
 
 class UserList(HubuumList):
@@ -415,33 +424,33 @@ class AttachmentManagerDetail(HubuumDetail):
     lookup_fields = ("id", "model")
 
 
-class AttachmentMetaList(generics.CreateAPIView, LoggingMixin):
+class AttachmentList(generics.CreateAPIView, LoggingMixin):
     """Get: List attachment data for a model. Post: Add attachment data to a model."""
 
     schema = AutoSchema(
         tags=["Attachment"],
     )
 
-    queryset = AttachmentMeta.objects.all()
-    serializer_class = AttachmentMetaSerializer
+    queryset = Attachment.objects.all()
+    serializer_class = AttachmentSerializer
 
 
-class AttachmentMetaDetail(HubuumDetail):
+class AttachmentDetail(HubuumDetail):
     """Get, Patch, or Destroy an attachment metadata."""
 
     parser_classes = (MultiPartParser,)
-    queryset = AttachmentMeta.objects.all()
-    serializer_class = AttachmentMetaSerializer
+    queryset = Attachment.objects.all()
+    serializer_class = AttachmentSerializer
 
-    def get(self, request, *args, **kwargs):
-        """Get an attachment metadata."""
+    schema = AutoSchema(
+        tags=["Attachment"],
+    )
+
+    def _get_attachment(self, request, *args, **kwargs):
+        """Get an attachment object, or raise 404."""
         model_name = self.kwargs.get("model").lower()
-        obj = self.kwargs.get("instance")
+        obj_id = self.kwargs.get("instance")
         attachment_id = self.kwargs.get("attachment")
-
-        download_request = False
-        if resolve(request.path).url_name == "download_attachment":
-            download_request = True
 
         model = get_model(model_name)
 
@@ -453,34 +462,53 @@ class AttachmentMetaDetail(HubuumDetail):
 
         content_type = ContentType.objects.get_for_model(model)
 
-        metaobj = None
+        # Find the meta object for the attachment, that is the object that
+        # has the FileField, but also all the other metadata for the attachment.
+        # To do this we use the obj_id from the URL, and check that against the
+        # lookup_fields for the view.
+        obj = None
         for field in self.lookup_fields:
             try:
-                metaobj = self.queryset.get(
-                    content_type=content_type, object_id=obj, **{field: attachment_id}
+                obj = Attachment.objects.get(
+                    content_type=content_type,
+                    object_id=obj_id,
+                    **{field: attachment_id},
                 )
-            except AttachmentMeta.DoesNotExist:
+            except Attachment.DoesNotExist:
                 pass
 
-        if not metaobj:
+        if obj:
+            self.check_object_permissions(request, obj)
+        else:
             raise NotFound(detail="Attachment not found.")
 
+        return obj
+
+    def get(self, request, *args, **kwargs):
+        """Get an attachment metadata."""
+        obj = self._get_attachment(request, *args, **kwargs)
+
+        download_request = False
+        if resolve(request.path).url_name == "download_attachment":
+            download_request = True
+
+        # If this is a download request, we return the file itself.
+        # If the file itself is missing, we raise a 404 and log the missing
+        # file as an error.
         if download_request:
             try:
-                with open(metaobj.attachment.name, "rb") as file:
-                    response = HttpResponse(
-                        file, content_type="application/octet-stream"
-                    )
-                    response[
-                        "Content-Disposition"
-                    ] = f"attachment; filename={metaobj.original_filename}"
-                    return response
+                return self.file_response(
+                    obj.attachment.name,
+                    obj.original_filename,
+                )
             except FileNotFoundError as exc:  # pragma: no cover, we can't provoke this
-                manual_logger.error("File belonging to attachment not found.")
+                manual_logger.error(
+                    "File belonging to attachment {metaobj.id} was not found."
+                )
                 raise NotFound(detail="File not found.") from exc
-        return Response(
-            AttachmentMetaSerializer(metaobj).data, status=status.HTTP_200_OK
-        )
+
+        # It was not a download request, so return the serialized metadata object.
+        return Response(AttachmentSerializer(obj).data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Add an attachment metadata."""
@@ -494,12 +522,12 @@ class AttachmentMetaDetail(HubuumDetail):
         if not model_supports_attachments(model):
             raise UnsupportedAttachmentModelError()
 
-        # Get ContentType for the dynamic model
         content_type = ContentType.objects.get_for_model(model)
         obj = self.get_object(model=model, lookup_identifier="instance")
 
-        # Populate the request data with the content type and object id that
-        # we extrapolated got from the URL, then validate the data.
+        # Note that the validator requires content_type and object_id to be
+        # present in the request data, but we got them from the URL, so we
+        # have to manually add them back into the request data.
         request.data["content_type"] = content_type.id
         request.data["object_id"] = obj.id
         serializer = self.get_serializer(data=request.data)
@@ -514,29 +542,24 @@ class AttachmentMetaDetail(HubuumDetail):
         size = len(uploaded_file.read())
         uploaded_file.seek(0)
 
+        max_attachments = obj.attachment_count_limit()
+        max_attachment_size = obj.attachment_individual_size_limit()
+        max_total_size = obj.attachment_total_size_limit()
+
         # Check limits
-        if (
-            obj.attachment_count_limit()
-            and obj.attachment_count() >= obj.attachment_count_limit()
-        ):
+        if max_attachments and obj.attachment_count() >= max_attachments:
             raise AttachmentCountLimitExceededError()
 
-        if (
-            obj.attachment_individual_size_limit()
-            and size > obj.attachment_individual_size_limit()
-        ):
+        if max_attachment_size and size > max_attachment_size:
             raise AttachmentTooBig()
 
-        if (
-            obj.attachment_total_size_limit()
-            and size + obj.attachments_size() > obj.attachment_total_size_limit()
-        ):
+        if max_total_size and size + obj.attachment_size() > max_total_size:
             raise AttachmentSizeLimitExceededError()
 
         namespace = Namespace.objects.get(id=request.data.get("namespace"))
 
-        # Create and save an AttachmentMeta object
-        attachment_data = AttachmentMeta(
+        # Create and save an Attachment object
+        attachment_data = Attachment(
             namespace=namespace,
             attachment=uploaded_file,
             content_type=content_type,
@@ -551,6 +574,13 @@ class AttachmentMetaDetail(HubuumDetail):
             },
             status=status.HTTP_201_CREATED,
         )
+
+    def delete(self, request, *args, **kwargs):
+        """Delete an attachment"""
+        obj = self._get_attachment(request, *args, **kwargs)
+        self.check_object_permissions(request, obj)
+        obj.delete()
+        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
 
 class ExtensionDataList(HubuumList):
