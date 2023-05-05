@@ -97,9 +97,4 @@ urlpatterns = [
         "pos/<val>",
         views.PurchaseOrderDetail.as_view(),
     ),
-    path("purchasedocuments/", views.PurchaseDocumentList.as_view()),
-    path(
-        "purchasedocuments/<val>",
-        views.PurchaseDocumentDetail.as_view(),
-    ),
 ]

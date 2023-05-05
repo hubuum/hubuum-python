@@ -18,7 +18,6 @@ from hubuum.models.resources import (
     HostType,
     Jack,
     Person,
-    PurchaseDocuments,
     PurchaseOrder,
     Room,
     Vendor,
@@ -346,22 +345,6 @@ class PersonFilterSet(NamespacePermissionFilter):
             "office_phone": _textual_lookups,
             "mobile_phone": _textual_lookups,
             "room": _key_lookups,
-        }
-        fields.update(_namespace_fields)
-
-
-class PurchaseDocumentsFilterSet(NamespacePermissionFilter):
-    """FilterSet class for PurchaseDocuments."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        # It would be neat to have the binary field "document"
-        # be matchable to a hash...
-        model = PurchaseDocuments
-        fields = {
-            "document_id": _numeric_lookups,
-            "purchase_order": _key_lookups,
         }
         fields.update(_namespace_fields)
 

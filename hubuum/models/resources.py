@@ -134,29 +134,6 @@ class Person(NamespacedHubuumModelWithExtensions):
         ordering = ["id"]
 
 
-class PurchaseDocuments(NamespacedHubuumModelWithExtensions):
-    """Accounting, the documents of an order.
-
-    The documents that came with a given purchase order.
-    """
-
-    document_id = models.CharField(max_length=255)
-    purchase_order = models.ForeignKey(
-        "PurchaseOrder", models.CASCADE, blank=False, null=False
-    )
-    document = models.BinaryField(blank=False, null=False)
-
-    class Meta:
-        """Set permissions and other metadata."""
-
-        verbose_name_plural = "purchase documents"
-        ordering = ["id"]
-
-    def __str__(self):
-        """Stringify the object, used to represent the object towards users."""
-        return self.document_id
-
-
 class PurchaseOrder(NamespacedHubuumModelWithExtensions):
     """Accounting, the order.
 

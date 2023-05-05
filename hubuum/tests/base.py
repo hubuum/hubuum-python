@@ -6,13 +6,7 @@ from django.test import TestCase
 from hubuum.exceptions import MissingParam
 from hubuum.models.core import Attachment, AttachmentManager, Extension
 from hubuum.models.permissions import Namespace
-from hubuum.models.resources import (
-    Person,
-    PurchaseDocuments,
-    PurchaseOrder,
-    Room,
-    Vendor,
-)
+from hubuum.models.resources import Person, PurchaseOrder, Room, Vendor
 
 
 class HubuumModelTestCase(TestCase):
@@ -89,8 +83,6 @@ class HubuumModelTestCase(TestCase):
         obj = self.obj
         if isinstance(obj, Person):
             self.assertEqual(str(obj), self.attribute("username"))
-        elif isinstance(obj, PurchaseDocuments):
-            self.assertEqual(str(obj), self.attribute("document_id"))
         elif isinstance(obj, PurchaseOrder):
             self.assertEqual(str(obj), self.attribute("po_number"))
         elif isinstance(obj, Room):
