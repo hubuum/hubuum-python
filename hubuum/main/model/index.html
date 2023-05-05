@@ -335,6 +335,11 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.auth.User.supports_attachments">
+    supports_attachments()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#hubuum.models.auth.User.supports_extensions">
     supports_extensions()
   </a>
@@ -348,6 +353,103 @@
 <a class="md-nav__link" href="#hubuum.models.core">
     hubuum.models.core
   </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.Attachment">
+    Attachment
+  </a>
+<nav aria-label="Attachment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.Attachment.Meta">
+    Meta
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.Attachment.__str__">
+    __str__()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.Attachment.generate_sha256_filename">
+    generate_sha256_filename()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.Attachment.save">
+    save()
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentManager">
+    AttachmentManager
+  </a>
+<nav aria-label="AttachmentManager" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentManager.Meta">
+    Meta
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentManager.__str__">
+    __str__()
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel">
+    AttachmentModel
+  </a>
+<nav aria-label="AttachmentModel" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.Meta">
+    Meta
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.attachment_count">
+    attachment_count()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.attachment_count_limit">
+    attachment_count_limit()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.attachment_individual_size_limit">
+    attachment_individual_size_limit()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.attachment_size">
+    attachment_size()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.attachment_total_size_limit">
+    attachment_total_size_limit()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.attachments">
+    attachments()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.AttachmentModel.attachments_are_enabled">
+    attachments_are_enabled()
+  </a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#hubuum.models.core.Extension">
@@ -433,6 +535,11 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.HubuumModel.supports_attachments">
+    supports_attachments()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#hubuum.models.core.HubuumModel.supports_extensions">
     supports_extensions()
   </a>
@@ -457,6 +564,11 @@
 <li class="md-nav__item">
 <a class="md-nav__link" href="#hubuum.models.core.model_is_open">
     model_is_open()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hubuum.models.core.model_supports_attachments">
+    model_supports_attachments()
   </a>
 </li>
 <li class="md-nav__item">
@@ -876,7 +988,12 @@
 <span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
-<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Extension to the default User class."""</span>
 
     <span class="n">model_permissions_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
@@ -893,6 +1010,11 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">supports_extensions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Check if a class supports extensions."""</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">supports_attachments</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if a class supports attachments."""</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
@@ -1034,10 +1156,10 @@
 <p>Meta class for User.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta class for User."""</span>
 
     <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
@@ -1055,9 +1177,9 @@
 <p>Return the number of groups the user is a member of.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">group_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">group_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Return the number of groups the user is a member of."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -1077,12 +1199,7 @@ Otherwise, check if the user can:
   - create objects in the namespace (using has_create) on the last element.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
@@ -1110,7 +1227,12 @@ Otherwise, check if the user can:
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
-<span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">has_namespace</span><span class="p">(</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">has_namespace</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">namespace</span><span class="p">,</span>
     <span class="n">write_perm</span><span class="o">=</span><span class="s2">"has_namespace"</span><span class="p">,</span>
@@ -1156,9 +1278,9 @@ Otherwise, check if the user can:
 <p>Return true if the user is a member of only one group.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">has_only_one_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">has_only_one_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Return true if the user is a member of only one group."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
 </code></pre></div></td></tr></table></div>
@@ -1175,12 +1297,7 @@ Otherwise, check if the user can:
 obj: Hubuum Object</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
@@ -1204,7 +1321,12 @@ obj: Hubuum Object</p>
 <span class="normal">165</span>
 <span class="normal">166</span>
 <span class="normal">167</span>
-<span class="normal">168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">has_perm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">has_perm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Model (?) permissions check for an object.</span>
 
@@ -1263,9 +1385,9 @@ obj: Hubuum Object</p>
 <p>Check if the user is a member of a specific group.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_member_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_member_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check if the user is a member of a specific group."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_member_of_any</span><span class="p">([</span><span class="n">group</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
@@ -1280,9 +1402,9 @@ obj: Hubuum Object</p>
 <p>Check to see if a user is a member of any of the groups in the list.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_member_of_any</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_member_of_any</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check to see if a user is a member of any of the groups in the list."""</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">groups</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">all</span><span class="p">()])</span>
 </code></pre></div></td></tr></table></div>
@@ -1300,12 +1422,7 @@ param: namespace (namespace object)
 return True|False</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/auth.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">85</span>
 <span class="normal">86</span>
 <span class="normal">87</span>
 <span class="normal">88</span>
@@ -1313,7 +1430,12 @@ return True|False</p>
 <span class="normal">90</span>
 <span class="normal">91</span>
 <span class="normal">92</span>
-<span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">namespaced_can</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">namespaced_can</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check to see if the user can perform perm for namespace.</span>
 
 <span class="sd">    param: perm (permission string, 'has_[create|read|update|delete|namespace])</span>
@@ -1327,6 +1449,28 @@ return True|False</p>
     <span class="c1"># that has the given permission the namespace.</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">groups_that_can</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_member_of_any</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h2 class="doc doc-heading" id="hubuum.models.auth.User.supports_attachments">
+<code class="highlight language-python"><span class="n">supports_attachments</span><span class="p">()</span></code>
+<span class="doc doc-labels">
+<small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+</span>
+<a class="headerlink" href="#hubuum.models.auth.User.supports_attachments" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p>Check if a class supports attachments.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/auth.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">supports_attachments</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Check if a class supports attachments."""</span>
+    <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
 </details>
 </div>
@@ -1363,6 +1507,533 @@ return True|False</p>
 <p>Core models for hubuum.</p>
 <div class="doc doc-children">
 <div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="hubuum.models.core.Attachment">
+<code>Attachment</code>
+<a class="headerlink" href="#hubuum.models.core.Attachment" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" href="#hubuum.models.core.NamespacedHubuumModel" title="hubuum.models.core.NamespacedHubuumModel">NamespacedHubuumModel</a></code></p>
+<p>A model for the attachments data for objects.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Attachment</span><span class="p">(</span><span class="n">NamespacedHubuumModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A model for the attachments data for objects."""</span>
+
+    <span class="n">attachment</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">content_type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">object_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveIntegerField</span><span class="p">()</span>
+    <span class="n">content_object</span> <span class="o">=</span> <span class="n">GenericForeignKey</span><span class="p">(</span><span class="s2">"content_type"</span><span class="p">,</span> <span class="s2">"object_id"</span><span class="p">)</span>
+    <span class="n">sha256</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveIntegerField</span><span class="p">(</span><span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">original_filename</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">generate_sha256_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sha256_hash</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Generate a custom filename for the uploaded file using its sha256 hash."""</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"attachments/file/</span><span class="si">{</span><span class="n">sha256_hash</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Override the save method to compute the sha256 hash and size of the uploaded file."""</span>
+        <span class="n">file_contents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sha256</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">file_contents</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_sha256_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sha256</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Meta for the model."""</span>
+
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<div class="doc doc-children">
+<div class="doc doc-object doc-class">
+<h3 class="doc doc-heading" id="hubuum.models.core.Attachment.Meta">
+<code>Meta</code>
+<a class="headerlink" href="#hubuum.models.core.Attachment.Meta" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Meta for the model.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Meta for the model."""</span>
+
+    <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<div class="doc doc-children">
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.Attachment.__str__">
+<code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.Attachment.__str__" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Stringify the object, used to represent the object towards users.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.Attachment.generate_sha256_filename">
+<code class="highlight language-python"><span class="n">generate_sha256_filename</span><span class="p">(</span><span class="n">sha256_hash</span><span class="p">)</span></code>
+<a class="headerlink" href="#hubuum.models.core.Attachment.generate_sha256_filename" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Generate a custom filename for the uploaded file using its sha256 hash.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">generate_sha256_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sha256_hash</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Generate a custom filename for the uploaded file using its sha256 hash."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"attachments/file/</span><span class="si">{</span><span class="n">sha256_hash</span><span class="si">}</span><span class="s2">"</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.Attachment.save">
+<code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<a class="headerlink" href="#hubuum.models.core.Attachment.save" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Override the save method to compute the sha256 hash and size of the uploaded file.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Override the save method to compute the sha256 hash and size of the uploaded file."""</span>
+    <span class="n">file_contents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sha256</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">file_contents</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">original_filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">attachment</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_sha256_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sha256</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="hubuum.models.core.AttachmentManager">
+<code>AttachmentManager</code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentManager" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" href="#hubuum.models.core.HubuumModel" title="hubuum.models.core.HubuumModel">HubuumModel</a></code></p>
+<p>A model for attachments to objects.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">AttachmentManager</span><span class="p">(</span><span class="n">HubuumModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A model for attachments to objects."""</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_model_can_have_attachments</span><span class="p">],</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">enabled</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">per_object_count_limit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveIntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">per_object_individual_size_limit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveIntegerField</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">per_object_total_size_limit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveIntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Meta for the model."""</span>
+
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<div class="doc doc-children">
+<div class="doc doc-object doc-class">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentManager.Meta">
+<code>Meta</code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentManager.Meta" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Meta for the model.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Meta for the model."""</span>
+
+    <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<div class="doc doc-children">
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentManager.__str__">
+<code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentManager.__str__" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Stringify the object, used to represent the object towards users.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="hubuum.models.core.AttachmentModel">
+<code>AttachmentModel</code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p class="doc doc-class-bases">
+        Bases: <code><span title="django.db.models">models</span>.<span title="django.db.models.Model">Model</span></code></p>
+<p>A model that supports attachments.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">AttachmentModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A model that supports attachments."""</span>
+
+    <span class="n">attachment_data_objects</span> <span class="o">=</span> <span class="n">GenericRelation</span><span class="p">(</span>
+        <span class="n">Attachment</span><span class="p">,</span> <span class="n">related_query_name</span><span class="o">=</span><span class="s2">"att_objects"</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">attachments_are_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if the model is ready to receive attachments."""</span>
+        <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">attachments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""List all attachments registered to the object."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment_data_objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">attachment_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return the number of attachments registered to the object."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment_data_objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">attachment_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return the total size of all attachments registered to the object."""</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">attachment</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">attachment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachments</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">attachment_individual_size_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return the max size of an attachment for the object."""</span>
+        <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">per_object_individual_size_limit</span>
+
+    <span class="k">def</span> <span class="nf">attachment_total_size_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return the size limit of attachments for the object."""</span>
+        <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">per_object_total_size_limit</span>
+
+    <span class="k">def</span> <span class="nf">attachment_count_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return the count limit of attachments for the object."""</span>
+        <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">per_object_count_limit</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Meta for the model."""</span>
+
+        <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<div class="doc doc-children">
+<div class="doc doc-object doc-class">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.Meta">
+<code>Meta</code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.Meta" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Meta for the model.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Meta for the model."""</span>
+
+    <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<div class="doc doc-children">
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.attachment_count">
+<code class="highlight language-python"><span class="n">attachment_count</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.attachment_count" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Return the number of attachments registered to the object.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">attachment_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return the number of attachments registered to the object."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment_data_objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.attachment_count_limit">
+<code class="highlight language-python"><span class="n">attachment_count_limit</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.attachment_count_limit" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Return the count limit of attachments for the object.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">attachment_count_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return the count limit of attachments for the object."""</span>
+    <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">per_object_count_limit</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.attachment_individual_size_limit">
+<code class="highlight language-python"><span class="n">attachment_individual_size_limit</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.attachment_individual_size_limit" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Return the max size of an attachment for the object.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">attachment_individual_size_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return the max size of an attachment for the object."""</span>
+    <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">per_object_individual_size_limit</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.attachment_size">
+<code class="highlight language-python"><span class="n">attachment_size</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.attachment_size" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Return the total size of all attachments registered to the object.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">attachment_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return the total size of all attachments registered to the object."""</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">attachment</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">attachment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachments</span><span class="p">())</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.attachment_total_size_limit">
+<code class="highlight language-python"><span class="n">attachment_total_size_limit</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.attachment_total_size_limit" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Return the size limit of attachments for the object.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">attachment_total_size_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return the size limit of attachments for the object."""</span>
+    <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">per_object_total_size_limit</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.attachments">
+<code class="highlight language-python"><span class="n">attachments</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.attachments" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>List all attachments registered to the object.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">attachments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""List all attachments registered to the object."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachment_data_objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.AttachmentModel.attachments_are_enabled">
+<code class="highlight language-python"><span class="n">attachments_are_enabled</span><span class="p">()</span></code>
+<a class="headerlink" href="#hubuum.models.core.AttachmentModel.attachments_are_enabled" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Check if the model is ready to receive attachments.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">attachments_are_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Check if the model is ready to receive attachments."""</span>
+    <span class="k">return</span> <span class="n">AttachmentManager</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="hubuum.models.core.Extension">
 <code>Extension</code>
 <a class="headerlink" href="#hubuum.models.core.Extension" title="Permanent link">¶</a></h2>
@@ -1373,34 +2044,38 @@ return True|False</p>
 <p>For now, it is implied that the extension uses REST.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Extension</span><span class="p">(</span><span class="n">NamespacedHubuumModel</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Extension</span><span class="p">(</span><span class="n">NamespacedHubuumModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""An extension to a specific model.</span>
 
 <span class="sd">    For now, it is implied that the extension uses REST.</span>
 <span class="sd">    """</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_model</span><span class="p">])</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_model_can_have_extensions</span><span class="p">]</span>
+    <span class="p">)</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_url</span><span class="p">])</span>
     <span class="n">require_interpolation</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
@@ -1425,10 +2100,10 @@ return True|False</p>
 <p>Meta for the model.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta for the model."""</span>
 
     <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
@@ -1446,9 +2121,9 @@ return True|False</p>
 <p>Stringify the object, used to represent the object towards users.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 </code></pre></div></td></tr></table></div>
@@ -1470,30 +2145,30 @@ return True|False</p>
 https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relations</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ExtensionData</span><span class="p">(</span><span class="n">NamespacedHubuumModel</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ExtensionData</span><span class="p">(</span><span class="n">NamespacedHubuumModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A model for the extensions data for objects.</span>
 
 <span class="sd">    Note that the object_id refers to an object of the appropriate model.</span>
@@ -1528,11 +2203,11 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Meta for the model.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta for the model."""</span>
 
     <span class="n">unique_together</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"extension"</span><span class="p">,</span> <span class="s2">"content_type"</span><span class="p">,</span> <span class="s2">"object_id"</span><span class="p">)</span>
@@ -1551,9 +2226,9 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Stringify the object, used to represent the object towards users.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1573,53 +2248,53 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>A model that supports extensions.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ExtensionsModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ExtensionsModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A model that supports extensions."""</span>
 
     <span class="n">extension_data_objects</span> <span class="o">=</span> <span class="n">GenericRelation</span><span class="p">(</span>
@@ -1677,10 +2352,10 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Meta data for the class.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta data for the class."""</span>
 
     <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1698,19 +2373,19 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Return the data for each extension the object has.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extension_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extension_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Return the data for each extension the object has."""</span>
     <span class="n">extension_data</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -1735,13 +2410,13 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Return the URLs for each extension the object has.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extension_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extension_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Return the URLs for each extension the object has."""</span>
     <span class="n">url_map</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">extension</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extensions</span><span class="p">():</span>
@@ -1760,10 +2435,10 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>List all extensions registered for the object.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""List all extensions registered for the object."""</span>
     <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">Extension</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span>
@@ -1779,14 +2454,14 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Interpolate fields within {} to the values of those fields.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Interpolate fields within {} to the values of those fields."""</span>
 
     <span class="k">def</span> <span class="nf">_get_value_from_match</span><span class="p">(</span><span class="n">matchobj</span><span class="p">):</span>
@@ -1811,26 +2486,31 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Base model for Hubuum Objects.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
-<span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HubuumModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HubuumModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Base model for Hubuum Objects."""</span>
 
     <span class="n">created_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1840,6 +2520,11 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
     <span class="k">def</span> <span class="nf">supports_extensions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Check if a class supports extensions."""</span>
         <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ExtensionsModel</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">supports_attachments</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if a class supports attachments."""</span>
+        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">AttachmentModel</span><span class="p">)</span>
 
     <span class="n">readonly_fields</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">"created_at"</span><span class="p">,</span>
@@ -1861,10 +2546,10 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Meta data for the class.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta data for the class."""</span>
 
     <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1872,6 +2557,28 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 </details>
 <div class="doc doc-children">
 </div>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h3 class="doc doc-heading" id="hubuum.models.core.HubuumModel.supports_attachments">
+<code class="highlight language-python"><span class="n">supports_attachments</span><span class="p">()</span></code>
+<span class="doc doc-labels">
+<small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+</span>
+<a class="headerlink" href="#hubuum.models.core.HubuumModel.supports_attachments" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Check if a class supports attachments.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">supports_attachments</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Check if a class supports attachments."""</span>
+    <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">AttachmentModel</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</details>
 </div>
 </div>
 <div class="doc doc-object doc-function">
@@ -1885,10 +2592,10 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Check if a class supports extensions.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">supports_extensions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check if a class supports extensions."""</span>
     <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ExtensionsModel</span><span class="p">)</span>
@@ -1909,22 +2616,22 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Base model for a namespaced Hubuum Objects.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">NamespacedHubuumModel</span><span class="p">(</span><span class="n">HubuumModel</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">NamespacedHubuumModel</span><span class="p">(</span><span class="n">HubuumModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Base model for a namespaced Hubuum Objects."""</span>
 
     <span class="c1"># When we delete a namespace, do we want *all* the objects to disappear?</span>
@@ -1951,10 +2658,10 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Meta data for the class.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta data for the class."""</span>
 
     <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1975,11 +2682,34 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Check if the model is an open model.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model_is_open</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model_is_open</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check if the model is an open model."""</span>
     <span class="k">return</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models_that_are_open</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
+<h2 class="doc doc-heading" id="hubuum.models.core.model_supports_attachments">
+<code class="highlight language-python"><span class="n">model_supports_attachments</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></code>
+<a class="headerlink" href="#hubuum.models.core.model_supports_attachments" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p>Check if a model supports attachments.</p>
+<details class="quote">
+<summary>Source code in <code>hubuum/models/core.py</code></summary>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model_supports_attachments</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Check if a model supports attachments."""</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">AttachmentModel</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 </details>
 </div>
@@ -1992,12 +2722,12 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Check if a model supports extensions.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model_supports_extensions</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model_supports_extensions</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check if a model supports extensions."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -2015,9 +2745,9 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Return a list of models open to all authenticated users.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/core.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">models_that_are_open</span><span class="p">():</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">models_that_are_open</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">"""Return a list of models open to all authenticated users."""</span>
     <span class="k">return</span> <span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="s2">"group"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -2043,14 +2773,7 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>The namespace ('domain') of an object.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
@@ -2100,7 +2823,14 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
-<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Namespace</span><span class="p">(</span><span class="n">HubuumModel</span><span class="p">):</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Namespace</span><span class="p">(</span><span class="n">HubuumModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The namespace ('domain') of an object."""</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2169,10 +2899,10 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Meta for the model.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta for the model."""</span>
 
     <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
@@ -2190,9 +2920,9 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 <p>Stringify the object, used to represent the object towards users.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 </code></pre></div></td></tr></table></div>
@@ -2249,14 +2979,7 @@ param: raise_exception (True)</p>
 </table>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
@@ -2269,7 +2992,14 @@ param: raise_exception (True)</p>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
-<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_permissions_for_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_permissions_for_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Try to find a permission object for the given group.</span>
 
 <span class="sd">    param: group (Group instance)</span>
@@ -2302,15 +3032,15 @@ param: raise_exception (True)</p>
 <p>Grant all permissions to the namespace to the given group.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grant_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grant_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Grant all permissions to the namespace to the given group."""</span>
     <span class="n">create</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">create</span><span class="p">[</span><span class="s2">"namespace"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
@@ -2333,17 +3063,17 @@ param: raise_exception (True)</p>
 return [group objects] (may be empty)</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">groups_that_can</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perm</span><span class="p">):</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">groups_that_can</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perm</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Fetch groups that can perform a specific permission.</span>
 
 <span class="sd">    param: perm (permission string, 'has_[read|create|update|delete|namespace])</span>
@@ -2367,17 +3097,21 @@ return [group objects] (may be empty)</p>
 <a class="headerlink" href="#hubuum.models.permissions.NamespacedHubuumModelWithExtensions" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p class="doc doc-class-bases">
-        Bases: <code><a class="autorefs autorefs-internal" href="#hubuum.models.core.NamespacedHubuumModel" title="hubuum.models.core.NamespacedHubuumModel">NamespacedHubuumModel</a></code>, <code><a class="autorefs autorefs-internal" href="#hubuum.models.core.ExtensionsModel" title="hubuum.models.core.ExtensionsModel">ExtensionsModel</a></code></p>
+        Bases: <code><a class="autorefs autorefs-internal" href="#hubuum.models.core.NamespacedHubuumModel" title="hubuum.models.core.NamespacedHubuumModel">NamespacedHubuumModel</a></code>, <code><a class="autorefs autorefs-internal" href="#hubuum.models.core.AttachmentModel" title="hubuum.models.core.AttachmentModel">AttachmentModel</a></code>, <code><a class="autorefs autorefs-internal" href="#hubuum.models.core.ExtensionsModel" title="hubuum.models.core.ExtensionsModel">ExtensionsModel</a></code></p>
 <p>An abstract model that provides Namespaces and Extensions.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">NamespacedHubuumModelWithExtensions</span><span class="p">(</span><span class="n">NamespacedHubuumModel</span><span class="p">,</span> <span class="n">ExtensionsModel</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">NamespacedHubuumModelWithExtensions</span><span class="p">(</span>
+    <span class="n">NamespacedHubuumModel</span><span class="p">,</span> <span class="n">AttachmentModel</span><span class="p">,</span> <span class="n">ExtensionsModel</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">"""An abstract model that provides Namespaces and Extensions."""</span>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
@@ -2395,10 +3129,10 @@ return [group objects] (may be empty)</p>
 <p>Meta data for the class.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Meta data for the class."""</span>
 
     <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2428,14 +3162,7 @@ return [group objects] (may be empty)</p>
 under the current one.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 87</span>
 <span class="normal"> 88</span>
 <span class="normal"> 89</span>
 <span class="normal"> 90</span>
@@ -2462,7 +3189,14 @@ under the current one.</p>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Permission</span><span class="p">(</span><span class="n">HubuumModel</span><span class="p">):</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Permission</span><span class="p">(</span><span class="n">HubuumModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Permissions in Hubuum.</span>
 
 <span class="sd">    - Permissions are set by group.</span>
@@ -2508,11 +3242,11 @@ under the current one.</p>
 <p>Metadata permissions.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Metadata permissions."""</span>
 
     <span class="n">unique_together</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"namespace"</span><span class="p">,</span> <span class="s2">"group"</span><span class="p">)</span>
@@ -2531,9 +3265,9 @@ under the current one.</p>
 <p>Stringify the object, used to represent the object towards users.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/permissions.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Stringify the object, used to represent the object towards users."""</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>

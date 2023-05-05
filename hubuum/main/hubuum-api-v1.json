@@ -3943,6 +3943,3070 @@
         ]
       }
     },
+    "/api/v1/attachment_manager/": {
+      "get": {
+        "operationId": "listAttachmentManagers",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "model__contains",
+            "required": false,
+            "in": "query",
+            "description": "model__contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__icontains",
+            "required": false,
+            "in": "query",
+            "description": "model__icontains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__endswith",
+            "required": false,
+            "in": "query",
+            "description": "model__endswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__iendswith",
+            "required": false,
+            "in": "query",
+            "description": "model__iendswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__startswith",
+            "required": false,
+            "in": "query",
+            "description": "model__startswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__istartswith",
+            "required": false,
+            "in": "query",
+            "description": "model__istartswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model",
+            "required": false,
+            "in": "query",
+            "description": "model",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__iexact",
+            "required": false,
+            "in": "query",
+            "description": "model__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "enabled",
+            "required": false,
+            "in": "query",
+            "description": "enabled",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_count_limit",
+            "required": false,
+            "in": "query",
+            "description": "per_object_count_limit",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_count_limit__gt",
+            "required": false,
+            "in": "query",
+            "description": "per_object_count_limit__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_count_limit__gte",
+            "required": false,
+            "in": "query",
+            "description": "per_object_count_limit__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_count_limit__lt",
+            "required": false,
+            "in": "query",
+            "description": "per_object_count_limit__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_count_limit__lte",
+            "required": false,
+            "in": "query",
+            "description": "per_object_count_limit__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_count_limit__range",
+            "required": false,
+            "in": "query",
+            "description": "per_object_count_limit__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_individual_size_limit",
+            "required": false,
+            "in": "query",
+            "description": "per_object_individual_size_limit",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_individual_size_limit__gt",
+            "required": false,
+            "in": "query",
+            "description": "per_object_individual_size_limit__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_individual_size_limit__gte",
+            "required": false,
+            "in": "query",
+            "description": "per_object_individual_size_limit__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_individual_size_limit__lt",
+            "required": false,
+            "in": "query",
+            "description": "per_object_individual_size_limit__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_individual_size_limit__lte",
+            "required": false,
+            "in": "query",
+            "description": "per_object_individual_size_limit__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_individual_size_limit__range",
+            "required": false,
+            "in": "query",
+            "description": "per_object_individual_size_limit__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_total_size_limit",
+            "required": false,
+            "in": "query",
+            "description": "per_object_total_size_limit",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_total_size_limit__gt",
+            "required": false,
+            "in": "query",
+            "description": "per_object_total_size_limit__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_total_size_limit__gte",
+            "required": false,
+            "in": "query",
+            "description": "per_object_total_size_limit__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_total_size_limit__lt",
+            "required": false,
+            "in": "query",
+            "description": "per_object_total_size_limit__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_total_size_limit__lte",
+            "required": false,
+            "in": "query",
+            "description": "per_object_total_size_limit__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_object_total_size_limit__range",
+            "required": false,
+            "in": "query",
+            "description": "per_object_total_size_limit__range",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "example": 123
+                    },
+                    "next": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "uri",
+                      "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "uri",
+                      "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AttachmentManager"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "post": {
+        "operationId": "createAttachmentManager",
+        "description": "",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentManager"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
+    "/api/v1/attachment_manager/{val}": {
+      "get": {
+        "operationId": "retrieveAttachmentManager",
+        "description": "Get, Patch, or Destroy an attachment.",
+        "parameters": [
+          {
+            "name": "val",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentManager"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "put": {
+        "operationId": "updateAttachmentManager",
+        "description": "Get, Patch, or Destroy an attachment.",
+        "parameters": [
+          {
+            "name": "val",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentManager"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "patch": {
+        "operationId": "partialUpdateAttachmentManager",
+        "description": "Get, Patch, or Destroy an attachment.",
+        "parameters": [
+          {
+            "name": "val",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentManager"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentManager"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "delete": {
+        "operationId": "destroyAttachmentManager",
+        "description": "Get, Patch, or Destroy an attachment.",
+        "parameters": [
+          {
+            "name": "val",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
+    "/api/v1/attachments/": {
+      "get": {
+        "operationId": "listAttachments",
+        "description": "Get all attachments for a given model.",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "content_type",
+            "required": false,
+            "in": "query",
+            "description": "content_type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id",
+            "required": false,
+            "in": "query",
+            "description": "object_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__gt",
+            "required": false,
+            "in": "query",
+            "description": "object_id__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__gte",
+            "required": false,
+            "in": "query",
+            "description": "object_id__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__lt",
+            "required": false,
+            "in": "query",
+            "description": "object_id__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__lte",
+            "required": false,
+            "in": "query",
+            "description": "object_id__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__range",
+            "required": false,
+            "in": "query",
+            "description": "object_id__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__contains",
+            "required": false,
+            "in": "query",
+            "description": "sha256__contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__icontains",
+            "required": false,
+            "in": "query",
+            "description": "sha256__icontains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__endswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__endswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iendswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iendswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__startswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__startswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__istartswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__istartswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256",
+            "required": false,
+            "in": "query",
+            "description": "sha256",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iexact",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "size",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__gt",
+            "required": false,
+            "in": "query",
+            "description": "size__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__gte",
+            "required": false,
+            "in": "query",
+            "description": "size__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__lt",
+            "required": false,
+            "in": "query",
+            "description": "size__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__lte",
+            "required": false,
+            "in": "query",
+            "description": "size__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__range",
+            "required": false,
+            "in": "query",
+            "description": "size__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__contains",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__icontains",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__icontains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__endswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__endswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iendswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iendswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__startswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__startswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__istartswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__istartswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename",
+            "required": false,
+            "in": "query",
+            "description": "original_filename",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iexact",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "required": false,
+            "in": "query",
+            "description": "namespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "description": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__month",
+            "required": false,
+            "in": "query",
+            "description": "created_at__month",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__quarter",
+            "required": false,
+            "in": "query",
+            "description": "created_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at",
+            "required": false,
+            "in": "query",
+            "description": "created_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__range",
+            "required": false,
+            "in": "query",
+            "description": "created_at__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__month",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__month",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__quarter",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at",
+            "required": false,
+            "in": "query",
+            "description": "updated_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__range",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__range",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "example": 123
+                    },
+                    "next": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "uri",
+                      "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "uri",
+                      "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Attachment"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "post": {
+        "operationId": "createAttachment",
+        "description": "",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
+    "/api/v1/attachments/{model}/": {
+      "get": {
+        "operationId": "retrieveAttachment",
+        "description": "Get all attachments for a given model.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content_type",
+            "required": false,
+            "in": "query",
+            "description": "content_type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id",
+            "required": false,
+            "in": "query",
+            "description": "object_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__gt",
+            "required": false,
+            "in": "query",
+            "description": "object_id__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__gte",
+            "required": false,
+            "in": "query",
+            "description": "object_id__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__lt",
+            "required": false,
+            "in": "query",
+            "description": "object_id__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__lte",
+            "required": false,
+            "in": "query",
+            "description": "object_id__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__range",
+            "required": false,
+            "in": "query",
+            "description": "object_id__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__contains",
+            "required": false,
+            "in": "query",
+            "description": "sha256__contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__icontains",
+            "required": false,
+            "in": "query",
+            "description": "sha256__icontains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__endswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__endswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iendswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iendswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__startswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__startswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__istartswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__istartswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256",
+            "required": false,
+            "in": "query",
+            "description": "sha256",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iexact",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "size",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__gt",
+            "required": false,
+            "in": "query",
+            "description": "size__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__gte",
+            "required": false,
+            "in": "query",
+            "description": "size__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__lt",
+            "required": false,
+            "in": "query",
+            "description": "size__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__lte",
+            "required": false,
+            "in": "query",
+            "description": "size__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__range",
+            "required": false,
+            "in": "query",
+            "description": "size__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__contains",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__icontains",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__icontains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__endswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__endswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iendswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iendswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__startswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__startswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__istartswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__istartswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename",
+            "required": false,
+            "in": "query",
+            "description": "original_filename",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iexact",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "required": false,
+            "in": "query",
+            "description": "namespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "description": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__month",
+            "required": false,
+            "in": "query",
+            "description": "created_at__month",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__quarter",
+            "required": false,
+            "in": "query",
+            "description": "created_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at",
+            "required": false,
+            "in": "query",
+            "description": "created_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__range",
+            "required": false,
+            "in": "query",
+            "description": "created_at__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__month",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__month",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__quarter",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at",
+            "required": false,
+            "in": "query",
+            "description": "updated_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__range",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__range",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "post": {
+        "operationId": "createAttachment",
+        "description": "",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
+    "/api/v1/attachments/{model}/{instance}": {
+      "get": {
+        "operationId": "retrieveAttachment",
+        "description": "Get an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "post": {
+        "operationId": "createAttachment",
+        "description": "Add an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "put": {
+        "operationId": "updateAttachment",
+        "description": "Get, Patch, or Destroy an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "patch": {
+        "operationId": "partialUpdateAttachment",
+        "description": "Get, Patch, or Destroy an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "delete": {
+        "operationId": "destroyAttachment",
+        "description": "Delete an attachment.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
+    "/api/v1/attachments/{model}/{instance}/": {
+      "get": {
+        "operationId": "retrieveAttachment",
+        "description": "Get all attachments for a given model.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content_type",
+            "required": false,
+            "in": "query",
+            "description": "content_type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id",
+            "required": false,
+            "in": "query",
+            "description": "object_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__gt",
+            "required": false,
+            "in": "query",
+            "description": "object_id__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__gte",
+            "required": false,
+            "in": "query",
+            "description": "object_id__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__lt",
+            "required": false,
+            "in": "query",
+            "description": "object_id__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__lte",
+            "required": false,
+            "in": "query",
+            "description": "object_id__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "object_id__range",
+            "required": false,
+            "in": "query",
+            "description": "object_id__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__contains",
+            "required": false,
+            "in": "query",
+            "description": "sha256__contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__icontains",
+            "required": false,
+            "in": "query",
+            "description": "sha256__icontains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__endswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__endswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iendswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iendswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__startswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__startswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__istartswith",
+            "required": false,
+            "in": "query",
+            "description": "sha256__istartswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256",
+            "required": false,
+            "in": "query",
+            "description": "sha256",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iexact",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "size",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__gt",
+            "required": false,
+            "in": "query",
+            "description": "size__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__gte",
+            "required": false,
+            "in": "query",
+            "description": "size__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__lt",
+            "required": false,
+            "in": "query",
+            "description": "size__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__lte",
+            "required": false,
+            "in": "query",
+            "description": "size__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size__range",
+            "required": false,
+            "in": "query",
+            "description": "size__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__contains",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__icontains",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__icontains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__endswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__endswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iendswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iendswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__startswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__startswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__istartswith",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__istartswith",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename",
+            "required": false,
+            "in": "query",
+            "description": "original_filename",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iexact",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "required": false,
+            "in": "query",
+            "description": "namespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "description": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__month",
+            "required": false,
+            "in": "query",
+            "description": "created_at__month",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__quarter",
+            "required": false,
+            "in": "query",
+            "description": "created_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at",
+            "required": false,
+            "in": "query",
+            "description": "created_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__range",
+            "required": false,
+            "in": "query",
+            "description": "created_at__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__month",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__month",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__quarter",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at",
+            "required": false,
+            "in": "query",
+            "description": "updated_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__range",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__range",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "post": {
+        "operationId": "createAttachment",
+        "description": "",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
+    "/api/v1/attachments/{model}/{instance}/{attachment}": {
+      "get": {
+        "operationId": "retrieveAttachment",
+        "description": "Get an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "post": {
+        "operationId": "createAttachment",
+        "description": "Add an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "put": {
+        "operationId": "updateAttachment",
+        "description": "Get, Patch, or Destroy an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "patch": {
+        "operationId": "partialUpdateAttachment",
+        "description": "Get, Patch, or Destroy an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "delete": {
+        "operationId": "destroyAttachment",
+        "description": "Delete an attachment.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
+    "/api/v1/attachments/{model}/{instance}/{attachment}/download": {
+      "get": {
+        "operationId": "retrieveAttachment",
+        "description": "Get an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "post": {
+        "operationId": "createAttachment",
+        "description": "Add an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "put": {
+        "operationId": "updateAttachment",
+        "description": "Get, Patch, or Destroy an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "patch": {
+        "operationId": "partialUpdateAttachment",
+        "description": "Get, Patch, or Destroy an attachment metadata.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Attachment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      },
+      "delete": {
+        "operationId": "destroyAttachment",
+        "description": "Delete an attachment.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Attachment"
+        ]
+      }
+    },
     "/api/v1/hosts/": {
       "get": {
         "operationId": "listHosts",
@@ -10352,6 +13416,102 @@
           "object_id",
           "namespace",
           "extension"
+        ]
+      },
+      "AttachmentManager": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "per_object_count_limit": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "per_object_individual_size_limit": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "per_object_total_size_limit": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "model"
+        ]
+      },
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "attachment": {
+            "type": "string",
+            "format": "binary"
+          },
+          "object_id": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "sha256": {
+            "type": "string",
+            "readOnly": true
+          },
+          "size": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "original_filename": {
+            "type": "string",
+            "readOnly": true
+          },
+          "namespace": {
+            "type": "integer"
+          },
+          "content_type": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "attachment",
+          "object_id",
+          "namespace",
+          "content_type"
         ]
       },
       "Host": {
