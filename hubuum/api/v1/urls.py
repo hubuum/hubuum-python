@@ -49,18 +49,24 @@ urlpatterns = [
     ),
     # Attachment API.
     # List attachment setup for all models, or post a new setup for a model.
-    path("attachments/", views.AttachmentManagerList.as_view()),
+    path("attachment_manager/", views.AttachmentManagerList.as_view()),
     # A specific attachment setup for a given model.
     path(
-        "attachments/<val>",
+        "attachment_manager/<val>",
         views.AttachmentManagerDetail.as_view(),
     ),
+    # Every attachment
+    path("attachments/", views.AttachmentList.as_view()),
     # Every attachment belonging to a given model.
     path("attachments/<model>/", views.AttachmentList.as_view()),
     # Every attachment belonging to a given object in a given model.
     path(
         "attachments/<model>/<instance>",
         views.AttachmentDetail.as_view(),
+    ),
+    path(
+        "attachments/<model>/<instance>/",
+        views.AttachmentList.as_view(),
     ),
     # A specific attachment object (ie, metadata) belonging to a given object in a given model.
     path(

@@ -3,6 +3,7 @@
 import structlog
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import FieldError
 from django.http import HttpResponse
 from django.urls import resolve
 from rest_framework import generics, status
@@ -25,6 +26,8 @@ from hubuum.exceptions import (
     UnsupportedAttachmentModelError,
 )
 from hubuum.filters import (
+    AttachmentFilterSet,
+    AttachmentManagerFilterSet,
     ExtensionDataFilterSet,
     ExtensionFilterSet,
     GroupFilterSet,
@@ -148,26 +151,23 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     """
 
     def get_object(self, lookup_identifier="val", model=None):
-        """Perform the actual lookup based on the model's lookup_fields.
+        """Perform the actual lookup based on the view's lookup_fields.
 
         raises: 404 if not found.
         return: object
         """
-        #        if self.request.user.is_anonymous:
-        #            raise NotAuthenticated()
-
-        #        queryset = self.get_queryset()
         if model is None:
             queryset = self.get_queryset()
+            fields = self.lookup_fields
         else:
             queryset = model.objects.all()
+            fields = ("id",)
 
         obj = None
         value = self.kwargs[lookup_identifier]
-        for field in self.lookup_fields:
+        for field in fields:
             try:
                 # https://stackoverflow.com/questions/9122169/calling-filter-with-a-variable-for-field-name
-                # No, just no.
                 obj = queryset.get(**{field: value})
                 if obj:
                     break
@@ -410,6 +410,7 @@ class AttachmentManagerList(HubuumList):
 
     queryset = AttachmentManager.objects.all()
     serializer_class = AttachmentManagerSerializer
+    filterset_class = AttachmentManagerFilterSet
 
 
 class AttachmentManagerDetail(HubuumDetail):
@@ -424,7 +425,7 @@ class AttachmentManagerDetail(HubuumDetail):
     lookup_fields = ("id", "model")
 
 
-class AttachmentList(generics.CreateAPIView, LoggingMixin):
+class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, LoggingMixin):
     """Get: List attachment data for a model. Post: Add attachment data to a model."""
 
     schema = AutoSchema(
@@ -433,6 +434,75 @@ class AttachmentList(generics.CreateAPIView, LoggingMixin):
 
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
+    filterset_class = AttachmentFilterSet
+
+    def _get_model(self, model):
+        """Get the model, or raise 404."""
+        model_name = model.lower()
+        model = get_model(model_name)
+
+        if model is None:
+            raise NotFound(detail=f"Model {model_name} does not exist.")
+
+        if not model_supports_attachments(model):
+            raise UnsupportedAttachmentModelError()
+
+        return model
+
+    def get(self, request, *args, **kwargs):
+        """Get all attachments for a given model."""
+        attachments = []
+
+        if self.kwargs.get("model"):
+            model_name = self.kwargs.get("model").lower()
+            model = self._get_model(model_name)
+            content_type = ContentType.objects.get_for_model(model)
+
+            # Get all attachments for the content_type, ie, the model in question.
+            # But filter out the attachments that belong to objects that match the
+            # query parameters.
+            model_filter = {}
+            attachment_filter = {}
+
+            for key in self.request.query_params:
+                if key.startswith("sha256"):
+                    attachment_filter[key] = self.request.query_params[key]
+                else:
+                    model_filter[key] = self.request.query_params[key]
+
+            if self.kwargs.get("instance"):
+                model_filter["id"] = self.kwargs.get("instance")
+
+            try:
+                attachments = Attachment.objects.filter(
+                    content_type=content_type,
+                    **attachment_filter,
+                    object_id__in=model.objects.filter(
+                        **model_filter,
+                    ),
+                )
+            except (ValueError, FieldError) as exc:
+                raise ParseError(detail="Invalid query parameter.") from exc
+        else:
+            # Be helpful and translate model= to content_type=.
+            # QueryDict is immutable, so we need to make a copy.
+            modified_query_dict = {}
+            for key in self.request.query_params:
+                if key == "model":
+                    model = self._get_model(self.request.query_params[key])
+                    content_type = ContentType.objects.get_for_model(model)
+                    modified_query_dict["content_type"] = content_type
+                else:
+                    modified_query_dict[key] = self.request.query_params[key]
+
+            try:
+                attachments = Attachment.objects.filter(
+                    **modified_query_dict,
+                )
+            except (ValueError, FieldError) as exc:
+                raise ParseError(detail="Invalid query parameter.") from exc
+
+        return Response(AttachmentSerializer(attachments, many=True).data)
 
 
 class AttachmentDetail(HubuumDetail):
@@ -483,10 +553,6 @@ class AttachmentDetail(HubuumDetail):
 
         content_type = ContentType.objects.get_for_model(model)
 
-        # Find the meta object for the attachment, that is the object that
-        # has the FileField, but also all the other metadata for the attachment.
-        # To do this we use the obj_id from the URL, and check that against the
-        # lookup_fields for the view.
         obj = None
         for field in self.lookup_fields:
             try:
@@ -495,7 +561,7 @@ class AttachmentDetail(HubuumDetail):
                     object_id=obj_id,
                     **{field: attachment_id},
                 )
-            except Attachment.DoesNotExist:
+            except (Attachment.DoesNotExist, ValueError):
                 pass
 
         if obj:
@@ -574,12 +640,13 @@ class AttachmentDetail(HubuumDetail):
             {
                 "detail": "Attachment uploaded successfully.",
                 "id": attachment_data.id,
+                "sha256": attachment_data.sha256,
             },
             status=status.HTTP_201_CREATED,
         )
 
     def delete(self, request, *args, **kwargs):
-        """Delete an attachment"""
+        """Delete an attachment."""
         obj = self._get_attachment(request, *args, **kwargs)
         self.check_object_permissions(request, obj)
         obj.delete()
