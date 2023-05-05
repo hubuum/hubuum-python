@@ -37,7 +37,6 @@ from hubuum.filters import (
     NamespaceFilterSet,
     PermissionFilterSet,
     PersonFilterSet,
-    PurchaseDocumentsFilterSet,
     PurchaseOrderFilterSet,
     RoomFilterSet,
     UserFilterSet,
@@ -58,7 +57,6 @@ from hubuum.models.resources import (
     HostType,
     Jack,
     Person,
-    PurchaseDocuments,
     PurchaseOrder,
     Room,
     Vendor,
@@ -81,7 +79,6 @@ from .serializers import (
     NamespaceSerializer,
     PermissionSerializer,
     PersonSerializer,
-    PurchaseDocumentsSerializer,
     PurchaseOrderSerializer,
     RoomSerializer,
     UserSerializer,
@@ -982,18 +979,3 @@ class PurchaseOrderDetail(HubuumDetail):
 
     queryset = PurchaseOrder.objects.all()
     serializer_class = PurchaseOrderSerializer
-
-
-class PurchaseDocumentList(HubuumList):
-    """Get: List purchasedocuments. Post: Add purchasedocument."""
-
-    queryset = PurchaseDocuments.objects.all().order_by("id")
-    serializer_class = PurchaseDocumentsSerializer
-    filterset_class = PurchaseDocumentsFilterSet
-
-
-class PurchaseDocumentDetail(HubuumDetail):
-    """Get, Patch, or Destroy a purchasedocument."""
-
-    queryset = PurchaseDocuments.objects.all()
-    serializer_class = PurchaseDocumentsSerializer

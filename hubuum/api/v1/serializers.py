@@ -23,7 +23,6 @@ from hubuum.models.resources import (
     HostType,
     Jack,
     Person,
-    PurchaseDocuments,
     PurchaseOrder,
     Room,
     Vendor,
@@ -360,16 +359,6 @@ class RoomSerializer(HubuumMetaSerializer):
         """How to serialize the object."""
 
         model = Room
-        fields = "__all__"
-
-
-class PurchaseDocumentsSerializer(HubuumMetaSerializer):
-    """Serialize a PurchaseDocument object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = PurchaseDocuments
         fields = "__all__"
 
 
