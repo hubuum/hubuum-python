@@ -24,7 +24,7 @@ import hubuum.log
 LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
 LOGGING_LEVEL_SOURCE = {}
 
-for source in ["DJANGO", "API", "SIGNALS", "REQUEST", "MANUAL", "AUTH"]:
+for source in ["DJANGO", "API", "SIGNALS", "REQUEST", "MANUAL", "MIGRATION", "AUTH"]:
     LOGGING_LEVEL_SOURCE[source] = os.environ.get(
         f"HUBUUM_LOGGING_LEVEL_{source}", LOGGING_LEVEL
     ).upper()
@@ -278,6 +278,11 @@ LOGGING = {
         "hubuum.auth": {
             "handlers": ["console"],
             "level": LOGGING_LEVEL_SOURCE["AUTH"],
+            "propagate": False,
+        },
+        "hubuum.migration": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["MIGRATION"],
             "propagate": False,
         },
         "hubuum.manual": {

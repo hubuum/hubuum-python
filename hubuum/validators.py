@@ -13,9 +13,51 @@ from hubuum.tools import get_model
 url_interpolation_regexp = re.compile("{(.*?)}")
 
 
+def _get_model(model):
+    """Get the model class from a string."""
+    if not isinstance(model, str):
+        raise ValidationError({"model": "The model name must be a string."})
+
+    model = get_model(model)
+    if not model:
+        raise ValidationError({"model": "No such model"})
+
+    return model
+
+
 def url_interpolation_fields(url):
     """Return the fields to be interpolated in the URL."""
     return re.findall(url_interpolation_regexp, url)
+
+
+def validate_model_can_have_extensions(model):
+    """Validate that the model can have extensions.
+
+    Requirements:
+     - Is a Hubuum model.
+     - Supports extensions.
+    """
+    model = _get_model(model)
+
+    if not model.supports_extensions():
+        raise ValidationError({"model": "Model does not support extensions."})
+
+    return True
+
+
+def validate_model_can_have_attachments(model):
+    """Validate that the model can have attachments.
+
+    Requirements:
+     - Is a Hubuum model.
+     - Supports extensions.
+    """
+    model = _get_model(model)
+
+    if not model.supports_attachments():
+        raise ValidationError({"model": "Model does not support attachments."})
+
+    return True
 
 
 def validate_model(model_name):
@@ -24,17 +66,10 @@ def validate_model(model_name):
     Requirements:
      - Is a string.
      - Resolves as the name of a Hubuum model.
+
+     _get_model will raise a ValidationError if the model is not found.
     """
-    if not isinstance(model_name, str):
-        raise ValidationError({"model": "The model name must be a string."})
-
-    model = get_model(model_name)
-    if not model:
-        raise ValidationError({"model": "No such model"})
-
-    if not model.supports_extensions():
-        raise ValidationError({"model": "Model does not support extensions."})
-
+    _get_model(model_name)
     return True
 
 

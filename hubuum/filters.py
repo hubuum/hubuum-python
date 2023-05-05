@@ -5,7 +5,13 @@ from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
 from hubuum.models.auth import User
-from hubuum.models.core import Extension, ExtensionData, model_is_open
+from hubuum.models.core import (
+    Attachment,
+    AttachmentManager,
+    Extension,
+    ExtensionData,
+    model_is_open,
+)
 from hubuum.models.permissions import Namespace, Permission
 from hubuum.models.resources import (
     Host,
@@ -19,8 +25,10 @@ from hubuum.models.resources import (
 )
 
 _key_lookups = ["exact"]  # in?
+_boolean_lookups = _key_lookups
 _many_to_many_lookups = _key_lookups
 _many_to_one_lookups = _key_lookups
+
 _textual_lookups = [
     "contains",
     "icontains",
@@ -206,13 +214,46 @@ class PermissionFilterSet(filters.FilterSet):
         fields = {
             "namespace": _key_lookups,
             "group": _key_lookups,
-            "has_create": ["exact"],
-            "has_read": ["exact"],
-            "has_update": ["exact"],
-            "has_delete": ["exact"],
-            "has_namespace": ["exact"],
+            "has_create": _boolean_lookups,
+            "has_read": _boolean_lookups,
+            "has_update": _boolean_lookups,
+            "has_delete": _boolean_lookups,
+            "has_namespace": _boolean_lookups,
         }
         fields.update(_hubuum_fields)
+
+
+class AttachmentManagerFilterSet(filters.FilterSet):
+    """FilterSet class for AttachmentManagers."""
+
+    class Meta:
+        """Metadata for the class."""
+
+        model = AttachmentManager
+        fields = {
+            "model": _textual_lookups,
+            "enabled": _boolean_lookups,
+            "per_object_count_limit": _numeric_lookups,
+            "per_object_individual_size_limit": _numeric_lookups,
+            "per_object_total_size_limit": _numeric_lookups,
+        }
+
+
+class AttachmentFilterSet(NamespacePermissionFilter):
+    """FilterSet for the Attachment model."""
+
+    class Meta:
+        """Meta class for AttachmentFilterSet."""
+
+        model = Attachment
+        fields = {
+            "content_type": _key_lookups,
+            "object_id": _numeric_lookups,
+            "sha256": _textual_lookups,
+            "size": _numeric_lookups,
+            "original_filename": _textual_lookups,
+        }
+        fields.update(_namespace_fields)
 
 
 class ExtensionFilterSet(NamespacePermissionFilter):
@@ -226,7 +267,7 @@ class ExtensionFilterSet(NamespacePermissionFilter):
             "name": _textual_lookups,
             "model": _textual_lookups,
             "url": _textual_lookups,
-            "require_interpolation": ["exact"],
+            "require_interpolation": _boolean_lookups,
             "header": _textual_lookups,
             "cache_time": _numeric_lookups,
         }

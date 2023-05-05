@@ -54,6 +54,11 @@ class User(AbstractUser):
         """Check if a class supports extensions."""
         return False
 
+    @classmethod
+    def supports_attachments(cls):
+        """Check if a class supports attachments."""
+        return False
+
     @property
     def group_list(self):
         """List the names of all the groups the user is a member of."""

@@ -12,8 +12,7 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient, APITestCase
 
 from hubuum.exceptions import MissingParam
-
-# from hubuum.models import Namespace
+from hubuum.log import debug, info
 
 
 # This testsuite design is based on the testsuite for MREG:
@@ -25,8 +24,15 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         """By default setUp sets up an APIClient for the superuser with a token."""
         self.user = None
         self.namespace = None
-
         self.client = self.get_superuser_client()
+
+    def info(self, message="test", **kwargs):  # pragma: no cover
+        """Log an informational message."""
+        info(message=message, **kwargs)
+
+    def debug(self, message="test", **kwargs):  # pragma: no cover
+        """Log a debug message."""
+        debug(message=message, **kwargs)
 
     def get_superuser_client(self):
         """Get a client for a superuser."""
@@ -143,8 +149,10 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         # Note that as long as tests pass, this will never be called, so it's a little
         if not response.status_code == expected_code:  # pragma: no cover
             path = f"{response.request['PATH_INFO']}{response.request['QUERY_STRING']}"
-            fail = f"{response.status_code} {response.data}"
-            print(f"{path} FAILED: {fail}")
+            fail = f"{path} FAILED: {response.status_code}"
+            if hasattr(response, "data"):
+                fail = f"{fail} [{response.data}]"
+            print(fail)
         self.assertEqual(response.status_code, expected_code)
 
     def _assert_delete_and_status(self, path, status_code, client=None):
@@ -171,11 +179,15 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self._assert_status_and_debug(response, status_code)
         return response
 
-    def _assert_post_and_status(self, path, status_code, data=None, client=None):
+    def _assert_post_and_status(
+        self, path, status_code, data=None, client=None, **kwargs
+    ):
         """Post and assert status."""
+        posting_format = kwargs.get("format", "json")
+
         if client is None:
             client = self.client
-        response = client.post(self._create_path(path), data)
+        response = client.post(self._create_path(path), data, format=posting_format)
         self._assert_status_and_debug(response, status_code)
         return response
 
@@ -324,6 +336,10 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
     def assert_post_and_409(self, path, *args, **kwargs):
         """Post and assert status as 409."""
         return self._assert_post_and_status(path, 409, *args, **kwargs)
+
+    def assert_post_and_415(self, path, *args, **kwargs):
+        """Post and assert status as 415."""
+        return self._assert_post_and_status(path, 415, *args, **kwargs)
 
 
 # def clean_and_save(entity):

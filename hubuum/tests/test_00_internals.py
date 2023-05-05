@@ -5,11 +5,15 @@ from rest_framework.exceptions import NotFound, ValidationError
 from hubuum.exceptions import MissingParam
 from hubuum.log import filter_sensitive_data
 from hubuum.models.auth import User
-from hubuum.models.core import model_supports_extensions
+from hubuum.models.core import model_supports_attachments, model_supports_extensions
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host
 from hubuum.tools import get_object
-from hubuum.validators import validate_model
+from hubuum.validators import (
+    validate_model,
+    validate_model_can_have_attachments,
+    validate_model_can_have_extensions,
+)
 
 from .base import HubuumModelTestCase
 
@@ -63,12 +67,8 @@ class InternalsTestCase(HubuumModelTestCase):
         with pytest.raises(NotFound):
             test.has_namespace(12)
 
-    def test_extensions_validation_errors(self):
-        """Test exceptions from the extensions."""
-        # Test that extension support checking works.
-        self.assertTrue(model_supports_extensions("Host"))
-        self.assertTrue(model_supports_extensions(Host))
-
+    def test_validate_model(self):
+        """Test validate_model interface."""
         # Test that we require data["model"] to be a string
         with pytest.raises(ValidationError):
             validate_model({})
@@ -80,15 +80,35 @@ class InternalsTestCase(HubuumModelTestCase):
         with pytest.raises(ValidationError):
             validate_model("nosuchmodel")
 
+        self.assertTrue(validate_model("host"))
+
+    def test_extensions_validation_errors(self):
+        """Test exceptions from the extensions."""
+        # Test that extension support checking works.
+        self.assertTrue(model_supports_extensions("Host"))
+        self.assertTrue(model_supports_extensions(Host))
+
         # Test that when we have a string, and a model with the name, but it does
         # not support extensions.
         with pytest.raises(ValidationError):
-            validate_model("user")
+            validate_model_can_have_extensions("user")
 
         with pytest.raises(ValidationError):
-            validate_model("permission")
+            validate_model_can_have_extensions("permission")
 
-        self.assertTrue(validate_model("host"))
+    def test_attachment_validation_errors(self):
+        """Test exceptions from the attachments."""
+        # Test that extension support checking works.
+        self.assertTrue(model_supports_attachments("Host"))
+        self.assertTrue(model_supports_attachments(Host))
+
+        # Test that when we have a string, and a model with the name, but it does
+        # not support attachments.
+        with pytest.raises(ValidationError):
+            validate_model_can_have_attachments("user")
+
+        with pytest.raises(ValidationError):
+            validate_model_can_have_attachments("permission")
 
     def test_filtering_of_sensitive_data(self):
         """Test that sensitive data is filtered from structlog records."""
