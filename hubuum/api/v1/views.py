@@ -446,6 +446,27 @@ class AttachmentDetail(HubuumDetail):
         tags=["Attachment"],
     )
 
+    def _ensure_size_limits(self, obj, request):
+        """Ensure adding the attachment won't exceed size limits."""
+        size = len(request.data.get("attachment").read())
+        request.data.get("attachment").seek(0)
+
+        max_attachments = obj.attachment_count_limit()
+        max_attachment_size = obj.attachment_individual_size_limit()
+        max_total_size = obj.attachment_total_size_limit()
+
+        # Check limits
+        if max_attachments and obj.attachment_count() >= max_attachments:
+            raise AttachmentCountLimitExceededError()
+
+        if max_attachment_size and size > max_attachment_size:
+            raise AttachmentTooBig()
+
+        if max_total_size and size + obj.attachment_size() > max_total_size:
+            raise AttachmentSizeLimitExceededError()
+
+        return True
+
     def _get_attachment(self, request, *args, **kwargs):
         """Get an attachment object, or raise 404."""
         model_name = self.kwargs.get("model").lower()
@@ -536,32 +557,14 @@ class AttachmentDetail(HubuumDetail):
         if not obj.attachments_are_enabled():
             raise AttachmentsNotEnabledError()
 
-        # Get the uploaded file from the request, get its size,
-        # and reset the file pointer
-        uploaded_file = request.data.get("attachment")
-        size = len(uploaded_file.read())
-        uploaded_file.seek(0)
-
-        max_attachments = obj.attachment_count_limit()
-        max_attachment_size = obj.attachment_individual_size_limit()
-        max_total_size = obj.attachment_total_size_limit()
-
-        # Check limits
-        if max_attachments and obj.attachment_count() >= max_attachments:
-            raise AttachmentCountLimitExceededError()
-
-        if max_attachment_size and size > max_attachment_size:
-            raise AttachmentTooBig()
-
-        if max_total_size and size + obj.attachment_size() > max_total_size:
-            raise AttachmentSizeLimitExceededError()
+        self._ensure_size_limits(obj, request)
 
         namespace = Namespace.objects.get(id=request.data.get("namespace"))
 
         # Create and save an Attachment object
         attachment_data = Attachment(
             namespace=namespace,
-            attachment=uploaded_file,
+            attachment=request.data.get("attachment"),
             content_type=content_type,
             object_id=obj.id,
         )

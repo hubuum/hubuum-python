@@ -76,7 +76,7 @@ class HubuumModelTestCase(TestCase):
             raise MissingParam
 
         # Ick.
-        if model == Extension or model == AttachmentManager:
+        if model in (Extension, AttachmentManager):
             kwargs["model"] = "host"
 
         obj, _ = model.objects.get_or_create(**kwargs)
