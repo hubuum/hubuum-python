@@ -3,7 +3,48 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from . import views
+from .views.attachment import (
+    AttachmentDetail,
+    AttachmentList,
+    AttachmentManagerDetail,
+    AttachmentManagerList,
+)
+from .views.extension import (
+    ExtensionDataDetail,
+    ExtensionDataList,
+    ExtensionDetail,
+    ExtensionList,
+)
+from .views.iam import (
+    GroupDetail,
+    GroupList,
+    GroupMembers,
+    GroupMembersUser,
+    NamespaceDetail,
+    NamespaceList,
+    NamespaceMembers,
+    NamespaceMembersGroup,
+    PermissionDetail,
+    PermissionList,
+    UserDetail,
+    UserList,
+)
+from .views.resources import (
+    HostDetail,
+    HostList,
+    HostTypeDetail,
+    HostTypeList,
+    JackDetail,
+    JackList,
+    PersonDetail,
+    PersonList,
+    PurchaseOrderDetail,
+    PurchaseOrderList,
+    RoomDetail,
+    RoomList,
+    VendorDetail,
+    VendorList,
+)
 
 router = routers.DefaultRouter()
 # router.register(r'host', views.HeroViewSet)
@@ -13,88 +54,88 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path("", include(router.urls)),
     # Users and groups.
-    path("users/", views.UserList.as_view()),
-    path("users/<val>", views.UserDetail.as_view()),
-    path("groups/", views.GroupList.as_view()),
-    path("groups/<val>", views.GroupDetail.as_view()),
-    path("groups/<val>/members/", views.GroupMembers.as_view()),
-    path("groups/<val>/members/<userid>", views.GroupMembersUser.as_view()),
+    path("users/", UserList.as_view()),
+    path("users/<val>", UserDetail.as_view()),
+    path("groups/", GroupList.as_view()),
+    path("groups/<val>", GroupDetail.as_view()),
+    path("groups/<val>/members/", GroupMembers.as_view()),
+    path("groups/<val>/members/<userid>", GroupMembersUser.as_view()),
     # Permissions
-    path("permissions/", views.PermissionList.as_view()),
+    path("permissions/", PermissionList.as_view()),
     path(
         "permissions/<val>",
-        views.PermissionDetail.as_view(),
+        PermissionDetail.as_view(),
     ),
     # Namespaces
-    path("namespaces/", views.NamespaceList.as_view()),
-    path("namespaces/<val>", views.NamespaceDetail.as_view()),
+    path("namespaces/", NamespaceList.as_view()),
+    path("namespaces/<val>", NamespaceDetail.as_view()),
     path(
         "namespaces/<val>/groups/",
-        views.NamespaceMembers.as_view(),
+        NamespaceMembers.as_view(),
     ),
     path(
         "namespaces/<val>/groups/<groupid>",
-        views.NamespaceMembersGroup.as_view(),
+        NamespaceMembersGroup.as_view(),
     ),
     # Extension API.
-    path("extensions/", views.ExtensionList.as_view()),
+    path("extensions/", ExtensionList.as_view()),
     path(
         "extensions/<val>",
-        views.ExtensionDetail.as_view(),
+        ExtensionDetail.as_view(),
     ),
-    path("extension_data/", views.ExtensionDataList.as_view()),
+    path("extension_data/", ExtensionDataList.as_view()),
     path(
         "extension_data/<val>",
-        views.ExtensionDataDetail.as_view(),
+        ExtensionDataDetail.as_view(),
     ),
     # Attachment API.
     # List attachment setup for all models, or post a new setup for a model.
-    path("attachment_manager/", views.AttachmentManagerList.as_view()),
+    path("attachment_manager/", AttachmentManagerList.as_view()),
     # A specific attachment setup for a given model.
     path(
         "attachment_manager/<val>",
-        views.AttachmentManagerDetail.as_view(),
+        AttachmentManagerDetail.as_view(),
     ),
     # Every attachment
-    path("attachments/", views.AttachmentList.as_view()),
+    path("attachments/", AttachmentList.as_view()),
     # Every attachment belonging to a given model.
-    path("attachments/<model>/", views.AttachmentList.as_view()),
+    path("attachments/<model>/", AttachmentList.as_view()),
     # Every attachment belonging to a given object in a given model.
     path(
         "attachments/<model>/<instance>",
-        views.AttachmentDetail.as_view(),
+        AttachmentDetail.as_view(),
     ),
     path(
         "attachments/<model>/<instance>/",
-        views.AttachmentList.as_view(),
+        AttachmentList.as_view(),
     ),
     # A specific attachment object (ie, metadata) belonging to a given object in a given model.
     path(
         "attachments/<model>/<instance>/<attachment>",
-        views.AttachmentDetail.as_view(),
+        AttachmentDetail.as_view(),
     ),
     # The actual attachment file
     path(
         "attachments/<model>/<instance>/<attachment>/download",
-        views.AttachmentDetail.as_view(),
+        AttachmentDetail.as_view(),
         name="download_attachment",
     ),
     # Object models and their endpoints.
-    path("hosts/", views.HostList.as_view()),
-    path("hosts/<val>", views.HostDetail.as_view()),
-    path("hosttypes/", views.HostTypeList.as_view()),
-    path("hosttypes/<val>", views.HostTypeDetail.as_view()),
-    path("rooms/", views.RoomList.as_view()),
-    path("rooms/<val>", views.RoomDetail.as_view()),
-    path("jacks/", views.JackList.as_view()),
-    path("jacks/<val>", views.JackDetail.as_view()),
-    path("persons/", views.PersonList.as_view()),
-    path("persons/<val>", views.PersonDetail.as_view()),
-    path("vendors/", views.VendorList.as_view()),
-    path("vendors/<val>", views.VendorDetail.as_view()),
-    path("pos/", views.PurchaseOrderList.as_view()),
+    path("hosts/", HostList.as_view()),
+    path("hosts/<val>", HostDetail.as_view()),
+    path("hosttypes/", HostTypeList.as_view()),
+    path("hosttypes/<val>", HostTypeDetail.as_view()),
+    path("rooms/", RoomList.as_view()),
+    path("rooms/<val>", RoomDetail.as_view()),
+    path("jacks/", JackList.as_view()),
+    path("jacks/<val>", JackDetail.as_view()),
+    path("persons/", PersonList.as_view()),
+    path("persons/<val>", PersonDetail.as_view()),
+    path("vendors/", VendorList.as_view()),
+    path("vendors/<val>", VendorDetail.as_view()),
+    path("pos/", PurchaseOrderList.as_view()),
     path(
         "pos/<val>",
-        views.PurchaseOrderDetail.as_view(),
+        PurchaseOrderDetail.as_view(),
     ),
 ]
