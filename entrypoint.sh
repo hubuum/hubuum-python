@@ -12,7 +12,7 @@ python manage.py migrate
 function sigterm()
 {
 	echo "Received SIGTERM"
-	kill -term `cat /var/run/gunicorn.pid`
+	kill -term $( cat /var/run/gunicorn.pid )
 }
 trap sigterm SIGTERM
 
