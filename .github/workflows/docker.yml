@@ -36,7 +36,7 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          tags: hubuum:${{ env.PLATFORM_TAG }}-testing
+          tags: hubuum:${{ env.PLATFORM_TAG }}
           build-args: |
             ENVIRONMENT=testing
           load: true
@@ -98,7 +98,7 @@ jobs:
       - name: Download Docker image artifact
         uses: actions/download-artifact@v3
         with:
-          name: hubuum-${{ env.PLATFORM_TAG }}
+          name: hubuum-${{ env.PLATFORM_TAG }}.tar.gz
           path: hubuum_artifact
 
       - name: Check file size
@@ -117,7 +117,7 @@ jobs:
           docker load < hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar
 
       - name: Run tests
-        run: docker run -e MODE=testing hubuum:${{ env.PLATFORM_TAG }}-testing
+        run: docker run -e MODE=testing hubuum:${{ env.PLATFORM_TAG }}
 
   push-images:
     needs: test-images
