@@ -31,7 +31,7 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          tags: hubuum:${{ matrix.platform }}
+          tags: hubuum:${{ matrix.platform | replace('/', '-') }}-testing
           build-args: |
             ENVIRONMENT=testing
           load: true
@@ -70,7 +70,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Run tests
-        run: docker run -e MODE=testing hubuum:${{ matrix.platform }}
+        run: docker run -e MODE=testing hubuum:${{ matrix.platform | replace('/', '-') }}-testing
 
   push-images:
     needs: test-images
@@ -93,7 +93,7 @@ jobs:
         with:
           registry: ghcr.io
           username: terjekv
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -115,7 +115,6 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          tags: hubuum:rebuild
           load: true
 
       - name: Build and push Docker images
