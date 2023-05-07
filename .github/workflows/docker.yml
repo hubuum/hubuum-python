@@ -112,7 +112,14 @@ jobs:
           gzip -d hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
           docker load < hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar
 
+      - name: Install QEMU
+        run: sudo apt-get update && sudo apt-get install -y qemu-user-static
+
+      - name: Register QEMU arm64
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
       - name: Run tests
+        #        if: matrix.platform == 'linux/amd64'
         run: >
           docker run -e MODE=testing
           -e HUBUUM_DATABASE_HOST=${{ env.HUBUUM_DATABASE_HOST }}
