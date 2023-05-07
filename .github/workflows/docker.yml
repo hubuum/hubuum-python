@@ -21,7 +21,7 @@ jobs:
           - linux/arm64
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set platform tag
         id: set-platform-tag
@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set platform tag
         id: set-platform-tag
@@ -96,6 +96,18 @@ jobs:
           name: hubuum-${{ env.PLATFORM_TAG }}
           path: hubuum_artifact
 
+      - name: Check file size
+        run: |
+          echo "Checking file size of hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz"
+          du -sh hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+          echo "Checking file size of hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar"
+          du -sh hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar
+
+      - name: Load Docker image
+        run: |
+          gzip -d hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+          docker load < hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar
+
       - name: Load Docker image from artifact
         run: |
           gzip -d hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
@@ -109,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
