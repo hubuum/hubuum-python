@@ -35,7 +35,10 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
     def _check_levels(self, cap_logs, expected_levels):
         """Check the log levels in the log."""
         for i, level in enumerate(expected_levels):
-            self.assertEqual(cap_logs[i]["log_level"], level)
+            if not isinstance(level, list):
+                level = [level]
+
+            self.assertIn(cap_logs[i]["log_level"], level)
 
     def _check_events(self, cap_logs, expected_events):
         """Check the events in the log."""
@@ -241,6 +244,11 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_finished",
             ],
         )
+
+        # During a github action run, under QEMU, generating the knox
+        # token takes a long time -- log enough for the http_logging requests
+        # to raise the level of the response. So we will accept a few more values
+        # for the log level for the fifth log entry.
         self._check_levels(
             cap_logs,
             [
@@ -248,7 +256,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "info",
                 "info",
                 "info",
-                "debug",
+                ["debug", "warning", "critical"],
                 "info",
                 "info",
                 "info",
@@ -298,7 +306,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_finished",
             ],
         )
-        self._check_levels(cap_logs, ["info", "error", "warning", "info"])
+        self._check_levels(cap_logs, ["info", "error", ["warning", "critical"], "info"])
 
         self.assertIsNone(cap_logs[1]["id"])
 
