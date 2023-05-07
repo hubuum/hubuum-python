@@ -113,7 +113,13 @@ jobs:
           docker load < hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar
 
       - name: Run tests
-        run: docker run -e MODE=testing hubuum:${{ env.PLATFORM_TAG }}
+        run: >
+          docker run -e MODE=testing
+          -e HUBUUM_DATABASE_HOST=${{ env.HUBUUM_DATABASE_HOST }}
+          -e HUBUUM_DATABASE_NAME=${{ env.HUBUUM_DATABASE_NAME }}
+          -e HUBUUM_DATABASE_PASSWORD=${{ env.HUBUUM_DATABASE_PASSWORD }}
+          -e HUBUUM_DATABASE_USER=${{ env.HUBUUM_DATABASE_USER }}
+          hubuum:${{ env.PLATFORM_TAG }}
 
   push-images:
     needs: test-images
