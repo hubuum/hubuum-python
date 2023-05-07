@@ -35,5 +35,9 @@ RUN apk add --no-cache python3 py3-pip libstdc++ postgresql-libs
 RUN pip install --no-cache /wheels/*
 RUN rm -rf /wheels
 
+LABEL org.opencontainers.image.source="https://github.com/terjekv/hubuum"
+LABEL org.opencontainers.image.description="hubuum container image"
+LABEL org.opencontainers.image.licenses="CC0-1.0"
+
 WORKDIR /app
 CMD ["/app/entrypoint.sh"]
