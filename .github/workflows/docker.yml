@@ -18,7 +18,7 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          - linux/arm64
+    #          - linux/arm64
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -59,7 +59,7 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          - linux/arm64
+    #          - linux/arm64
 
     services:
       postgres:
@@ -158,14 +158,16 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          #          platforms: linux/amd64,linux/arm64
           load: true
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v4
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          #          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
