@@ -43,12 +43,14 @@ jobs:
 
       - name: Save Docker images as artifacts
         run: |
-          docker save hubuum:${{ env.PLATFORM_TAG }} | gzip > hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+          mkdir -p hubuum_artifact
+          docker save hubuum:${{ env.PLATFORM_TAG }} | gzip > hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v3
         with:
           name: hubuum-${{ env.PLATFORM_TAG }}
-          path: hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+          path: hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
 
   test-images:
     needs: build-images
@@ -92,11 +94,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: hubuum-${{ env.PLATFORM_TAG }}
-          path: hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+          path: hubuum_artifact
+
       - name: Load Docker image from artifact
         run: |
-          gzip -d hubuum-${{ env.PLATFORM_TAG }}.tar.gz
-          docker load < hubuum-${{ env.PLATFORM_TAG }}.tar
+          gzip -d hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+          docker load < hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar
 
       - name: Run tests
         run: docker run -e MODE=testing hubuum:${{ env.PLATFORM_TAG }}-testing
