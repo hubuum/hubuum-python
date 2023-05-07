@@ -224,6 +224,9 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/logout/",
             )
 
+        for log in cap_logs:
+            print(log)
+
         self.assertTrue(len(cap_logs) == 11)
         self._check_events(
             cap_logs,
