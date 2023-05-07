@@ -82,6 +82,7 @@ jobs:
       HUBUUM_DATABASE_USER: postgres
       HUBUUM_DATABASE_PASSWORD: postgres
       HUBUUM_DATABASE_NAME: github_actions
+      HUBUUM_DATABASE_HOST: host.docker.internal
 
     steps:
       - name: Check out the repository
