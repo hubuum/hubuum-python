@@ -53,10 +53,10 @@ class LogHttpResponseMiddleware:
         else:  # pragma: no cover
             log_level = logging.ERROR
 
-        if run_time_ms >= 1000:  # pragma: no cover
-            log_level = logging.WARNING
-        elif run_time_ms >= 2000:  # pragma: no cover
+        if run_time_ms >= 5000:  # pragma: no cover
             log_level = logging.CRITICAL
+        elif run_time_ms >= 1000:  # pragma: no cover
+            log_level = logging.WARNING
 
         content = "[]"
         if "application/json" in response.headers.get("Content-Type", ""):

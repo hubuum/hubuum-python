@@ -35,7 +35,10 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
     def _check_levels(self, cap_logs, expected_levels):
         """Check the log levels in the log."""
         for i, level in enumerate(expected_levels):
-            self.assertEqual(cap_logs[i]["log_level"], level)
+            if not isinstance(level, list):
+                level = [level]
+
+            self.assertIn(cap_logs[i]["log_level"], level)
 
     def _check_events(self, cap_logs, expected_events):
         """Check the events in the log."""
@@ -224,9 +227,6 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/logout/",
             )
 
-        for log in cap_logs:
-            print(log)
-
         self.assertTrue(len(cap_logs) == 11)
         self._check_events(
             cap_logs,
@@ -244,6 +244,11 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_finished",
             ],
         )
+
+        # During a github action run, under QEMU, generating the knox
+        # token takes a long time -- log enough for the http_logging requests
+        # to raise the level of the response. So we will accept a few more values
+        # for the log level for the fifth log entry.
         self._check_levels(
             cap_logs,
             [
@@ -251,7 +256,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "info",
                 "info",
                 "info",
-                "debug",
+                ["debug", "warning", "critical"],
                 "info",
                 "info",
                 "info",
