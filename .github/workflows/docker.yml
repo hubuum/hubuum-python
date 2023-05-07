@@ -46,6 +46,11 @@ jobs:
           mkdir -p hubuum_artifact
           docker save hubuum:${{ env.PLATFORM_TAG }} | gzip > hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
 
+      - name: Check file size
+        run: |
+          echo "Checking file size of hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz"
+          du -sh hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v3
         with:
@@ -100,8 +105,6 @@ jobs:
         run: |
           echo "Checking file size of hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz"
           du -sh hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
-          echo "Checking file size of hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar"
-          du -sh hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar
 
       - name: Load Docker image
         run: |
