@@ -21,7 +21,7 @@ export DJANGO_SETTINGS_MODULE=hubuumsite.settings
 # Run tests if in testing mode
 if [ "$MODE" = "testing" ]; then
     # Run Django test suite
-    exec python manage.py test --noinput --failfast
+    exec python manage.py test --noinput -v3 
 else
     export HUBUUM_LOGGING_PRODUCTION=true
     # Start the application using Gunicorn, store its PID, set the worker temporary directory, and wait for it to terminate
