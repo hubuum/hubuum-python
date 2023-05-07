@@ -133,9 +133,6 @@ jobs:
     needs: test-images
     runs-on: ubuntu-latest
 
-    env:
-      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
-
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
