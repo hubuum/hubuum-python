@@ -23,6 +23,11 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
+      - name: Set platform tag
+        id: set-platform-tag
+        run: |
+          echo "PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed 's/\//-/g')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
@@ -31,7 +36,7 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          tags: hubuum:${{ matrix.platform | replace('/', '-') }}-testing
+          tags: hubuum:${{ env.PLATFORM_TAG }}-testing
           build-args: |
             ENVIRONMENT=testing
           load: true
@@ -66,11 +71,16 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
+      - name: Set platform tag
+        id: set-platform-tag
+        run: |
+          echo "PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed 's/\//-/g')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
       - name: Run tests
-        run: docker run -e MODE=testing hubuum:${{ matrix.platform | replace('/', '-') }}-testing
+        run: docker run -e MODE=testing hubuum:${{ env.PLATFORM_TAG }}-testing
 
   push-images:
     needs: test-images
