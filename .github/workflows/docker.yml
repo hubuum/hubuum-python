@@ -119,11 +119,16 @@ jobs:
           -e HUBUUM_DATABASE_NAME=${{ env.HUBUUM_DATABASE_NAME }}
           -e HUBUUM_DATABASE_PASSWORD=${{ env.HUBUUM_DATABASE_PASSWORD }}
           -e HUBUUM_DATABASE_USER=${{ env.HUBUUM_DATABASE_USER }}
+          --platform ${{ matrix.platform }}
           hubuum:${{ env.PLATFORM_TAG }}
 
   push-images:
     needs: test-images
     runs-on: ubuntu-latest
+
+    env:
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
