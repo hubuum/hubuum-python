@@ -7,6 +7,9 @@ migrations:
 models:
   - "hubuum/models/*"
 
+settings:
+  - "hubuumsite/settings.py"
+
 dependencies:
   - "requirements*"
 
