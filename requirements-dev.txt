@@ -7,7 +7,7 @@ knox==0.1.14
 
 rich==13.3.5 # Used for console logging.
 
-sentry-sdk[django]==1.22.1
+sentry-sdk[django]==1.22.2
 structlog_sentry==2.0.2
 
 python-dateutil==2.8.2
