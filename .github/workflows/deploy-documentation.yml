@@ -1,17 +1,13 @@
 name: Deploy documentation
-
 on:
   push:
     branches:
       - main
-    tags:
-      - "*"
-  workflow_dispatch:
-
+permissions:
+  contents: write
 jobs:
-  build_and_deploy:
+  deploy:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'hubuum' || github.repository_owner == 'terjekv'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,25 +19,18 @@ jobs:
         with:
           python-version: 3.x
 
+      - name: Set up cache
+        uses: actions/cache@v3
+        with:
+          key: mkdocs-material-${{ github.ref }} 
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install tox
+            pip install -r requirements-dev.txt
+            mkdocs --version
 
-      - name: Build documentation
-        run: tox -r -e docs
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          publish_branch: gh-pages
-          enable_jekyll: false
-          force_orphan: false
-          cname: terje.kvernes.no
-          user_name: "GitHub Actions"
-          user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_message: "Deploy documentation to GitHub Pages"
-          keep_files: true
-          destination_dir: ${{ format('hubuum/{0}', (github.ref == 'refs/heads/main' && 'main' || github.ref_name)) }}
+      - name: Deploy
+        run: mkdocs gh-deploy --force
