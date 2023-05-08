@@ -32,5 +32,8 @@ jobs:
             pip install -r requirements-dev.txt
             mkdocs --version
 
+      - name: Build docs, update swagger
+        run: tox -e docs
+
       - name: Deploy
         run: mkdocs gh-deploy --force
