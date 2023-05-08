@@ -2,7 +2,7 @@ Django>3
 django_rest_knox==4.2.0
 djangorestframework==3.14.0
 django_filter==23.2
-ddjango-structlog==5.0.1
+django-structlog==5.0.1
 knox==0.1.14
 
 rich==13.3.5 # Used for console logging.
