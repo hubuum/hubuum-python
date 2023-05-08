@@ -23,6 +23,8 @@ if [ "$MODE" = "testing" ]; then
     # Run Django test suite
     exec python manage.py test --noinput --failfast
 else
+    # Note, without setting HUBUUM_SECRET_KEY, the application will start in development mode (DEBUG being true, random
+    # secret key, etc.)
     export HUBUUM_LOGGING_PRODUCTION=true
     # Start the application using Gunicorn, store its PID, set the worker temporary directory, and wait for it to terminate
     gunicorn hubuumsite.wsgi:application --workers=3 --bind 0.0.0.0:8099 --pid /var/run/gunicorn.pid --worker-tmp-dir /dev/shm --log-level error &

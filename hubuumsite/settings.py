@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import logging
 import os
+import random
 from datetime import timedelta
 from pathlib import Path
 
@@ -21,17 +22,56 @@ from structlog_sentry import SentryProcessor
 
 import hubuum.log
 
+# First let us determine if we are in production or not.
+# Default is development mode, as the only way to safely
+# be in production is to have a consistent SECRET_KEY.
+DEVELOPMENT_MODE = True
+if os.environ.get("HUBUUM_SECRET_KEY"):
+    DEVELOPMENT_MODE = False
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# We expect to be given the SECRET_KEY if we're in production. If not,
+# we'll generate a random one on server start (or restart) and use that.
+# Note that this generation will break all active sessions.
+if DEVELOPMENT_MODE:
+    DEBUG = True
+    CHARS = (
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVXYZ"
+        "0123456789"
+        "#()^[]-_*%&=+/"
+    )
+    SECRET_KEY = "".join([random.SystemRandom().choice(CHARS) for i in range(50)])
+    LOGGING_PRODUCTION = os.environ.get("HUBUUM_LOGGING_PRODUCTION", False)
+else:
+    SECRET_KEY = os.environ.get("HUBUUM_SECRET_KEY")
+    DEBUG = False
+    LOGGING_PRODUCTION = True
+
+# Logging configuration. We follow 12-factor app guidelines and *only* log to stdout.
+# By default we log everything at the CRITICAL level, but this can be overridden
+# globally or per source.
 LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
 LOGGING_LEVEL_SOURCE = {}
+
+# "system" messages are informational messages about the system itself.
+# These are by default logged at the INFO level, and do NOT adhere to the
+# global logging level. To disable these messages, set HUBUUM_LOGGING_LEVEL_SYSTEM
+# to WARNING or higher.
+LOGGING_LEVEL_SOURCE["SYSTEM"] = os.environ.get(
+    "HUBUUM_LOGGING_LEVEL_SYSTEM", "info"
+).upper()
 
 for source in ["DJANGO", "API", "SIGNALS", "REQUEST", "MANUAL", "MIGRATION", "AUTH"]:
     LOGGING_LEVEL_SOURCE[source] = os.environ.get(
         f"HUBUUM_LOGGING_LEVEL_{source}", LOGGING_LEVEL
     ).upper()
 
-LOGGING_PRODUCTION = os.environ.get("HUBUUM_LOGGING_PRODUCTION", False)
-
+# SENTRY support, enable by setting HUBUUM_SENTRY_DSN.
+# Set HUBUUM_SENTRY_LEVEL to the minimum level to report to sentry. This can get
+# noisy, and it does _not_ adhere to the global logging level.
 SENTRY_DSN = os.environ.get("HUBUUM_SENTRY_DSN", "")
+SENTRY_LEVEL = os.environ.get("HUBUUM_SENTRY_LEVEL", "critical").upper()
 
 if SENTRY_DSN:
     sentry_sdk.init(
@@ -42,25 +82,14 @@ if SENTRY_DSN:
         traces_sample_rate=1.0,
     )
 
-# from rest_framework.settings import api_settings
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "_1i4sc7w+h!i6fz=+-@@0kj#61152x6c=a(b61-%1*$5m)xwok"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
 ALLOWED_HOSTS = []
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -77,7 +106,6 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "hubuum.User"
-
 
 MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
@@ -192,11 +220,13 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
+# Configure logging based on the logging environment variables set above.
 output_type = structlog.dev.ConsoleRenderer(colors=True)
 if LOGGING_PRODUCTION or not DEBUG:
     output_type = structlog.processors.JSONRenderer()
 
-SENTRY_LEVEL = os.environ.get("HUBUUM_SENTRY_LEVEL", "critical").upper()
+# Configure Sentry to use the appropriate levels. Convert the text value to
+# the appropriate logging level.
 if SENTRY_LEVEL not in [
     "CRITICAL",
     "ERROR",
@@ -206,7 +236,6 @@ if SENTRY_LEVEL not in [
 ]:  # pragma: no cover
     raise ValueError("Invalid SENTRY_LEVEL")
 
-# set sentry_level to logger.level depending on the value of SENTRY_LEVEL
 if SENTRY_LEVEL == "DEBUG":
     SENTRY_LOG_LEVEL = logging.DEBUG
 elif SENTRY_LEVEL == "INFO":
@@ -218,7 +247,8 @@ elif SENTRY_LEVEL == "ERROR":
 elif SENTRY_LEVEL == "CRITICAL":
     SENTRY_LOG_LEVEL = logging.CRITICAL
 
-
+# Note that we always include the Sentry processor, but it will only be active if
+# SENTRY_DSN is set.
 structlog.configure(
     processors=[
         hubuum.log.filter_sensitive_data,
@@ -259,6 +289,10 @@ LOGGING = {
         "django_structlog": {
             "handlers": ["console"],
             "level": LOGGING_LEVEL_SOURCE["DJANGO"],
+        },
+        "hubuum.system": {
+            "handlers": ["console"],
+            "level": LOGGING_LEVEL_SOURCE["SYSTEM"],
         },
         "hubuum.api.object": {
             "handlers": ["console"],

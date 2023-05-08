@@ -12,6 +12,8 @@ structlog_sentry
 
 python-dateutil
 
+gunicorn
+
 mkdocs
 mkdocs-material
 mkdocs-swagger-ui-tag
