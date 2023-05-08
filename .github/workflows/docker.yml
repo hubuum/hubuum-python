@@ -12,7 +12,7 @@ on:
     - cron: "15 3 * * 6"
 
 jobs:
-  build-images:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,7 +29,6 @@ jobs:
           POSTGRES_DB: github_actions
         ports:
           - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     env:
@@ -66,7 +65,6 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
       - name: Run tests
-        #        if: matrix.platform == 'linux/amd64'
         run: >
           docker run -e MODE=testing
           -e HUBUUM_DATABASE_HOST=${{ env.HUBUUM_DATABASE_HOST }}
@@ -75,6 +73,47 @@ jobs:
           -e HUBUUM_DATABASE_USER=${{ env.HUBUUM_DATABASE_USER }}
           --platform ${{ matrix.platform }}
           hubuum:${{ env.PLATFORM_TAG }}
+
+      - name: Save Docker images as artifacts
+        run: |
+          mkdir -p hubuum_artifact
+          docker save hubuum:${{ env.PLATFORM_TAG }} | gzip > hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: hubuum-${{ env.PLATFORM_TAG }}
+          path: hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
+
+  push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    env:
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Download Docker image artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: hubuum-linux-amd64
+          path: hubuum_artifact/linux-amd64
+
+      - name: Download Docker image artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: hubuum-linux-arm64
+          path: hubuum_artifact/linux-arm64
+
+      - name: Load Docker images
+        run: |
+          gzip -dc hubuum_artifact/linux-amd64/hubuum-linux-amd64.tar.gz | docker load
+          gzip -dc hubuum_artifact/linux-arm64/hubuum-linux-arm64.tar.gz | docker load
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
