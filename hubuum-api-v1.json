@@ -5062,7 +5062,7 @@
     },
     "/api/v1/attachments/{model}/": {
       "get": {
-        "operationId": "retrieveAttachment",
+        "operationId": "retrieveAttachmentModel",
         "description": "Get all attachments for a given model.",
         "parameters": [
           {
@@ -5605,7 +5605,7 @@
         ]
       },
       "post": {
-        "operationId": "createAttachment",
+        "operationId": "createAttachmentModel",
         "description": "",
         "parameters": [
           {
@@ -5656,7 +5656,7 @@
     },
     "/api/v1/attachments/{model}/{instance}": {
       "get": {
-        "operationId": "retrieveAttachment",
+        "operationId": "retrieveAttachmentModelInstance",
         "description": "Get an attachment metadata.",
         "parameters": [
           {
@@ -5695,7 +5695,7 @@
         ]
       },
       "post": {
-        "operationId": "createAttachment",
+        "operationId": "createAttachmentModelInstance",
         "description": "Add an attachment metadata.",
         "parameters": [
           {
@@ -5743,7 +5743,7 @@
         ]
       },
       "put": {
-        "operationId": "updateAttachment",
+        "operationId": "updateAttachmentModelInstance",
         "description": "Get, Patch, or Destroy an attachment metadata.",
         "parameters": [
           {
@@ -5791,7 +5791,7 @@
         ]
       },
       "patch": {
-        "operationId": "partialUpdateAttachment",
+        "operationId": "partialUpdateAttachmentModelInstance",
         "description": "Get, Patch, or Destroy an attachment metadata.",
         "parameters": [
           {
@@ -5839,7 +5839,7 @@
         ]
       },
       "delete": {
-        "operationId": "destroyAttachment",
+        "operationId": "destroyAttachmentModelInstance",
         "description": "Delete an attachment.",
         "parameters": [
           {
@@ -5873,7 +5873,7 @@
     },
     "/api/v1/attachments/{model}/{instance}/": {
       "get": {
-        "operationId": "retrieveAttachment",
+        "operationId": "retrieveAttachmentModelInstanceObject",
         "description": "Get all attachments for a given model.",
         "parameters": [
           {
@@ -6425,7 +6425,7 @@
         ]
       },
       "post": {
-        "operationId": "createAttachment",
+        "operationId": "createAttachmentModelInstanceObject",
         "description": "",
         "parameters": [
           {
@@ -6485,7 +6485,7 @@
     },
     "/api/v1/attachments/{model}/{instance}/{attachment}": {
       "get": {
-        "operationId": "retrieveAttachment",
+        "operationId": "retrieveAttachmentModelInstanceObjectAttachment",
         "description": "Get an attachment metadata.",
         "parameters": [
           {
@@ -6533,7 +6533,7 @@
         ]
       },
       "post": {
-        "operationId": "createAttachment",
+        "operationId": "createAttachmentModelInstanceObjectAttachment",
         "description": "Add an attachment metadata.",
         "parameters": [
           {
@@ -6590,7 +6590,7 @@
         ]
       },
       "put": {
-        "operationId": "updateAttachment",
+        "operationId": "updateAttachmentModelInstanceObjectAttachment",
         "description": "Get, Patch, or Destroy an attachment metadata.",
         "parameters": [
           {
@@ -6647,7 +6647,7 @@
         ]
       },
       "patch": {
-        "operationId": "partialUpdateAttachment",
+        "operationId": "partialUpdateAttachmentModelInstanceObjectAttachment",
         "description": "Get, Patch, or Destroy an attachment metadata.",
         "parameters": [
           {
@@ -6704,7 +6704,7 @@
         ]
       },
       "delete": {
-        "operationId": "destroyAttachment",
+        "operationId": "destroyAttachmentModelInstanceObjectAttachment",
         "description": "Delete an attachment.",
         "parameters": [
           {
@@ -6747,7 +6747,7 @@
     },
     "/api/v1/attachments/{model}/{instance}/{attachment}/download": {
       "get": {
-        "operationId": "retrieveAttachment",
+        "operationId": "retrieveAttachmentModelInstanceObjectAttachmentDownload",
         "description": "Get an attachment metadata.",
         "parameters": [
           {
@@ -6795,7 +6795,7 @@
         ]
       },
       "post": {
-        "operationId": "createAttachment",
+        "operationId": "createAttachmentModelInstanceObjectAttachmentDownload",
         "description": "Add an attachment metadata.",
         "parameters": [
           {
@@ -6852,7 +6852,7 @@
         ]
       },
       "put": {
-        "operationId": "updateAttachment",
+        "operationId": "updateAttachmentModelInstanceObjectAttachmentDownload",
         "description": "Get, Patch, or Destroy an attachment metadata.",
         "parameters": [
           {
@@ -6909,7 +6909,7 @@
         ]
       },
       "patch": {
-        "operationId": "partialUpdateAttachment",
+        "operationId": "partialUpdateAttachmentModelInstanceObjectAttachmentDownload",
         "description": "Get, Patch, or Destroy an attachment metadata.",
         "parameters": [
           {
@@ -6966,7 +6966,7 @@
         ]
       },
       "delete": {
-        "operationId": "destroyAttachment",
+        "operationId": "destroyAttachmentModelInstanceObjectAttachmentDownload",
         "description": "Delete an attachment.",
         "parameters": [
           {
