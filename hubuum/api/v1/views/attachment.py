@@ -33,6 +33,42 @@ from .base import HubuumDetail, HubuumList, LoggingMixin, MultipleFieldLookupORM
 manual_logger = structlog.get_logger("hubuum.manual")
 
 
+class AttachmentAutoSchema(AutoSchema):
+    """
+    Custom AutoSchema for generating unique operation IDs for the Attachment views.
+
+    The generated operation IDs will utilize specific path parameters to ensure uniqueness.
+    """
+
+    def get_operation_id(self, path, method):
+        """
+        Generate a unique operation ID by appending specific path parameters to the base ID.
+
+        Args:
+            path (str): The path of the current route.
+            method (str): The HTTP method of the current route.
+
+        Returns:
+            str: The unique operation ID for the route.
+        """
+        operation_id_base = super().get_operation_id(path, method)
+
+        # Order is relevant, so use a list of tuples and not a dict.
+        path_mapping = [
+            ("{model}", "Model"),
+            ("{instance}", "Instance"),
+            ("{instance}/", "Object"),
+            ("{attachment}", "Attachment"),
+            ("download", "Download"),
+        ]
+
+        for path_substr, postfix in path_mapping:
+            if path_substr in path:
+                operation_id_base += postfix
+
+        return operation_id_base
+
+
 class AttachmentManagerList(HubuumList):
     """Get: List attachmentmanagers. Post: Add attachmentmanager."""
 
@@ -60,7 +96,7 @@ class AttachmentManagerDetail(HubuumDetail):
 class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, LoggingMixin):
     """Get: List attachment data for a model. Post: Add attachment data to a model."""
 
-    schema = AutoSchema(
+    schema = AttachmentAutoSchema(
         tags=["Attachment"],
     )
 
@@ -144,7 +180,7 @@ class AttachmentDetail(HubuumDetail):
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
 
-    schema = AutoSchema(
+    schema = AttachmentAutoSchema(
         tags=["Attachment"],
     )
 
