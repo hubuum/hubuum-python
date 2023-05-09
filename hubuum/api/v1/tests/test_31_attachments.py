@@ -2,13 +2,72 @@
 
 import hashlib
 import os
+from unittest.mock import MagicMock, Mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from hubuum.api.v1.views.attachment import AttachmentAutoSchema
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host, Person
 
 from .base import HubuumAPITestCase
+
+
+def create_mocked_view(action, model_name):
+    """Create a mocked view for testing the autoschema."""
+    mocked_view = Mock()
+    mocked_view.action = action
+
+    # Mock the model's __name__ attribute
+    mock_model = MagicMock()
+    mock_model.configure_mock(__name__=model_name)
+    mocked_view.queryset = Mock()
+    mocked_view.queryset.model = mock_model
+
+    return mocked_view
+
+
+class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
+    """Test the custom autoschema for operation IDs."""
+
+    def setUp(self):
+        """Set up the test environment for the class."""
+        self.action = "list"
+        self.model_name = "MockModel"
+        self.schema = AttachmentAutoSchema()
+        self.schema.view = create_mocked_view(self.action, self.model_name)
+        return super().setUp()
+
+    def test_operation_id_generation_from_url(self):
+        """Test different URLs and see what we get back."""
+        # We're using lists rather than a dict because black refuses
+        # to break key-value pairs into multiple lines, causing the line
+        # length to exceed limits.
+        question = [
+            "/prefix/doesntmatter/{model}",
+            "/api/v1/attachments/{model}",
+            "/{model}/",
+            "/{model}/{instance}",
+            "/{model}/{instance}/",
+            "/{model}/{instance}/{attachment}",
+            "/{model}/{instance}/{attachment}/download",
+        ]
+
+        # The first three are the same because the prefix is stripped
+        answer = [
+            "listMockModelsModel",
+            "listMockModelsModel",
+            "listMockModelsModel",
+            "listMockModelsModelInstance",
+            "listMockModelsModelInstanceObject",
+            "listMockModelsModelInstanceObjectAttachment",
+            "listMockModelsModelInstanceObjectAttachmentDownload",
+        ]
+
+        # Enumerate through the lists and test each one
+        for i, value in enumerate(question):
+            operation_id = self.schema.get_operation_id(value, "get")
+            self.assertEqual(operation_id, answer[i])
 
 
 class HubuumAttachmentTestCase(HubuumAPITestCase):
