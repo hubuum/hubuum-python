@@ -109,7 +109,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         """Test logging of a namespace being retrieved."""
         with capture_logs() as cap_logs:
             get_logger().bind()
-            self.assert_get("/namespaces/")
+            self.assert_get("/iam/namespaces/")
 
         self.assertEqual(len(cap_logs), 3)
 
@@ -117,8 +117,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             cap_logs, ["request_started", "response", "request_finished"]
         )
         self._check_levels(cap_logs, ["info", "debug", "info"])
-        self._check_request_started(cap_logs[0], "GET /api/v1/namespaces/")
-        self._check_response(cap_logs[1], "GET", "/api/v1/namespaces/", 200, "OK")
+        self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/")
+        self._check_response(cap_logs[1], "GET", "/api/v1/iam/namespaces/", 200, "OK")
         self._check_json(
             Namespace,
             cap_logs[1]["content"],
@@ -126,30 +126,32 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             element=0,
             count=1,
         )
-        self._check_request_finished(cap_logs[2], "GET /api/v1/namespaces/", 200)
+        self._check_request_finished(cap_logs[2], "GET /api/v1/iam/namespaces/", 200)
 
     def test_logging_of_failed_namespace_get(self):
         """Test logging of a failed namespace retrieval."""
         with capture_logs() as cap_logs:
             get_logger().bind()
-            self.assert_get_and_404("/namespaces/nope")
+            self.assert_get_and_404("/iam/namespaces/nope")
 
         self.assertEqual(len(cap_logs), 3)
         self._check_events(
             cap_logs, ["request_started", "response", "request_finished"]
         )
         self._check_levels(cap_logs, ["info", "warning", "info"])
-        self._check_request_started(cap_logs[0], "GET /api/v1/namespaces/nope")
+        self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/nope")
         self._check_response(
-            cap_logs[1], "GET", "/api/v1/namespaces/nope", 404, "Not Found"
+            cap_logs[1], "GET", "/api/v1/iam/namespaces/nope", 404, "Not Found"
         )
-        self._check_request_finished(cap_logs[2], "GET /api/v1/namespaces/nope", 404)
+        self._check_request_finished(
+            cap_logs[2], "GET /api/v1/iam/namespaces/nope", 404
+        )
 
     def test_logging_object_creation(self):
         """Test logging of a host being created."""
         with capture_logs() as cap_logs:
             get_logger().bind()
-            host_blob = self.assert_post("/hosts/", self.host_data)
+            host_blob = self.assert_post("/resources/hosts/", self.host_data)
             host_id = host_blob.data["id"]
 
         self.assertEqual(len(cap_logs), 5)
@@ -167,10 +169,12 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         self._check_levels(cap_logs, ["info", "info", "info", "debug", "info"])
 
-        self._check_request_started(cap_logs[0], "POST /api/v1/hosts/")
+        self._check_request_started(cap_logs[0], "POST /api/v1/resources/hosts/")
         self.assertTrue(cap_logs[1]["id"] == host_id)
         self._check_object_change(cap_logs[2], "created", "Host", host_id, "superuser")
-        self._check_response(cap_logs[3], "POST", "/api/v1/hosts/", 201, "Created")
+        self._check_response(
+            cap_logs[3], "POST", "/api/v1/resources/hosts/", 201, "Created"
+        )
         self._check_json(
             Host,
             cap_logs[3]["content"],
@@ -181,7 +185,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "namespace": self.namespace.id,
             },
         )
-        self._check_request_finished(cap_logs[4], "POST /api/v1/hosts/", 201)
+        self._check_request_finished(cap_logs[4], "POST /api/v1/resources/hosts/", 201)
 
     def test_manual_logging(self):
         """Test manual logging."""

@@ -118,7 +118,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         perms = {}
         for perm in permissions:
             perms[perm] = True
-        self.assert_post_and_204(f"/namespaces/{namespace}/groups/{group}", perms)
+        self.assert_post_and_204(f"/iam/namespaces/{namespace}/groups/{group}", perms)
         self.client = oldclient
 
     def basic_auth(self, username, password):

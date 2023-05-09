@@ -151,36 +151,36 @@ class APIExtensionsData(HubuumExtensionTestCase):
         extension_id = exblob.data["id"]
 
         exdblob = self.assert_post(
-            "/extension_data/", self._extension_data_blob(extension_id)
+            "/extensions/data/", self._extension_data_blob(extension_id)
         )
         exdid = exdblob.data["id"]
         # Test the __str__ method. Due to dependecies, it's easiest done here.
         self.assertEqual(str(exdid), str(ExtensionData.objects.get(id=exdid)))
-        self.assert_get(f"/extension_data/{exdid}")
+        self.assert_get(f"/extensions/data/{exdid}")
         self.assertTrue(exdblob.data["json_data"]["key"] == "value")
 
         # Updating by using post
         newvalue = "newvalue"
         self.assert_post(
-            "/extension_data/",
+            "/extensions/data/",
             self._extension_data_blob(extension_id, value=newvalue),
         )
-        exdblob = self.assert_get(f"/extension_data/{exdid}")
+        exdblob = self.assert_get(f"/extensions/data/{exdid}")
         self.assertTrue(exdblob.data["json_data"]["key"] == newvalue)
 
         # Posting with the wrong content_type (user vs host)
         exdblob = self.assert_post_and_400(
-            "/extension_data/",
+            "/extensions/data/",
             self._extension_data_blob(extension_id, content_type="user"),
         )
 
         # Before we add the ansible extension itself, there is no such data entry.
-        hblob = self.assert_get("/hosts/test")
+        hblob = self.assert_get("/resources/hosts/test")
         self.assertFalse("ansible" in hblob.data["extension_data"])
 
         # We add the ansible extension and dig around a bit.
         self.assert_post("/extensions/", self.extension_blob2)
-        hblob = self.assert_get("/hosts/test")
+        hblob = self.assert_get("/resources/hosts/test")
         self.assertTrue(hblob.data["extension_data"]["fleet"]["key"] == newvalue)
         self.assertIsNone(hblob.data["extension_data"]["ansible"])
         self.assertEqual(hblob.data["extensions"], ["ansible", "fleet"])
@@ -188,6 +188,6 @@ class APIExtensionsData(HubuumExtensionTestCase):
             hblob.data["extension_urls"]["fleet"],
             f"https://fleet.my.domain/api/v1/fleet/hosts/identifier/{hblob.data['name']}",
         )
-        hblob = self.assert_get("/hosts/test2")
+        hblob = self.assert_get("/resources/hosts/test2")
         self.assertIsNone(hblob.data["extension_data"]["fleet"])
         self.assertIsNone(hblob.data["extension_data"]["ansible"])

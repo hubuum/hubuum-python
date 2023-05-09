@@ -14,7 +14,7 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         """Set up the test environment."""
         super().setUp()
         self.namespace, _ = Namespace.objects.get_or_create(name="namespace1")
-        self.hosts_url = "/hosts/"
+        self.hosts_url = "/resources/hosts/"
         self._create_hosts(250)
 
     def tearDown(self) -> None:
