@@ -1,14 +1,18 @@
 """Test the logging in hubuum."""
 
 import json
+from typing import List, Tuple
+from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.hashers import make_password
+from django.http import HttpRequest, HttpResponse
 from rest_framework.test import APIClient
 from structlog import get_logger
 from structlog.testing import capture_logs
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.log import critical, debug, error, info, warning
+from hubuum.middleware.logging_http import LogHttpResponseMiddleware
 from hubuum.models.auth import User
 from hubuum.models.permissions import HubuumModel, Namespace
 from hubuum.models.resources import Host
@@ -320,3 +324,44 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertEqual(cap_logs[2]["status_code"], 401)
 
         user.delete()
+
+    def test_run_time_ms_escalation(self):
+        """Test run_time_ms escalation for logging levels."""
+        middleware = LogHttpResponseMiddleware(MagicMock())
+
+        # mock the get_response method to return a response with a specified status code and delay
+        def mock_get_response(_):
+            return HttpResponse(status=200)
+
+        middleware.get_response = mock_get_response
+
+        # test the behavior of the logging system with different delays
+        delay_responses: List[Tuple[float, str]] = [
+            (0.1, "debug"),
+            (0.5, "debug"),
+            (1.0, "warning"),
+            (2.0, "warning"),
+            (5.0, "critical"),
+            (5.5, "critical"),
+        ]
+
+        for delay, expected_level in delay_responses:
+            with patch("time.time", side_effect=[0, delay]):
+                with capture_logs() as cap_logs:
+                    get_logger().bind()
+                    middleware(HttpRequest())
+                    self.assertEqual(cap_logs[0]["log_level"], expected_level)
+
+    def test_return_500_error(self):
+        """Test middleware returning 500 error."""
+        middleware = LogHttpResponseMiddleware(MagicMock())
+
+        def mock_get_response(_):
+            return HttpResponse(status=500)
+
+        middleware.get_response = mock_get_response
+
+        with capture_logs() as cap_logs:
+            get_logger().bind()
+            middleware(HttpRequest())
+            self.assertEqual(cap_logs[0]["status_code"], 500)
