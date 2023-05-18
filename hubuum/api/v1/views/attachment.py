@@ -256,9 +256,11 @@ class AttachmentDetail(HubuumDetail):
                     obj.attachment.name,
                     obj.original_filename,
                 )
-            except FileNotFoundError as exc:  # pragma: no cover, we can't provoke this
+            except FileNotFoundError as exc:
                 manual_logger.error(
-                    "File belonging to attachment {metaobj.id} was not found."
+                    event="attachment_file",
+                    file_status="missing",
+                    text=f"File belonging to attachment {obj.id} was not found.",
                 )
                 raise NotFound(detail="File not found.") from exc
 

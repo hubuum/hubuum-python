@@ -199,6 +199,13 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         except ValueError:
             return False
 
+    def assert_list_contains(self, item_list, func):
+        """Assert that a list contains an item matching a function."""
+        for item in item_list:
+            if func(item):
+                return
+        raise AssertionError(f"Elements not found in {list}")  # pragma: no cover
+
     def assert_is_iso_date(self, value):
         """Assert that a value is a valid date."""
         self.assertTrue(self._is_iso_date(value))
