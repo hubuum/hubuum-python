@@ -2,8 +2,10 @@
 import http
 import logging
 import time
+from typing import Callable, cast
 
 import structlog
+from django.http import HttpRequest, HttpResponse
 
 logger = structlog.getLogger("hubuum.request")
 
@@ -17,7 +19,7 @@ class LogHttpResponseMiddleware:
     The time it took to process the response is also logged.
     """
 
-    def __init__(self, get_response):
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]):
         """
         Initialize the middleware.
 
@@ -25,7 +27,7 @@ class LogHttpResponseMiddleware:
         """
         self.get_response = get_response
 
-    def __call__(self, request):
+    def __call__(self, request: HttpRequest) -> HttpResponse:
         """
         Process the request and log the response.
 
@@ -38,7 +40,7 @@ class LogHttpResponseMiddleware:
         status_code = response.status_code
         run_time_ms = (end_time - start_time) * 1000
 
-        status_label = http.client.responses[status_code]
+        status_label = cast(str, http.client.responses[status_code])
 
         if status_code == 201:
             log_level = logging.DEBUG
@@ -50,12 +52,12 @@ class LogHttpResponseMiddleware:
             log_level = logging.WARNING
         elif 400 < status_code < 500:
             log_level = logging.WARNING
-        else:  # pragma: no cover
+        else:
             log_level = logging.ERROR
 
-        if run_time_ms >= 5000:  # pragma: no cover
+        if run_time_ms >= 5000:
             log_level = logging.CRITICAL
-        elif run_time_ms >= 1000:  # pragma: no cover
+        elif run_time_ms >= 1000:
             log_level = logging.WARNING
 
         content = "[]"

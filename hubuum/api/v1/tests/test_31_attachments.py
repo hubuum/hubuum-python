@@ -2,11 +2,16 @@
 
 import hashlib
 import os
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
+from structlog import get_logger
+from structlog.testing import capture_logs
 
-from hubuum.api.v1.views.attachment import AttachmentAutoSchema
+from hubuum.api.v1.views.attachment import AttachmentAutoSchema, AttachmentDetail
+from hubuum.api.v1.views.base import HubuumDetail
+from hubuum.models.core import Attachment
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host, Person
 
@@ -457,6 +462,46 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self.assert_get_and_404(
             f"/attachments/data/host/{host.id}/{att.data['id']}/download"
         )
+
+    def _patch_path(self, cls, function_name):
+        """Create a patch path for a function in a class."""
+        return f"{cls.__module__}.{cls.__name__}.{function_name}"
+
+    def test_attachment_download_file_not_found(self):
+        """Test downloading an attachment that does not exist.
+
+        This should give us a 404, and log an error. We check for both.
+        """
+        _get_attachment_path = self._patch_path(AttachmentDetail, "_get_attachment")
+        file_response_path = self._patch_path(HubuumDetail, "file_response")
+
+        with patch(_get_attachment_path) as mock_get_attachment:
+            with patch(file_response_path) as mock_file_response:
+                mock_get_attachment.return_value = MagicMock(spec=Attachment, data=b"")
+                mock_file_response.side_effect = FileNotFoundError()
+
+                url = reverse(
+                    "download_attachment",
+                    kwargs={
+                        "model": "mymodel",
+                        "instance": 1,
+                        "attachment": "myattachment",
+                    },
+                )
+
+                with capture_logs() as cap_logs:
+                    get_logger().bind()
+
+                    response = self.client.get(url)
+                    self.assertEqual(response.status_code, 404)
+                    self.assert_list_contains(
+                        cap_logs,
+                        lambda it: bool(  # type: ignore
+                            it.get("log_level") == "error"  # type: ignore
+                            and it.get("event") == "attachment_file"
+                            and it.get("file_status") == "missing"
+                        ),
+                    )
 
 
 def tearDownModule():  # pylint: disable=invalid-name
