@@ -204,7 +204,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         for item in item_list:
             if func(item):
                 return
-        raise AssertionError(f"Elements not found in {list}")  # pragma: no cover
+        raise AssertionError(f"Elements not found in {list}")
 
     def assert_is_iso_date(self, value):
         """Assert that a value is a valid date."""

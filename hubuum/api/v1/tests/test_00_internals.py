@@ -38,3 +38,10 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
         self.assertFalse(self._is_iso_date("Not a date"))
         self.assert_is_iso_date("2020-01-01T00:00:00Z")
         self.assert_is_iso_date("2023-04-14T07:11:54.866956Z")
+
+    def test_assert_list_contains(self):
+        """Test that _assert_list_contains correctly identifies list contents."""
+        self.assert_list_contains(["a", "b", "c"], lambda x: x == "b")
+
+        with pytest.raises(AssertionError):
+            self.assert_list_contains(["a", "b", "c"], lambda x: x == "d")
