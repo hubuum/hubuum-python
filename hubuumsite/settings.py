@@ -218,7 +218,7 @@ REST_KNOX = {
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get(
-            "HUBUUM_DATABASE_BACKEND", "django.db.backends.postgresql"
+            "HUBUUM_DATABASE_ENGINE", "django.db.backends.postgresql"
         ),
         "NAME": os.environ.get("HUBUUM_DATABASE_NAME", "hubuum"),
         "USER": os.environ.get("HUBUUM_DATABASE_USER", "hubuum"),

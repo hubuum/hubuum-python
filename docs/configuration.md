@@ -24,7 +24,7 @@ Hubuum supports [Sentry](https://sentry.io) for log tracking. The following envi
 
 ## Database Access
 
-- `HUBUUM_DATABASE_BACKEND`: Sets the database backend. Defaults to "django.db.backends.postgresql".
+- `HUBUUM_DATABASE_ENGINE`: Sets the database engine. Defaults to "django.db.backends.postgresql".
 - `HUBUUM_DATABASE_NAME`: Sets the name of the database. Defaults to "hubuum".
 - `HUBUUM_DATABASE_USER`: Sets the database user. Defaults to "hubuum".
 - `HUBUUM_DATABASE_PASSWORD`: Sets the password for the database user. Defaults to `None`.
