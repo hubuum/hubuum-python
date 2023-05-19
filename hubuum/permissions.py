@@ -1,5 +1,4 @@
 """Permissions module for hubuum."""
-# from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import (
     SAFE_METHODS,

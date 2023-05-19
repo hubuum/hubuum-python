@@ -34,14 +34,13 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         json_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         """Create an extension data blob."""
-        blob = {
+        return {
             "namespace": self.namespace.id,
             "extension": extension_id,
             "content_type": content_type,
             "object_id": host_id,
             "json_data": json_data,
         }
-        return blob
 
     def _add_host(self, name: str, fqdn: str) -> None:
         """Add a host to our collection."""
