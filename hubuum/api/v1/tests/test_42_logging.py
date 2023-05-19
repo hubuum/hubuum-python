@@ -278,7 +278,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "info",
                 "info",
                 "info",
-                ["debug", "warning", "critical"],
+                ["debug", "warning", "critical", "error"],
                 "info",
                 "info",
                 "info",
@@ -328,7 +328,9 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_finished",
             ],
         )
-        self._check_levels(cap_logs, ["info", "error", ["warning", "critical"], "info"])
+        self._check_levels(
+            cap_logs, ["info", "error", ["warning", "critical", "error"], "info"]
+        )
 
         self.assertIsNone(cap_logs[1]["id"])
 
