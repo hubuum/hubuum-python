@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Union
 # because the latter only supportes Z for UTC in python 3.11.
 # https://github.com/python/cpython/issues/80010
 from dateutil.parser import isoparse
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
@@ -26,6 +27,18 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self.user = None
         self.namespace = None
         self.client = self.get_superuser_client()
+
+    def db_engine(self) -> str:
+        """Return the database engine."""
+        return settings.DATABASES["default"]["ENGINE"]
+
+    def db_engine_is_sqlite(self) -> bool:
+        """Return True if the engine is sqlite."""
+        return self.db_engine() == "django.db.backends.sqlite3"
+
+    def db_engine_is_postgresql(self) -> bool:
+        """Return True if the engine is postgresql."""
+        return self.db_engine() == "django.db.backends.postgresql"
 
     def get_superuser_client(self) -> APIClient:
         """Get a client for a superuser."""

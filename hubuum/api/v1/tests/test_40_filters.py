@@ -114,7 +114,18 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         )
         self.assert_get_elements("/iam/users/", 3)
         self.assert_get_elements("/iam/users/?email__contains=domain", 2)
-        self.assert_get_elements("/iam/users/?email__endswith=com", 0)
+
+        # SQLite doesn't support case-sensitive lookup operators, so results may differ.
+        # Here, on SQLite, we will match the user with staff@domain.COM, but on postgres,
+        # we will NOT match due to case sensitivity.
+        # https://docs.djangoproject.com/en/4.2/ref/databases/#sqlite-string-matching
+        # (Arguments about case sensitivity in domain names emails not withstanding,
+        # this is a test of the filter)
+        if self.db_engine_is_sqlite():  # pragma: no cover
+            self.assert_get_elements("/iam/users/?email__endswith=com", 1)
+        else:
+            self.assert_get_elements("/iam/users/?email__endswith=com", 0)
+
         self.assert_get_elements("/iam/users/?email__iendswith=com", 1)
         self.assert_get_elements("/iam/users/?username__startswith=staff", 1)
         self.assert_get_elements("/iam/users/?username__contains=test", 2)

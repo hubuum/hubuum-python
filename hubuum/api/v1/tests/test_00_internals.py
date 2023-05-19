@@ -45,3 +45,10 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
 
         with pytest.raises(AssertionError):
             self.assert_list_contains(["a", "b", "c"], lambda x: x == "d")
+
+    def test_db_introspection(self):
+        """Test that we have some semblance of consistency in our DB introspection."""
+        self.assertTrue(
+            True in [self.db_engine_is_postgresql(), self.db_engine_is_sqlite()]
+        )
+        self.assertFalse(self.db_engine_is_postgresql() and self.db_engine_is_sqlite())
