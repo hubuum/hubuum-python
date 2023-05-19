@@ -50,4 +50,4 @@ You can run the SQLite suite by itself by doing `tox -e $( tox -l | grep sqlite 
 
 ### Coverage
 
-Coverage (`tox -e coverage && tox -e report`) assumes that local 
+Coverage (`tox -e coverage && tox -e report`) assumes that the local environment variables are set up to allow for testing. See the sections for postgresql and SQLite above.
