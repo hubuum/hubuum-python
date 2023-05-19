@@ -298,6 +298,30 @@
     Pull Request Guidelines
   </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#local-testing">
+    Local testing
+  </a>
+<nav aria-label="Local testing" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#postgresql">
+    Postgresql
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#sqlite">
+    SQLite
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#coverage">
+    Coverage
+  </a>
+</li>
 </ul>
 </nav>
 </li>
@@ -328,12 +352,38 @@
 <li>Check that the tests pass and code style is valid by running <code>tox -e format</code> and <code>tox -e flake8</code>.</li>
 <li>Check that coverage is 100% by running <code>tox -e coverage</code> and then <code>coverage report -m</code>.</li>
 </ol>
+<h3 id="local-testing">Local testing<a class="headerlink" href="#local-testing" title="Permanent link">¶</a></h3>
+<p>If you have both postgresql and sqlite available locally, you can run the complete test suite by issuing <code>tox</code>. The default environment list is rather large (see <code>tox -l</code>). You can also test against only one of them. Ideally you want to set your "default" engine setup by using the same enviroment variables as one uses under production:</p>
+<ul>
+<li><code>HUBUUM_DATABASE_ENGINE</code>: Sets the database engine. Defaults to "django.db.backends.postgresql".</li>
+<li><code>HUBUUM_DATABASE_NAME</code>: Sets the name of the database. Defaults to "hubuum".</li>
+<li><code>HUBUUM_DATABASE_USER</code>: Sets the database user. Defaults to "hubuum".</li>
+<li><code>HUBUUM_DATABASE_PASSWORD</code>: Sets the password for the database user. Defaults to <code>None</code>.</li>
+<li><code>HUBUUM_DATABASE_HOST</code>: Sets the database host. Defaults to "localhost".</li>
+<li><code>HUBUUM_DATABASE_PORT</code>: Sets the port for the database. Defaults to 5432.</li>
+</ul>
+<h4 id="postgresql">Postgresql<a class="headerlink" href="#postgresql" title="Permanent link">¶</a></h4>
+<p>You MUST specify the following variables for postgresql, even when using tox to ask for a postgresql enviroment (ie, <code>python310-django41-postgres</code>). The database name and engine will however be automatically set.</p>
+<ul>
+<li><code>HUBUUM_DATABASE_USER</code> </li>
+<li><code>HUBUUM_DATABASE_PASSWORD</code> </li>
+<li><code>HUBUUM_DATABASE_HOST</code> </li>
+<li><code>HUBUUM_DATABASE_PORT</code> </li>
+</ul>
+<p>You can see the available sqlite environments by doing <code>tox -l | grep postgres</code>.</p>
+<p>You can run the postgresql suite by itself by doing <code>tox -e $( tox -l | grep postgres | tr '\n' ',' )</code>.</p>
+<h4 id="sqlite">SQLite<a class="headerlink" href="#sqlite" title="Permanent link">¶</a></h4>
+<p>No configuration is required when using Tox and asking for an sqlite environment. The database will be created in <code>{envtmpdir}/hubuum.db</code>, typically something like <code>.tox/python310-django41-sqlite/tmp</code>, and it will be deleted after use. The engine will be automaticall set.</p>
+<p>You can see the available sqlite environments by doing <code>tox -l | grep sqlite</code>.</p>
+<p>You can run the SQLite suite by itself by doing <code>tox -e $( tox -l | grep sqlite | tr '\n' ',' )</code>.</p>
+<h3 id="coverage">Coverage<a class="headerlink" href="#coverage" title="Permanent link">¶</a></h3>
+<p>Coverage (<code>tox -e coverage &amp;&amp; tox -e report</code>) assumes that local </p>
 <hr/>
 <div class="md-source-file">
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 16, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">May 19, 2023</span>
 </small>
 </div>
 </article>
