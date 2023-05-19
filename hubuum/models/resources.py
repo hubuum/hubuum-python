@@ -1,3 +1,5 @@
+# Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
+# pyright: reportIncompatibleVariableOverride=false
 """Resource models.
 
 These models are the ones used by end users to create objects in Hubuum.
@@ -177,7 +179,7 @@ class Room(NamespacedHubuumModelWithExtensions):
 
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
-        return self.building + "-" + self.floor.rjust(2, "0") + "-" + self.room_id
+        return self.room_id
 
 
 class Vendor(NamespacedHubuumModelWithExtensions):

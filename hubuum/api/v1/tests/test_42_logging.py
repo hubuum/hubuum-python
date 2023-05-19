@@ -1,7 +1,7 @@
 """Test the logging in hubuum."""
 
 import json
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.hashers import make_password
@@ -9,6 +9,7 @@ from django.http import HttpRequest, HttpResponse
 from rest_framework.test import APIClient
 from structlog import get_logger
 from structlog.testing import capture_logs
+from structlog.types import EventDict
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.log import critical, debug, error, info, warning
@@ -36,7 +37,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.namespace.delete()
         super().tearDown()
 
-    def _check_levels(self, cap_logs, expected_levels):
+    def _check_levels(self, cap_logs: EventDict, expected_levels: List[str]) -> None:
         """Check the log levels in the log."""
         for i, level in enumerate(expected_levels):
             if not isinstance(level, list):
@@ -44,25 +45,34 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
             self.assertIn(cap_logs[i]["log_level"], level)
 
-    def _check_events(self, cap_logs, expected_events):
+    def _check_events(self, cap_logs: EventDict, expected_events: List[str]) -> None:
         """Check the events in the log."""
         for i, event in enumerate(expected_events):
             self.assertEqual(cap_logs[i]["event"], event)
 
-    def _check_request_started(self, log, method_and_expected_path):
+    def _check_request_started(
+        self, log: Dict[str, Any], method_and_expected_path: str
+    ) -> None:
         """Check the request_started log entry."""
         self.assertEqual(log["event"], "request_started")
         self.assertEqual(log["request"], method_and_expected_path)
 
-    def _check_request_finished(self, log, method_and_expected_path, code):
+    def _check_request_finished(
+        self, log: Dict[str, Any], method_and_expected_path: str, code: int
+    ) -> None:
         """Check the request_finished log entry."""
         self.assertEqual(log["event"], "request_finished")
         self.assertEqual(log["request"], method_and_expected_path)
         self.assertEqual(log["code"], code)
 
-    def _check_response(
-        self, log, method, path, status_code, status_label
-    ):  # pylint: disable=too-many-arguments
+    def _check_response(  # pylint: disable=too-many-arguments
+        self,
+        log: Dict[str, Any],
+        method: str,
+        path: str,
+        status_code: int,
+        status_label: str,
+    ) -> None:
         """Check the HTTP response log entry."""
         self.assertEqual(log["event"], "response")
         self.assertEqual(log["method"], method)
@@ -71,9 +81,14 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertEqual(log["status_code"], status_code)
         self.assertTrue(float(log["run_time_ms"]) > 0)
 
-    def _check_json(
-        self, cls: HubuumModel, content: str, expected_content: dict, element=0, count=0
-    ):  # pylint: disable=too-many-arguments
+    def _check_json(  # pylint: disable=too-many-arguments
+        self,
+        cls: HubuumModel,
+        content: str,
+        expected_content: Dict[str, Any],
+        element: int = 0,
+        count: int = 0,
+    ) -> None:
         """Check the JSON against expected_content.
 
         Args:
@@ -89,7 +104,12 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         self._check_structure(cls, json_data, expected_content)
 
-    def _check_structure(self, cls: HubuumModel, content: dict, expected_content: dict):
+    def _check_structure(
+        self,
+        cls: Type[HubuumModel],
+        content: Dict[str, Any],
+        expected_content: Dict[str, Any],
+    ) -> None:
         """Check the structure of a response."""
         self.assert_is_iso_date(content["created_at"])
         self.assert_is_iso_date(content["updated_at"])
@@ -100,16 +120,16 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         for key, value in expected_content.items():
             self.assertEqual(content[key], value)
 
-    def _check_object_change(
-        self, log, operation, model, instance, user
-    ):  # pylint: disable=too-many-arguments
+    def _check_object_change(  # pylint: disable=too-many-arguments
+        self, log: Dict[str, Any], operation: str, model: str, instance: str, user: str
+    ) -> None:
         """Check the object change log entry."""
         self.assertEqual(log["event"], operation)
         self.assertEqual(log["model"], model)
         self.assertEqual(log["instance"], instance)
         self.assertEqual(log["user"], user)
 
-    def test_logging_of_namespace_get(self):
+    def test_logging_of_namespace_get(self) -> None:
         """Test logging of a namespace being retrieved."""
         with capture_logs() as cap_logs:
             get_logger().bind()
@@ -132,7 +152,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         )
         self._check_request_finished(cap_logs[2], "GET /api/v1/iam/namespaces/", 200)
 
-    def test_logging_of_failed_namespace_get(self):
+    def test_logging_of_failed_namespace_get(self) -> None:
         """Test logging of a failed namespace retrieval."""
         with capture_logs() as cap_logs:
             get_logger().bind()
@@ -151,7 +171,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             cap_logs[2], "GET /api/v1/iam/namespaces/nope", 404
         )
 
-    def test_logging_object_creation(self):
+    def test_logging_object_creation(self) -> None:
         """Test logging of a host being created."""
         with capture_logs() as cap_logs:
             get_logger().bind()
@@ -191,7 +211,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         )
         self._check_request_finished(cap_logs[4], "POST /api/v1/resources/hosts/", 201)
 
-    def test_manual_logging(self):
+    def test_manual_logging(self) -> None:
         """Test manual logging."""
         with capture_logs() as cap_logs:
             get_logger().bind()
@@ -215,7 +235,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertTrue(cap_logs[3]["log_level"] == "critical")
         self.assertTrue(cap_logs[4]["log_level"] == "error")
 
-    def test_successful_auth_logging(self):
+    def test_successful_auth_logging(self) -> None:
         """Test logging of successful authentication."""
         plaintext = "django"
         user, _ = User.objects.get_or_create(
@@ -288,7 +308,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         user.delete()
 
-    def test_unsuccessful_auth_logging(self):
+    def test_unsuccessful_auth_logging(self) -> None:
         """Test logging of successful authentication."""
         plaintext = "django"
         user, _ = User.objects.get_or_create(
@@ -325,7 +345,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         user.delete()
 
-    def test_run_time_ms_escalation(self):
+    def test_run_time_ms_escalation(self) -> None:
         """Test run_time_ms escalation for logging levels."""
         middleware = LogHttpResponseMiddleware(MagicMock())
 
@@ -341,8 +361,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             (0.5, "debug"),
             (1.0, "warning"),
             (2.0, "warning"),
-            (5.0, "critical"),
-            (5.5, "critical"),
+            (5.0, "error"),
+            (5.5, "error"),
         ]
 
         for delay, expected_level in delay_responses:
@@ -352,7 +372,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                     middleware(HttpRequest())
                     self.assertEqual(cap_logs[0]["log_level"], expected_level)
 
-    def test_return_500_error(self):
+    def test_return_500_error(self) -> None:
         """Test middleware returning 500 error."""
         middleware = LogHttpResponseMiddleware(MagicMock())
 

@@ -1,6 +1,6 @@
 """Filters for hubuum permissions."""
 from django.contrib.auth.models import Group
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
@@ -67,7 +67,7 @@ class JSONFieldLookupFilter(filters.CharFilter):
         field_name (str): The field name to filter on. Must be a JSON field.
     """
 
-    def filter(self, qs, value):
+    def filter(self, qs: QuerySet, value: str) -> QuerySet:
         """Filter the queryset based on a JSON key, value, and optional lookup type.
 
         Args:
@@ -126,10 +126,10 @@ class NamespacePermissionFilter(filters.FilterSet):
     This filter returns (request.)user-visible objects of a model in question.
     """
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         """Perform the filtering."""
         queryset = super().filter_queryset(queryset)
-        user = self.request.user
+        user = self.request.user  # type: ignore
         # model = queryset.model._meta.model_name
         #        permission = self.perm_format % {
         #            "app_label": queryset.model._meta.app_label,

@@ -1,4 +1,5 @@
 """IAM views for the API v1."""
+from typing import Any
 
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
@@ -9,6 +10,7 @@ from rest_framework.exceptions import (
     ParseError,
     ValidationError,
 )
+from rest_framework.request import Request
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.views import Response
 
@@ -104,7 +106,7 @@ class GroupMembers(
         operation_id_base="Groupmemberships",
     )
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get all users in the group."""
         group_object = self.get_object()
         users = User.objects.filter(groups=group_object)
@@ -128,7 +130,7 @@ class GroupMembersUser(
         operation_id_base="Groupmembershipsusers",
     )
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get user in group."""
         group = self.get_object()
 
@@ -137,17 +139,16 @@ class GroupMembersUser(
             if user.groups.filter(id=group.id).exists():
                 return Response(UserSerializer(user).data)
 
-        raise NotFound()
+        raise NotFound("User not found")
 
-    def patch(self, request, *args, **kwargs):
+    def patch(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Disallow patch."""
         raise MethodNotAllowed(request.method)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Add a user to a group."""
         group = self.get_object()
         user = get_user(kwargs["userid"])
-
         if user.groups.filter(id=group.id).exists():
             return Response(
                 f"User {user.id} is already a member of group {group.id}",
@@ -158,11 +159,10 @@ class GroupMembersUser(
         user.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Delete a user from a group."""
         group = self.get_object()
         user = get_user(kwargs["userid"])
-
         if user.groups.filter(id=group.id).exists():
             user.groups.remove(group)
             user.save()
@@ -206,7 +206,7 @@ class NamespaceList(HubuumList):
     namespace_write_permission = "has_namespace"
     filterset_class = NamespaceFilterSet
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Process creation of new namespaces."""
         user = request.user
         group = None
@@ -238,8 +238,8 @@ class NamespaceList(HubuumList):
         if serializer.is_valid(raise_exception=True):
             new_namespace = serializer.save()
 
-        if group is not None:
-            new_namespace.grant_all(group)
+            if group is not None:
+                new_namespace.grant_all(group)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -276,7 +276,7 @@ class NamespaceMembers(
         operation_id_base="NamespaceMember",
     )
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get all groups that have access to a given namespace."""
         namespace = self.get_object()
 
@@ -303,7 +303,7 @@ class NamespaceMembersGroup(
         operation_id_base="NamespaceMembersGroup",
     )
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get a group that has access to a namespace."""
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
@@ -312,7 +312,7 @@ class NamespaceMembersGroup(
         return Response(PermissionSerializer(permission).data)
 
     # TODO: Should be used to update a groups permissions for the namespace.
-    def patch(self, request, *args, **kwargs):
+    def patch(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Patch the permissions of an existing group for a namespace."""
         namespace = self.get_object()
         group = get_group(kwargs["groupid"])
@@ -323,7 +323,7 @@ class NamespaceMembersGroup(
         self.perform_update(serializer)
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Put associates a group with a namespace.
 
         /namespace/<namespaceid>/groups/<groupid>
@@ -361,7 +361,7 @@ class NamespaceMembersGroup(
         Permission.objects.create(**create)
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Delete disassociates a group with a namespace.
 
         Transparently deletes the permission object.

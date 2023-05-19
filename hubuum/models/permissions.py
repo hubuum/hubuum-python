@@ -1,4 +1,8 @@
+# Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
+# pyright: reportIncompatibleVariableOverride=false
 """Namespace models."""
+
+from typing import List
 
 from django.contrib.auth.models import Group
 from django.db import models
@@ -30,7 +34,7 @@ class Namespace(HubuumModel):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
 
-    def get_permissions_for_group(self, group: Group, raise_exception=True):
+    def get_permissions_for_group(self, group: Group, raise_exception: bool = True):
         """Try to find a permission object for the given group.
 
         param: group (Group instance)
@@ -52,7 +56,7 @@ class Namespace(HubuumModel):
 
         return None
 
-    def grant_all(self, group):
+    def grant_all(self, group: Group) -> bool:
         """Grant all permissions to the namespace to the given group."""
         create = {}
         create["namespace"] = self
@@ -62,7 +66,7 @@ class Namespace(HubuumModel):
         Permission.objects.update_or_create(**create)
         return True
 
-    def groups_that_can(self, perm):
+    def groups_that_can(self, perm: str) -> List[Group]:
         """Fetch groups that can perform a specific permission.
 
         param: perm (permission string, 'has_[read|create|update|delete|namespace])

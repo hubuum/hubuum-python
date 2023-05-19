@@ -5,6 +5,7 @@ import time
 from typing import Callable, cast
 
 import structlog
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
 logger = structlog.getLogger("hubuum.request")
@@ -55,10 +56,16 @@ class LogHttpResponseMiddleware:
         else:
             log_level = logging.ERROR
 
-        if run_time_ms >= 5000:
-            log_level = logging.CRITICAL
-        elif run_time_ms >= 1000:
-            log_level = logging.WARNING
+        extra_data = {}
+
+        if run_time_ms >= settings.VERY_SLOW_REQUESTS_THRESHOLD:  # pragma: no cover
+            extra_data["original_log_level"] = log_level
+            extra_data["very_slow_response"] = True
+            log_level = settings.VERY_SLOW_REQUESTS_LOG_LEVEL
+        elif run_time_ms >= settings.SLOW_REQUESTS_THRESHOLD:  # pragma: no cover
+            extra_data["original_log_level"] = log_level
+            extra_data["slow_response"] = True
+            log_level = settings.SLOW_REQUESTS_LOG_LEVEL
 
         content = "[]"
         if "application/json" in response.headers.get("Content-Type", ""):
@@ -70,6 +77,7 @@ class LogHttpResponseMiddleware:
             status_label=status_label,
             path=request.path_info,
             content=content,
+            **extra_data,
             run_time_ms=round(run_time_ms, 2),
         ).log(log_level, "response")
 

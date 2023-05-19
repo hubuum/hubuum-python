@@ -2,6 +2,7 @@
 
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.utils.serializer_helpers import ReturnList
 
 
 class HubuumFlexiblePagination(PageNumberPagination):
@@ -15,12 +16,12 @@ class HubuumFlexiblePagination(PageNumberPagination):
     max_page_size = 200
     page_size_query_param = "page_size"
 
-    def get_paginated_response(self, data):
+    def get_paginated_response(self, data: ReturnList) -> Response:
         """
         Return a paginated response with count, next, and previous links as headers.
 
         Args:
-            data: The data to be paginated.
+            data (ReturnList): The data to be paginated.
 
         Returns:
             rest_framework.response.Response: The paginated response.
@@ -30,7 +31,7 @@ class HubuumFlexiblePagination(PageNumberPagination):
         response["Link"] = self.build_link_header()
         return response
 
-    def build_link_header(self):
+    def build_link_header(self) -> str:
         """
         Build the Link header value with next and previous links.
 

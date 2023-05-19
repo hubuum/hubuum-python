@@ -1,8 +1,12 @@
 """Base view classes for Hubuum API v1."""
 
+from typing import Type
+
 import structlog
+from django.contrib.auth.models import AbstractUser
+from django.db.models import Model
 from django.http import HttpResponse
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.schemas.openapi import AutoSchema
 
@@ -17,7 +21,9 @@ class LoggingMixin:
     Also logs the user who performed the action.
     """
 
-    def _log(self, operation, model, user, instance):
+    def _log(
+        self, operation: str, model: str, user: AbstractUser, instance: Model
+    ) -> None:
         """Write the log string."""
         object_logger.info(
             operation,
@@ -26,7 +32,7 @@ class LoggingMixin:
             instance=instance.id,
         )
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: serializers.ModelSerializer) -> None:
         """Log creates."""
         super().perform_create(serializer)
         instance = serializer.instance
@@ -35,7 +41,7 @@ class LoggingMixin:
                 "created", instance.__class__.__name__, self.request.user, instance
             )
 
-    def perform_update(self, serializer):
+    def perform_update(self, serializer: serializers.ModelSerializer) -> None:
         """Log updates."""
         super().perform_update(serializer)
         instance = serializer.instance
@@ -44,7 +50,7 @@ class LoggingMixin:
                 "updated", instance.__class__.__name__, self.request.user, instance
             )
 
-    def perform_destroy(self, instance):
+    def perform_destroy(self, instance: Model) -> None:
         """Log deletes."""
         self._log("deleted", instance.__class__.__name__, self.request.user, instance)
         super().perform_destroy(instance)
@@ -69,7 +75,9 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     If no matches are found, return 404.
     """
 
-    def get_object(self, lookup_identifier="val", model=None):
+    def get_object(
+        self, lookup_identifier: str = "val", model: Type[Model] = None
+    ) -> Model:
         """Perform the actual lookup based on the view's lookup_fields.
 
         raises: 404 if not found.
@@ -129,7 +137,7 @@ class HubuumDetail(
     permission_classes = (NameSpace,)
     lookup_fields = ("id",)
 
-    def file_response(self, filename, original_filename):
+    def file_response(self, filename: str, original_filename: str) -> HttpResponse:
         """Return a HTTPresponse with the file in question."""
         with open(filename, "rb") as file:
             response = HttpResponse(file, content_type="application/octet-stream")

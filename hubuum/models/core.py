@@ -1,7 +1,10 @@
+# Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
+# pyright: reportIncompatibleVariableOverride=false
 """Core models for hubuum."""
 
 import hashlib
 import re
+from typing import Any, Dict, List, Match, Tuple, Union
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -16,17 +19,17 @@ from hubuum.validators import (
 )
 
 
-def model_is_open(model):
+def model_is_open(model: str) -> bool:
     """Check if the model is an open model."""
     return model in models_that_are_open()
 
 
-def models_that_are_open():
+def models_that_are_open() -> Tuple[str]:
     """Return a list of models open to all authenticated users."""
     return ("user", "group")
 
 
-def model_supports_extensions(model):
+def model_supports_extensions(model: Union[str, models.Model]) -> bool:
     """Check if a model supports extensions."""
     if isinstance(model, str):
         model = get_model(model)
@@ -34,7 +37,7 @@ def model_supports_extensions(model):
     return issubclass(model, ExtensionsModel)
 
 
-def model_supports_attachments(model):
+def model_supports_attachments(model: Union[str, models.Model]) -> bool:
     """Check if a model supports attachments."""
     if isinstance(model, str):
         model = get_model(model)
@@ -49,12 +52,12 @@ class HubuumModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @classmethod
-    def supports_extensions(cls):
+    def supports_extensions(cls) -> bool:
         """Check if a class supports extensions."""
         return issubclass(cls, ExtensionsModel)
 
     @classmethod
-    def supports_attachments(cls):
+    def supports_attachments(cls) -> bool:
         """Check if a class supports attachments."""
         return issubclass(cls, AttachmentModel)
 
@@ -124,11 +127,11 @@ class Attachment(NamespacedHubuumModel):
     size = models.PositiveIntegerField(editable=False)
     original_filename = models.CharField(max_length=255, editable=False)
 
-    def generate_sha256_filename(self, sha256_hash):
+    def generate_sha256_filename(self, sha256_hash: str):
         """Generate a custom filename for the uploaded file using its sha256 hash."""
         return f"attachments/file/{sha256_hash}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         """Override the save method to compute the sha256 hash and size of the uploaded file."""
         file_contents = self.attachment.read()
         self.sha256 = hashlib.sha256(file_contents).hexdigest()
@@ -154,37 +157,37 @@ class AttachmentModel(models.Model):
         Attachment, related_query_name="att_objects"
     )
 
-    def attachments_are_enabled(self):
+    def attachments_are_enabled(self) -> bool:
         """Check if the model is ready to receive attachments."""
         return AttachmentManager.objects.filter(
             model=self.__class__.__name__.lower(), enabled=True
         ).exists()
 
-    def attachments(self):
+    def attachments(self) -> List[Attachment]:
         """List all attachments registered to the object."""
         return self.attachment_data_objects.all()
 
-    def attachment_count(self):
+    def attachment_count(self) -> int:
         """Return the number of attachments registered to the object."""
         return self.attachment_data_objects.count()
 
-    def attachment_size(self):
+    def attachment_size(self) -> int:
         """Return the total size of all attachments registered to the object."""
         return sum(attachment.size for attachment in self.attachments())
 
-    def attachment_individual_size_limit(self):
+    def attachment_individual_size_limit(self) -> int:
         """Return the max size of an attachment for the object."""
         return AttachmentManager.objects.get(
             model=self.__class__.__name__.lower(), enabled=True
         ).per_object_individual_size_limit
 
-    def attachment_total_size_limit(self):
+    def attachment_total_size_limit(self) -> int:
         """Return the size limit of attachments for the object."""
         return AttachmentManager.objects.get(
             model=self.__class__.__name__.lower(), enabled=True
         ).per_object_total_size_limit
 
-    def attachment_count_limit(self):
+    def attachment_count_limit(self) -> int:
         """Return the count limit of attachments for the object."""
         return AttachmentManager.objects.get(
             model=self.__class__.__name__.lower(), enabled=True
@@ -254,12 +257,12 @@ class ExtensionsModel(models.Model):
         ExtensionData, related_query_name="ext_objects"
     )
 
-    def extensions(self):
+    def extensions(self) -> List[Extension]:
         """List all extensions registered for the object."""
         model = self.__class__.__name__.lower()
         return Extension.objects.filter(model=model).order_by("name")
 
-    def extension_data(self):
+    def extension_data(self) -> Dict[str, Any]:
         """Return the data for each extension the object has."""
         extension_data = {}
 
@@ -273,7 +276,7 @@ class ExtensionsModel(models.Model):
 
         return extension_data
 
-    def extension_urls(self):
+    def extension_urls(self) -> Dict[str, str]:
         """Return the URLs for each extension the object has."""
         url_map = {}
         for extension in self.extensions():
@@ -281,10 +284,10 @@ class ExtensionsModel(models.Model):
 
         return url_map
 
-    def interpolate(self, string):
+    def interpolate(self, string: str) -> str:
         """Interpolate fields within {} to the values of those fields."""
 
-        def _get_value_from_match(matchobj):
+        def _get_value_from_match(matchobj: Match[str]) -> str:
             """Interpolate the match object."""
             return getattr(self, matchobj.group(1))
 
