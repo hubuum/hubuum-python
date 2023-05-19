@@ -1,8 +1,6 @@
 """Test the filter interface."""
 from typing import Any, Dict
 
-from django.conf import settings
-
 from hubuum.models.auth import User
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host, Room
@@ -123,7 +121,7 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         # https://docs.djangoproject.com/en/4.2/ref/databases/#sqlite-string-matching
         # (Arguments about case sensitivity in domain names emails not withstanding,
         # this is a test of the filter)
-        if settings.DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+        if self.db_engine_is_sqlite():  # pragma: no cover
             self.assert_get_elements("/iam/users/?email__endswith=com", 1)
         else:
             self.assert_get_elements("/iam/users/?email__endswith=com", 0)
