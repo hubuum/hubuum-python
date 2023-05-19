@@ -1,5 +1,5 @@
 """Test the pagination in hubuum."""
-from typing import Union
+from typing import Dict, Union
 from urllib.parse import parse_qs, urlparse
 
 from rest_framework.response import Response
@@ -117,7 +117,7 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         else:
             self.assertNotIn("next", links)
 
-    def parse_link_header(self, link_header: str) -> dict[str, str]:
+    def parse_link_header(self, link_header: str) -> Dict[str, str]:
         """
         Parse the Link header into a dictionary.
 
