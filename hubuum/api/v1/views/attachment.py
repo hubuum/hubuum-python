@@ -1,13 +1,16 @@
 """Attachment views for API v1."""
 
+from typing import Any
+
 import structlog
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError
-from django.http import HttpResponse
+from django.db.models import Model
 from django.urls import resolve
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, ParseError  # NotAuthenticated,
 from rest_framework.parsers import MultiPartParser
+from rest_framework.request import Request
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.views import Response
 
@@ -40,7 +43,7 @@ class AttachmentAutoSchema(AutoSchema):
     The generated operation IDs will utilize specific path parameters to ensure uniqueness.
     """
 
-    def get_operation_id(self, path, method):
+    def get_operation_id(self, path: str, method: str) -> str:
         """
         Generate a unique operation ID by appending specific path parameters to the base ID.
 
@@ -104,7 +107,7 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
     serializer_class = AttachmentSerializer
     filterset_class = AttachmentFilterSet
 
-    def _get_model(self, model):
+    def _get_model(self, model: str) -> Model:
         """Get the model, or raise 404."""
         model_name = model.lower()
         model = get_model(model_name)
@@ -117,7 +120,7 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
 
         return model
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get all attachments for a given model."""
         attachments = []
 
@@ -184,10 +187,13 @@ class AttachmentDetail(HubuumDetail):
         tags=["Attachment"],
     )
 
-    def _ensure_size_limits(self, obj, request):
+    def _ensure_size_limits(self, obj: object, request: Request) -> bool:
         """Ensure adding the attachment won't exceed size limits."""
-        size = len(request.data.get("attachment").read())
-        request.data.get("attachment").seek(0)
+        attachment = request.data.get(
+            "attachment", ParseError(detail="No attachment provided.")
+        )
+        size = len(attachment.read())
+        attachment.seek(0)
 
         max_attachments = obj.attachment_count_limit()
         max_attachment_size = obj.attachment_individual_size_limit()
@@ -205,7 +211,9 @@ class AttachmentDetail(HubuumDetail):
 
         return True
 
-    def _get_attachment(self, request, *args, **kwargs):
+    def _get_attachment(
+        self, request: Request, *args: Any, **kwargs: Any
+    ) -> Attachment:
         """Get an attachment object, or raise 404."""
         model_name = self.kwargs.get("model").lower()
         obj_id = self.kwargs.get("instance")
@@ -239,7 +247,7 @@ class AttachmentDetail(HubuumDetail):
 
         return obj
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get an attachment metadata."""
         obj = self._get_attachment(request, *args, **kwargs)
 
@@ -267,7 +275,7 @@ class AttachmentDetail(HubuumDetail):
         # It was not a download request, so return the serialized metadata object.
         return Response(AttachmentSerializer(obj).data, status=status.HTTP_200_OK)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Add an attachment metadata."""
         model_name = kwargs["model"]
 
@@ -315,9 +323,9 @@ class AttachmentDetail(HubuumDetail):
             status=status.HTTP_201_CREATED,
         )
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Delete an attachment."""
         obj = self._get_attachment(request, *args, **kwargs)
         self.check_object_permissions(request, obj)
         obj.delete()
-        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)

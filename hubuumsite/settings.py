@@ -25,9 +25,10 @@ import hubuum.log
 # First let us determine if we are in production or not.
 # Default is development mode, as the only way to safely
 # be in production is to have a consistent SECRET_KEY.
-DEVELOPMENT_MODE = True
 if os.environ.get("HUBUUM_SECRET_KEY"):
     DEVELOPMENT_MODE = False
+else:
+    DEVELOPMENT_MODE = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # We expect to be given the SECRET_KEY if we're in production. If not,
@@ -41,7 +42,7 @@ if DEVELOPMENT_MODE:
         "0123456789"
         "#()^[]-_*%&=+/"
     )
-    SECRET_KEY = "".join([random.SystemRandom().choice(CHARS) for i in range(50)])
+    SECRET_KEY = "".join([random.SystemRandom().choice(CHARS) for _ in range(50)])
     LOGGING_PRODUCTION = os.environ.get("HUBUUM_LOGGING_PRODUCTION", False)
 else:
     SECRET_KEY = os.environ.get("HUBUUM_SECRET_KEY")
@@ -51,6 +52,20 @@ else:
 # Logging configuration. We follow 12-factor app guidelines and *only* log to stdout.
 # By default we log everything at the CRITICAL level, but this can be overridden
 # globally or per source.
+logmap = {
+    "CRITICAL": logging.CRITICAL,
+    "ERROR": logging.ERROR,
+    "WARNING": logging.WARNING,
+    "INFO": logging.INFO,
+    "DEBUG": logging.DEBUG,
+}
+
+
+def valid_log_level(level: str) -> bool:
+    """Check if a log level is valid."""
+    return level in logmap
+
+
 LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
 LOGGING_LEVEL_SOURCE = {}
 
@@ -81,6 +96,38 @@ if SENTRY_DSN:
         # We recommend adjusting this value in production,
         traces_sample_rate=1.0,
     )
+
+# Manage slow requests and their escalations.
+slow_requests_threshold = int(os.environ.get("HUBUUM_SLOW_REQUESTS_THRESHOLD", 1000))
+slow_requests_log_level = str(  # pylint: disable=invalid-name
+    os.environ.get("HUBUUM_SLOW_REQUESTS_LOG_LEVEL", "warning").upper()
+)
+
+very_slow_requests_threshold = int(
+    os.environ.get("HUBUUM_VERY_SLOW_REQUESTS_THRESHOLD", 5000)
+)
+very_slow_requests_log_level = str(  # pylint: disable=invalid-name
+    os.environ.get("HUBUUM_VERY_SLOW_REQUESTS_LOG_LEVEL", "error").upper()
+)
+
+if not valid_log_level(slow_requests_log_level):  # pragma: no cover
+    raise ValueError(f"Invalid log level: {slow_requests_log_level}")
+
+if not valid_log_level(very_slow_requests_log_level):  # pragma: no cover
+    raise ValueError(f"Invalid log level: {very_slow_requests_log_level}")
+
+if slow_requests_threshold > very_slow_requests_threshold:  # pragma: no cover
+    slow = f"HUBUUM_SLOW_REQUESTS_THRESHOLD ({slow_requests_threshold})"
+    very_slow = f"HUBUUM_VERY_SLOW_REQUESTS_THRESHOLD ({very_slow_requests_threshold})"
+    raise ValueError(f"{slow} must be less than {very_slow}")
+
+SLOW_REQUESTS_THRESHOLD = slow_requests_threshold
+SLOW_REQUESTS_LOG_LEVEL = logmap[slow_requests_log_level]
+
+VERY_SLOW_REQUESTS_THRESHOLD = very_slow_requests_threshold
+VERY_SLOW_REQUESTS_LOG_LEVEL = logmap[very_slow_requests_log_level]
+
+# from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -225,30 +272,13 @@ output_type = structlog.dev.ConsoleRenderer(colors=True)
 if LOGGING_PRODUCTION or not DEBUG:
     output_type = structlog.processors.JSONRenderer()
 
-# Configure Sentry to use the appropriate levels. Convert the text value to
-# the appropriate logging level.
-if SENTRY_LEVEL not in [
-    "CRITICAL",
-    "ERROR",
-    "WARNING",
-    "INFO",
-    "DEBUG",
-]:  # pragma: no cover
-    raise ValueError("Invalid SENTRY_LEVEL")
+SENTRY_LEVEL = os.environ.get("HUBUUM_SENTRY_LEVEL", "critical").upper()
+if not valid_log_level(SENTRY_LEVEL):  # pragma: no cover
+    raise ValueError(f"Invalid log level: {SENTRY_LEVEL}")
 
-if SENTRY_LEVEL == "DEBUG":
-    SENTRY_LOG_LEVEL = logging.DEBUG
-elif SENTRY_LEVEL == "INFO":
-    SENTRY_LOG_LEVEL = logging.INFO
-elif SENTRY_LEVEL == "WARNING":
-    SENTRY_LOG_LEVEL = logging.WARNING
-elif SENTRY_LEVEL == "ERROR":
-    SENTRY_LOG_LEVEL = logging.ERROR
-elif SENTRY_LEVEL == "CRITICAL":
-    SENTRY_LOG_LEVEL = logging.CRITICAL
+# set sentry_level to logger.level depending on the value of SENTRY_LEVEL
+SENTRY_LOG_LEVEL = logmap[SENTRY_LEVEL]
 
-# Note that we always include the Sentry processor, but it will only be active if
-# SENTRY_DSN is set.
 structlog.configure(
     processors=[
         hubuum.log.filter_sensitive_data,

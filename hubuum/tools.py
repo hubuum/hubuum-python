@@ -2,13 +2,14 @@
 
 This package is NOT allowed to import anything from internally in hubuum.
 """
-
+from typing import List, Union
 
 from django.apps import apps
+from django.db.models import Model
 from rest_framework.exceptions import NotFound
 
 
-def get_model(model):
+def get_model(model: Union[str, Model]) -> Union[Model, None]:
     """Return the model from a string. Returns None if it fails.."""
     try:
         return apps.get_model("hubuum", model)
@@ -16,8 +17,13 @@ def get_model(model):
         return None
 
 
-def get_object(cls, lookup_value, lookup_fields=None, raise_exception=True):
-    """Get a object from a class.
+def get_object(
+    cls: Model,
+    lookup_value: str,
+    lookup_fields: List[str] = None,
+    raise_exception: bool = True,
+) -> Union[object, None]:
+    """Get an object from a class.
 
     A generic way to find objects in a model.
     By default the list of fields searched are in order of precedence:

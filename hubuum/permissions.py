@@ -1,11 +1,13 @@
 """Permissions module for hubuum."""
-# from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import (
     SAFE_METHODS,
     DjangoObjectPermissions,
     IsAuthenticated,
 )
+from rest_framework.request import Request
+from rest_framework.views import APIView
+from typing_extensions import Literal
 
 
 class CustomObjectPermissions(DjangoObjectPermissions):
@@ -32,7 +34,7 @@ def fully_qualified_operations():
     return ["has_" + s for s in operations()]
 
 
-def operation_exists(permission, fully_qualified=False):
+def operation_exists(permission: str, fully_qualified: bool = False) -> bool:
     """Check if a permission label is valid."""
     if fully_qualified:
         return permission in fully_qualified_operations()
@@ -40,22 +42,27 @@ def operation_exists(permission, fully_qualified=False):
     return permission in operations()
 
 
-def is_super_or_admin(user):
+# We can't import this from models.auth because of circular imports
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+# suggest a solution, but it breaks at runtime. :()
+def is_super_or_admin(user: object) -> bool:
     """Check to see if a user is superuser or admin (staff)."""
-    return user.is_staff or user.is_superuser
+    return user.is_staff or user.is_superuser  # type: ignore
 
 
 class IsAuthenticatedAndReadOnly(IsAuthenticated):
     """Allow read-only access if authenticated."""
 
-    def has_permission(self, request, view):
+    def has_permission(self, request: Request, view: APIView) -> bool:
         """Check super (IsAuthenticated) and read-only methods (SAFE_METHODS)."""
         if not super().has_permission(request, view):
             return False
 
         return request.method in SAFE_METHODS
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(
+        self, request: Request, view: APIView, obj: object
+    ) -> Literal[True]:
         """Check super (IsAuthenticated) and read-only methods (SAFE_METHODS)."""
         #        if not super().has_object_permission(request, view, obj):
         #            return False
@@ -65,13 +72,15 @@ class IsAuthenticatedAndReadOnly(IsAuthenticated):
 class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
     """Permit super or admin users, else read only."""
 
-    def has_permission(self, request, view):
+    def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if we're super/admin otherwise authenticated readonly."""
         if is_super_or_admin(request.user):
             return True
         return super().has_permission(request, view)
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(
+        self, request: Request, view: APIView, obj: object
+    ) -> Literal[True]:
         """Check if we're super/admin otherwise authenticated readonly."""
         if is_super_or_admin(request.user):
             return True
@@ -94,7 +103,7 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
         - users in groups with has_read for the namespace set
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if superuser or admin by delegation, then check user, otherwise false."""
         # First check if we are superuser or asking for read-only (listing), if so, return true.
         if request.user.is_anonymous:
@@ -140,7 +149,9 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
 
         return True
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(
+        self, request: Request, view: APIView, obj: object
+    ) -> Literal[True]:
         """Check for object-specific access."""
         # We can't user the super method, as it allows read-only for everyone,
         # which we don't want.

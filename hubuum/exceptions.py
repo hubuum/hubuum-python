@@ -9,6 +9,10 @@ class MissingParam(Exception):
     """An exception thrown when a parameter is missing, or the param lacks a value."""
 
 
+class InvalidParam(Exception):
+    """An exception thrown when a parameter is invalid."""
+
+
 class Conflict(APIException):
     """Thrown when trying to overwrite an existing object."""
 

@@ -63,14 +63,14 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
     def test_is_active_false(self):
         """Test using an inactive user."""
         self.assert_get("/resources/hosts/")
-        self.user.is_active = False
-        self.user.save()
+        self.user.is_active = False  # type: ignore
+        self.user.save()  # type: ignore
         self.assert_get_and_401("/resources/hosts/")
 
     def test_is_deleted(self):
         """Test using a deleted user."""
         self.assert_get("/resources/hosts/")
-        self.user.delete()
+        self.user.delete()  # type: ignore
         self.assert_get_and_401("/resources/hosts/")
 
     def test_login_with_invalid_credentials(self):

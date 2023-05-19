@@ -7,6 +7,8 @@ knox
 
 rich
 
+typing_extensions
+
 sentry-sdk[django]
 structlog_sentry
 
@@ -27,6 +29,7 @@ uritemplate
 tox
 pytest
 pytest-django
+pytest-xdist
 coveralls
 isort
 pylint

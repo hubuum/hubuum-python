@@ -1,6 +1,9 @@
 """Provide a base class for testing model behaviour."""
+from typing import Any, Dict
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.db.models import Model
 from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
@@ -45,18 +48,20 @@ class HubuumModelTestCase(TestCase):
 
         self.namespace.delete()
 
-    def attribute(self, key):
+    def attribute(self, key: str) -> Any:
         """Fetch attributes from the attribute dictionary."""
         return self.attributes[key]
 
-    def _test_can_create_object(self, model=None, **kwargs):
+    def _test_can_create_object(self, model: Model = None, **kwargs: Any) -> object:
         """Create a generic object of any model."""
         if "namespace" not in kwargs and model is not Namespace:
             kwargs["namespace"] = self.namespace
 
         return self._create_object(model=model, **kwargs)
 
-    def _test_has_identical_values(self, obj=None, dictionary=None):
+    def _test_has_identical_values(
+        self, obj: object = None, dictionary: Dict[str, Any] = None
+    ):
         """Compare the dictionary with the same attributes from the self."""
         if not (obj and dictionary):
             raise MissingParam
@@ -64,7 +69,7 @@ class HubuumModelTestCase(TestCase):
         for key in dictionary.keys():
             self.assertEqual(getattr(obj, key), dictionary[key])
 
-    def _create_object(self, model=None, **kwargs):
+    def _create_object(self, model: Model = None, **kwargs: Any) -> object:
         """Create an object with overridable default group ownership."""
         if not model:
             raise MissingParam
@@ -86,11 +91,7 @@ class HubuumModelTestCase(TestCase):
         elif isinstance(obj, PurchaseOrder):
             self.assertEqual(str(obj), self.attribute("po_number"))
         elif isinstance(obj, Room):
-            floor = self.attribute("floor").rjust(2, "0")
-            building = self.attribute("building")
-            room_id = self.attribute("room_id")
-            string = building + "-" + floor + "-" + room_id
-            self.assertEqual(str(obj), string)
+            self.assertEqual(str(obj), self.attribute("room_id"))
         elif isinstance(obj, Vendor):
             self.assertEqual(str(obj), self.attribute("vendor_name"))
         elif isinstance(obj, (Attachment, AttachmentManager)):

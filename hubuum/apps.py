@@ -1,3 +1,4 @@
+# pyright: reportUnusedImport=false
 """A basic app config for hubuum."""
 
 from django.apps import AppConfig

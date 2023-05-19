@@ -1,9 +1,13 @@
+# Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
+# pyright: reportIncompatibleVariableOverride=false
 """Versioned (v1) serializers of the hubuum models."""
 import hashlib
+from typing import Any, Dict, List
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
+from django.core.files.uploadedfile import UploadedFile
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
@@ -16,6 +20,7 @@ from hubuum.models.core import (
     Extension,
     ExtensionData,
     ExtensionsModel,
+    HubuumModel,
 )
 from hubuum.models.permissions import Namespace, Permission
 from hubuum.models.resources import (
@@ -41,7 +46,7 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
     See https://github.com/encode/django-rest-framework/issues/6508
     """
 
-    def run_validation(self, data=empty):
+    def run_validation(self, data: Dict[str, Any] = empty) -> Dict[str, Any]:
         """Run the validation of the input."""
         if not isinstance(data, dict):
             raise ValidationError(
@@ -73,10 +78,22 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
         return super().run_validation(data)
 
 
-class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
+# run_validation type mismatch. From DRF there is no typing, so we get the following:
+# Base classes for class "PermissionSerializer" define method "run_validation"
+# in incompatible way
+# Parameter 2 type mismatch: base parameter is type "Type[empty]", override parameter
+# is type "Dict[str, Any]"
+# "Type[type]" is incompatible with "Type[Dict[str, Any]]"
+# PylancereportIncompatibleMethodOverride
+# serializers.py(416, 9): Base class "Serializer" provides type
+#  "(self: Self@Serializer, data: Type[empty] = empty) ->
+#   (empty | Unknown | OrderedDict[Unknown, Unknown] | None)", which is overridden
+# serializers.py(49, 9): Base class "ErrorOnBadFieldMixin" overrides with type
+#  "(self: Self@ErrorOnBadFieldMixin, data: Dict[str, Any] = empty) -> Dict[str, Any]""
+class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  # type: ignore
     """General Hubuum Serializer."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         """For methods that are subclasses of ExtensionsModel, enable relevant fields."""
         super().__init__(*args, **kwargs)
 
@@ -97,15 +114,15 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
             self.fields["extension_urls"] = serializers.SerializerMethodField()
         return
 
-    def get_extension_urls(self, obj):
+    def get_extension_urls(self, obj: HubuumModel) -> Dict[str, str]:
         """Deliver the endpoint for the URL for this specific object."""
         return obj.extension_urls()
 
-    def get_extension_data(self, obj):
+    def get_extension_data(self, obj: HubuumModel) -> Dict[str, Any]:
         """Display extension data."""
         return obj.extension_data()
 
-    def get_extensions(self, obj):
+    def get_extensions(self, obj: HubuumModel) -> List[str]:
         """Display active extensions for the object."""
         return sorted(o.name for o in obj.extensions())
 
@@ -126,7 +143,7 @@ class UserSerializer(HubuumMetaSerializer):
         style={"input_type": "password", "placeholder": "Password"},
     )
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict[str, Any]) -> User:
         """Ensure the password is hashed on user creation."""
         validated_data["password"] = make_password(validated_data.get("password"))
         return super().create(validated_data)
@@ -151,18 +168,20 @@ class GroupSerializer(HubuumMetaSerializer):
 class ExtensionSerializer(HubuumMetaSerializer):
     """Serialize an Extension object."""
 
-    def validate(self, attrs):
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         """Validate that the data offered applies to the correct model.
 
         This doesn't even get triggered unless we have a working extension object.
         """
         require_interpolation = True  # This should fetch the default for the field
 
+        model = None
         if self.partial and self.instance:
             require_interpolation = self.instance.require_interpolation
             url = self.instance.url
             model = self.instance.model
 
+        url = ""
         if "url" in attrs:
             url = attrs["url"]
 
@@ -210,7 +229,7 @@ class ExtensionDataSerializer(HubuumMetaSerializer):
         slug_field="model",
     )
 
-    def validate(self, attrs):
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         """Validate that the data offered applies to the correct model.
 
         This doesn't even get triggered unless we have a working extension object.
@@ -242,22 +261,32 @@ class AttachmentManagerSerializer(HubuumMetaSerializer):
         model = AttachmentManager
         fields = "__all__"
 
-    def validate(self, attrs):
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         """Validate that the the limits are sane."""
+        _per_object_total_size_limit = 0
+        _per_object_individual_size_limit = 0
+
+        if self.instance:
+            obj = self.instance
+            _per_object_total_size_limit = int(obj.per_object_total_size_limit)
+            _per_object_individual_size_limit = int(
+                obj.per_object_individual_size_limit
+            )
+
         per_object_total_size_limit = attrs.get(
             "per_object_total_size_limit",
-            self.instance.per_object_total_size_limit if self.instance else None,
+            _per_object_total_size_limit,
         )
         per_object_individual_size_limit = attrs.get(
-            "per_object_individual_size_limit",
-            self.instance.per_object_individual_size_limit if self.instance else None,
+            "per_object_individual_size_limit", _per_object_individual_size_limit
         )
 
         if per_object_total_size_limit and per_object_individual_size_limit:
             if per_object_total_size_limit < per_object_individual_size_limit:
+                # The extra paranthese make the string concateation explicit.
                 raise ValidationError(
-                    "per_object_total_size_limit should be greater than or equal to "
-                    "per_object_individual_size_limit."
+                    """per_object_total_size_limit should be greater than or equal to
+                        per_object_individual_size_limit."""
                 )
         return attrs
 
@@ -271,10 +300,10 @@ class AttachmentSerializer(HubuumMetaSerializer):
         model = Attachment
         fields = "__all__"
 
-    def validate_attachment(self, value):
+    def validate_attachment(self, file: UploadedFile) -> UploadedFile:
         """Validate attachment uniqueness."""
         # Calculate the sha256 hash and size of the uploaded file
-        file_contents = value.read()
+        file_contents = file.read()
         sha256 = hashlib.sha256(file_contents).hexdigest()
 
         # Check if a file with the same sha256 hash already exists in the database
@@ -282,9 +311,9 @@ class AttachmentSerializer(HubuumMetaSerializer):
             raise Conflict("Already uploaded.")
 
         # Reset file pointer to the beginning of the file after reading
-        value.seek(0)
+        file.seek(0)
 
-        return value
+        return file
 
 
 class HostSerializer(HubuumMetaSerializer):
@@ -312,7 +341,8 @@ class NamespaceSerializer(HubuumMetaSerializer):
         fields = "__all__"
 
 
-class PermissionSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):
+# run_validation type mismatch. See the comment for HubuumMetaSerializer.
+class PermissionSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  # type: ignore
     """Serialize a Permission object."""
 
     class Meta:

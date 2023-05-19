@@ -1,5 +1,8 @@
 """Test the pagination in hubuum."""
+from typing import Dict, Union
 from urllib.parse import parse_qs, urlparse
+
+from rest_framework.response import Response
 
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host
@@ -22,7 +25,7 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         self.namespace.delete()
         return super().tearDown()
 
-    def _create_hosts(self, num_hosts):
+    def _create_hosts(self, num_hosts: int) -> None:
         """
         Create the specified number of Host objects.
 
@@ -79,7 +82,12 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         response = self.assert_get(max_page_size_url)
         self.check_next_and_prev_links(response, expected_prev=1, expected_next=None)
 
-    def check_next_and_prev_links(self, response, expected_prev, expected_next):
+    def check_next_and_prev_links(
+        self,
+        response: Response,
+        expected_prev: Union[int, None],
+        expected_next: Union[int, None],
+    ) -> None:
         """
         Check the next and prev links in the Link header of the given response.
 
@@ -109,7 +117,7 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         else:
             self.assertNotIn("next", links)
 
-    def parse_link_header(self, link_header):
+    def parse_link_header(self, link_header: str) -> Dict[str, str]:
         """
         Parse the Link header into a dictionary.
 
@@ -127,7 +135,7 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
             links[rel] = url
         return links
 
-    def get_page_number_from_link(self, link):
+    def get_page_number_from_link(self, link: str) -> int:
         """
         Get the page number from a paginated link.
 

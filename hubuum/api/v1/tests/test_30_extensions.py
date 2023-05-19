@@ -1,4 +1,6 @@
 """Test hubuum extensions."""
+from typing import Any, Dict
+
 from hubuum.models.core import ExtensionData
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host
@@ -38,7 +40,9 @@ class HubuumExtensionTestCase(HubuumAPITestCase):
         self.namespace.delete()
         return super().tearDown()
 
-    def _extension_data_blob(self, extension_id, value="value", content_type="host"):
+    def _extension_data_blob(
+        self, extension_id: int, value: str = "value", content_type: str = "host"
+    ) -> Dict[str, Any]:
         """Create an extension data blob."""
         return {
             "namespace": self.namespace.id,
@@ -52,7 +56,7 @@ class HubuumExtensionTestCase(HubuumAPITestCase):
 class APIExtensionURLValidation(HubuumExtensionTestCase):
     """Test URL validation extensions."""
 
-    def _make_extension_blob(self, url, model="host"):
+    def _make_extension_blob(self, url: str, model: str = "host") -> Dict[str, Any]:
         """Make an extension blob with the given URL."""
         return {
             "namespace": self.namespace.id,

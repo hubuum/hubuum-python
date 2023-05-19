@@ -2,7 +2,7 @@
 import pytest
 from rest_framework.exceptions import NotFound, ValidationError
 
-from hubuum.exceptions import MissingParam
+from hubuum.exceptions import InvalidParam, MissingParam
 from hubuum.log import filter_sensitive_data
 from hubuum.models.auth import User
 from hubuum.models.core import model_supports_attachments, model_supports_extensions
@@ -126,3 +126,9 @@ class InternalsTestCase(HubuumModelTestCase):
 
         for data, expected in test_data:
             self.assertEqual(filter_sensitive_data(None, None, data), expected)
+
+        with pytest.raises(InvalidParam):
+            filter_sensitive_data(None, None, [])
+
+        with pytest.raises(InvalidParam):
+            filter_sensitive_data(None, None, Host)

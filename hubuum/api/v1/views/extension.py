@@ -1,7 +1,10 @@
 """Extension-related views for the API v1."""
 
+from typing import Any
+
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.views import Response
 
@@ -47,7 +50,7 @@ class ExtensionDataList(HubuumList):
     serializer_class = ExtensionDataSerializer
     filterset_class = ExtensionDataFilterSet
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Handle posting duplicates as a patch."""
         extension = request.data["extension"]
         object_id = request.data["object_id"]

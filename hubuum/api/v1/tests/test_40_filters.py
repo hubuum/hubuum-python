@@ -1,4 +1,6 @@
 """Test the filter interface."""
+from typing import Any, Dict
+
 from hubuum.models.auth import User
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host, Room
@@ -10,8 +12,11 @@ class HubuumFilterTestCase(HubuumAPITestCase):
     """Base class for testing Hubuum Filtering."""
 
     def _make_extension_blob(
-        self, model="host", name="fleet", url="http://my.fleet.tld/{fqdn}"
-    ):
+        self,
+        model: str = "host",
+        name: str = "fleet",
+        url: str = "http://my.fleet.tld/{fqdn}",
+    ) -> Dict[str, Any]:
         """Make an extension blob with the given URL."""
         return {
             "namespace": self.namespace.id,
@@ -21,18 +26,23 @@ class HubuumFilterTestCase(HubuumAPITestCase):
             "header": "Authorization: Bearer sh...==",
         }
 
-    def _make_extension_data_blob(self, extension_id, content_type, host_id, json_data):
+    def _make_extension_data_blob(
+        self,
+        extension_id: int,
+        content_type: str,
+        host_id: int,
+        json_data: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Create an extension data blob."""
-        blob = {
+        return {
             "namespace": self.namespace.id,
             "extension": extension_id,
             "content_type": content_type,
             "object_id": host_id,
             "json_data": json_data,
         }
-        return blob
 
-    def _add_host(self, name, fqdn):
+    def _add_host(self, name: str, fqdn: str) -> None:
         """Add a host to our collection."""
         self.hosts.append(
             Host.objects.create(name=name, fqdn=fqdn, namespace=self.namespace)

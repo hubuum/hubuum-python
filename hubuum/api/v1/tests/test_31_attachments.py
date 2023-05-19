@@ -2,23 +2,25 @@
 
 import hashlib
 import os
+from typing import Union
 from unittest.mock import MagicMock, Mock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import HttpResponse
 from django.urls import reverse
 from structlog import get_logger
 from structlog.testing import capture_logs
 
 from hubuum.api.v1.views.attachment import AttachmentAutoSchema, AttachmentDetail
 from hubuum.api.v1.views.base import HubuumDetail
-from hubuum.models.core import Attachment
+from hubuum.models.core import Attachment, HubuumModel
 from hubuum.models.permissions import Namespace
 from hubuum.models.resources import Host, Person
 
 from .base import HubuumAPITestCase
 
 
-def create_mocked_view(action, model_name):
+def create_mocked_view(action: str, model_name: str) -> Mock:
     """Create a mocked view for testing the autoschema."""
     mocked_view = Mock()
     mocked_view.action = action
@@ -89,25 +91,27 @@ class HubuumAttachmentTestCase(HubuumAPITestCase):
         self.namespace.delete()
         return super().tearDown()
 
-    def _enable_attachments(self, model):
+    def _enable_attachments(self, model: str) -> HttpResponse:
         """Enable attachments for a model."""
         return self.assert_post(
             "/attachments/manager/", {"model": model, "enabled": True}
         )
 
-    def _enable_attachments_for_hosts(self):
+    def _enable_attachments_for_hosts(self) -> HttpResponse:
         """Enable attachments for hosts."""
         return self._enable_attachments("host")
 
-    def _create_host(self, name="test_host"):
+    def _create_host(self, name: str = "test_host") -> Host:
         """Create a host."""
         return Host.objects.create(name=name, namespace=self.namespace)
 
-    def _create_person(self, username="test_person"):
+    def _create_person(self, username: str = "test_person") -> Person:
         """Create a person."""
         return Person.objects.create(username=username, namespace=self.namespace)
 
-    def _add_attachment(self, model, obj, content):
+    def _add_attachment(
+        self, model: str, obj: HubuumModel, content: bytes
+    ) -> HttpResponse:
         """Add an attachment to an object."""
         file = self._create_test_file(content)
         return self.assert_post_and_201(
@@ -116,7 +120,9 @@ class HubuumAttachmentTestCase(HubuumAPITestCase):
             format="multipart",
         )
 
-    def _create_test_file(self, content=None):
+    def _create_test_file(
+        self, content: Union[bytes, None] = None
+    ) -> SimpleUploadedFile:
         """Create a test file."""
         if content is None:
             content = self.file_content
@@ -463,7 +469,8 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
             f"/attachments/data/host/{host.id}/{att.data['id']}/download"
         )
 
-    def _patch_path(self, cls, function_name):
+    # TODO: patch.object?
+    def _patch_path(self, cls: HubuumModel, function_name: str) -> str:
         """Create a patch path for a function in a class."""
         return f"{cls.__module__}.{cls.__name__}.{function_name}"
 
@@ -496,8 +503,8 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
                     self.assertEqual(response.status_code, 404)
                     self.assert_list_contains(
                         cap_logs,
-                        lambda it: bool(  # type: ignore
-                            it.get("log_level") == "error"  # type: ignore
+                        lambda it: (
+                            it.get("log_level") == "error"
                             and it.get("event") == "attachment_file"
                             and it.get("file_status") == "missing"
                         ),

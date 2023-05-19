@@ -1,38 +1,17 @@
+# Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
+# pyright: reportIncompatibleVariableOverride=false
 """Authentication-related models for the hubuum project."""
 import re
+from typing import List, Union
 
-from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.models import AbstractUser, AnonymousUser, Group
+from django.db.models import Model
 from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import MissingParam
 from hubuum.models.permissions import Namespace, Permission
 from hubuum.permissions import operation_exists
 from hubuum.tools import get_model, get_object
-
-
-def get_user(user_identifier, raise_exception=True):
-    """Try to find a user based on the identifier.
-
-    Searches in User.lookup_fields
-    """
-    return get_object(User, user_identifier, raise_exception=raise_exception)
-
-
-def get_group(group_identifier, raise_exception=True):
-    """Try to find a group based on the identifier.
-
-    param: group_identifier
-
-    return: group object
-
-    raises: NotFound if no object found.
-    """
-    return get_object(
-        Group,
-        group_identifier,
-        lookup_fields=["id", "name"],
-        raise_exception=raise_exception,
-    )
 
 
 class User(AbstractUser):
@@ -50,39 +29,39 @@ class User(AbstractUser):
         return self.is_staff or self.is_superuser
 
     @classmethod
-    def supports_extensions(cls):
+    def supports_extensions(cls) -> bool:
         """Check if a class supports extensions."""
         return False
 
     @classmethod
-    def supports_attachments(cls):
+    def supports_attachments(cls) -> bool:
         """Check if a class supports attachments."""
         return False
 
     @property
-    def group_list(self):
+    def group_list(self) -> List[str]:
         """List the names of all the groups the user is a member of."""
         if self._group_list is None:
             self._group_list = list(self.groups.values_list("name", flat=True))
         return self._group_list
 
-    def group_count(self):
+    def group_count(self) -> int:
         """Return the number of groups the user is a member of."""
         return self.groups.count()
 
-    def has_only_one_group(self):
+    def has_only_one_group(self) -> bool:
         """Return true if the user is a member of only one group."""
         return self.group_count() == 1
 
-    def is_member_of(self, group):
+    def is_member_of(self, group: Group) -> bool:
         """Check if the user is a member of a specific group."""
         return self.is_member_of_any([group])
 
-    def is_member_of_any(self, groups):
+    def is_member_of_any(self, groups: List[Group]) -> bool:
         """Check to see if a user is a member of any of the groups in the list."""
         return bool([i for i in groups if i in self.groups.all()])
 
-    def namespaced_can(self, perm, namespace) -> bool:
+    def namespaced_can(self, perm: str, namespace: Namespace) -> bool:
         """Check to see if the user can perform perm for namespace.
 
         param: perm (permission string, 'has_[create|read|update|delete|namespace])
@@ -99,8 +78,8 @@ class User(AbstractUser):
 
     def has_namespace(
         self,
-        namespace,
-        write_perm="has_namespace",
+        namespace: Union[str, int],
+        write_perm: str = "has_namespace",
     ):
         """Check if the user has namespace permissions for the given namespace.
 
@@ -122,6 +101,8 @@ class User(AbstractUser):
         if len(scope) == 1:
             return False
 
+        # This needs fixing for sub-namespaces.
+        target = scope
         if write_perm == "has_namespace":
             target = scope[-2]
 
@@ -141,7 +122,11 @@ class User(AbstractUser):
     #            namespace=parent.id, has_namespace=True, group__in=self.groups.all()
     #        ).exists()
 
-    def has_perm(self, perm: str, obj: object = None) -> bool:
+    # We want to ask for a HubuumNamespaceModel objects, but due to overloading we must
+    # also support user objects, anonymous users, generic django models, and None.
+    def has_perm(
+        self, perm: str, obj: Union[Model, AbstractUser, AnonymousUser, None] = None
+    ) -> bool:
         """
         Model (?) permissions check for an object.
 
@@ -151,7 +136,8 @@ class User(AbstractUser):
         field = None
 
         try:
-            operation, model = re.match(User.model_permissions_pattern, perm).groups()
+            match = re.match(User.model_permissions_pattern, perm)
+            operation, model = match.groups()  # type: ignore
         except AttributeError as exc:
             raise MissingParam(
                 f"Unknown permission '{perm}' passed to has_perm"
@@ -176,3 +162,28 @@ class User(AbstractUser):
         """Meta class for User."""
 
         ordering = ["id"]
+
+
+def get_user(user_identifier: str, raise_exception: bool = True) -> User:
+    """Try to find a user based on the identifier.
+
+    Searches in User.lookup_fields
+    """
+    return get_object(User, user_identifier, raise_exception=raise_exception)
+
+
+def get_group(group_identifier: str, raise_exception: bool = True) -> Group:
+    """Try to find a group based on the identifier.
+
+    param: group_identifier
+
+    return: group object
+
+    raises: NotFound if no object found.
+    """
+    return get_object(
+        Group,
+        group_identifier,
+        lookup_fields=["id", "name"],
+        raise_exception=raise_exception,
+    )
