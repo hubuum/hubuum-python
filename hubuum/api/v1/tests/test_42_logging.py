@@ -83,7 +83,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
     def _check_json(  # pylint: disable=too-many-arguments
         self,
-        cls: HubuumModel,
+        cls: Type[HubuumModel],
         content: str,
         expected_content: Dict[str, Any],
         element: int = 0,
@@ -223,17 +223,11 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         self.assertTrue(len(cap_logs) == 5)
 
-        self.assertTrue(cap_logs[0]["event"] == "debugtest")
-        self.assertTrue(cap_logs[1]["event"] == "infotest")
-        self.assertTrue(cap_logs[2]["event"] == "warningtest")
-        self.assertTrue(cap_logs[3]["event"] == "criticaltest")
-        self.assertTrue(cap_logs[4]["event"] == "errortest")
-
-        self.assertTrue(cap_logs[0]["log_level"] == "debug")
-        self.assertTrue(cap_logs[1]["log_level"] == "info")
-        self.assertTrue(cap_logs[2]["log_level"] == "warning")
-        self.assertTrue(cap_logs[3]["log_level"] == "critical")
-        self.assertTrue(cap_logs[4]["log_level"] == "error")
+        self._check_events(
+            cap_logs,
+            ["debugtest", "infotest", "warningtest", "criticaltest", "errortest"],
+        )
+        self._check_levels(cap_logs, ["debug", "info", "warning", "critical", "error"])
 
     def test_successful_auth_logging(self) -> None:
         """Test logging of successful authentication."""

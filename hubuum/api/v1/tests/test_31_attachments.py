@@ -2,6 +2,7 @@
 
 import hashlib
 import os
+from typing import Union
 from unittest.mock import MagicMock, Mock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -119,7 +120,9 @@ class HubuumAttachmentTestCase(HubuumAPITestCase):
             format="multipart",
         )
 
-    def _create_test_file(self, content: str = None) -> SimpleUploadedFile:
+    def _create_test_file(
+        self, content: Union[bytes, None] = None
+    ) -> SimpleUploadedFile:
         """Create a test file."""
         if content is None:
             content = self.file_content
@@ -500,8 +503,8 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
                     self.assertEqual(response.status_code, 404)
                     self.assert_list_contains(
                         cap_logs,
-                        lambda it: bool(  # type: ignore
-                            it.get("log_level") == "error"  # type: ignore
+                        lambda it: (
+                            it.get("log_level") == "error"
                             and it.get("event") == "attachment_file"
                             and it.get("file_status") == "missing"
                         ),

@@ -218,7 +218,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
     def assert_list_contains(
         self, lst: List[Any], predicate: Callable[[Any], bool]
     ) -> None:
-        """Assert that a list contains an item matching a function."""
+        """Assert that a list contains at least one item matching a function."""
         for item in lst:
             if predicate(item):
                 return
