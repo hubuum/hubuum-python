@@ -511,10 +511,36 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
                     )
 
 
+class TesttearDownModuleTestCase(HubuumAPITestCase):
+    """Test case for global teardown of this module."""
+
+    def test_teardown_with_folders(self):
+        """Test teardown with folders."""
+        with open("attachments/file/test.txt", "w", encoding="utf-8") as file:
+            file.write("Hello, world!")
+        _cleanup_attachment_directories()
+
+    def test_teardown_without_folders(self):
+        """Test teardown without folders."""
+        # Run twice to ensure we have no folders to delete.
+        _cleanup_attachment_directories()
+        _cleanup_attachment_directories()
+
+
+def _cleanup_attachment_directories() -> None:
+    """Cleanup the attachments directories."""
+    _cleanup_directory("attachments")
+    _cleanup_directory("attachments/file")
+
+
+def _cleanup_directory(directory: str) -> None:
+    """Cleanup the attachments directory."""
+    try:
+        os.rmdir(directory)
+    except OSError:
+        pass
+
+
 def tearDownModule():  # pylint: disable=invalid-name
     """Global teardown for this test module, cleans up attachments directory."""
-    try:  # pragma: no cover
-        os.rmdir("attachments/file")
-        os.rmdir("attachments")
-    except OSError:  # pragma: no cover
-        pass
+    _cleanup_attachment_directories()

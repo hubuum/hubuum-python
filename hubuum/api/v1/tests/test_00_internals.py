@@ -1,10 +1,15 @@
 """Test internals."""
 
+import os
+import sys
+
 import pytest
+from django.http import HttpResponse
 from rest_framework.test import APIClient
 
 from hubuum.exceptions import MissingParam
 
+from ..serializers import GroupSerializer
 from .base import HubuumAPITestCase
 
 
@@ -24,6 +29,10 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
             self._get_token_client(
                 username="test_exceptions", superuser=False, staff=False
             )
+
+
+class InternalTestAPITestCase(HubuumAPITestCase):
+    """Test internal test utilities."""
 
     def test_create_path(self):
         """Test that _create_path generates correct paths."""
@@ -52,3 +61,26 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
             True in [self.db_engine_is_postgresql(), self.db_engine_is_sqlite()]
         )
         self.assertFalse(self.db_engine_is_postgresql() and self.db_engine_is_sqlite())
+
+    def test_serializer_without_request(self):
+        """Test that we can instantiate a serializer without a request."""
+        # This happens when openAPI is parsing the serializers, for some reason.
+        serializer = GroupSerializer(data={"name": "group"}, context={"request": None})
+        self.assertIsNone(serializer.context["request"])
+
+    def test_assert_with_debug_message(self):
+        """Test that asserts with unexpected status values fail."""
+        response = HttpResponse(status=404, content="Not found")
+        response.request = {
+            "PATH_INFO": "/api/v1/notfound",
+            "method": "GET",
+            "QUERY_STRING": "",
+        }
+        response.data = {"detail": "Not found"}
+
+        # Disable stdout to avoid polluting the test output with the debug message.
+        with open(os.devnull, "w", encoding="utf-8") as null_stdout:
+            sys.stdout = null_stdout
+            with pytest.raises(AssertionError):
+                self._assert_status_and_debug(response, 200)
+            sys.stdout = sys.__stdout__

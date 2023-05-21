@@ -160,8 +160,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self, response: HttpResponse, expected_code: int
     ) -> None:
         """Print the response content if the status code is unexpected."""
-        # Note that as long as tests pass, this will never be called, so it's a little
-        if not response.status_code == expected_code:  # pragma: no cover
+        if not response.status_code == expected_code:
             path = f"{response.request['PATH_INFO']}{response.request['QUERY_STRING']}"
             fail = f"{path} FAILED: {response.status_code}"
             if hasattr(response, "data"):
