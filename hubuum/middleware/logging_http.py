@@ -58,14 +58,14 @@ class LogHttpResponseMiddleware:
 
         extra_data = {}
 
-        if run_time_ms >= settings.VERY_SLOW_REQUESTS_THRESHOLD:
+        if run_time_ms >= settings.REQUESTS_THRESHOLD_VERY_SLOW:
             extra_data["original_log_level"] = log_level
             extra_data["very_slow_response"] = True
-            log_level = settings.VERY_SLOW_REQUESTS_LOG_LEVEL
-        elif run_time_ms >= settings.SLOW_REQUESTS_THRESHOLD:
+            log_level = settings.REQUESTS_LOG_LEVEL_VERY_SLOW
+        elif run_time_ms >= settings.REQUESTS_THRESHOLD_SLOW:
             extra_data["original_log_level"] = log_level
             extra_data["slow_response"] = True
-            log_level = settings.SLOW_REQUESTS_LOG_LEVEL
+            log_level = settings.REQUESTS_LOG_LEVEL_SLOW
 
         content = "[]"
         if "application/json" in response.headers.get("Content-Type", ""):

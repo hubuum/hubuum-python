@@ -104,6 +104,24 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         self.namespace.delete()
         return super().tearDown()
 
+    # These tests will differ on different database engines, but each coverage
+    # pass only uses one engine, so we can't get 100% coverage.
+    def test_database_specific_filtering(self):  # pragma: no cover
+        """Test filters that differ between database engines."""
+        User.objects.create(
+            username="stafftestuser", email="staff@domain.COM", is_staff=True
+        )
+        # SQLite doesn't support case-sensitive lookup operators, so results may differ.
+        # Here, on SQLite, we will match the user with staff@domain.COM, but on postgres,
+        # we will NOT match due to case sensitivity.
+        # https://docs.djangoproject.com/en/4.2/ref/databases/#sqlite-string-matching
+        # (Arguments about case sensitivity in domain names emails not withstanding,
+        # this is a test of the filter)
+        if self.db_engine_is_sqlite():
+            self.assert_get_elements("/iam/users/?email__endswith=com", 1)
+        else:
+            self.assert_get_elements("/iam/users/?email__endswith=com", 0)
+
     def test_user_filtering(self):
         """Test that filtering on fields in users works."""
         test = User.objects.create(
@@ -114,17 +132,6 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         )
         self.assert_get_elements("/iam/users/", 3)
         self.assert_get_elements("/iam/users/?email__contains=domain", 2)
-
-        # SQLite doesn't support case-sensitive lookup operators, so results may differ.
-        # Here, on SQLite, we will match the user with staff@domain.COM, but on postgres,
-        # we will NOT match due to case sensitivity.
-        # https://docs.djangoproject.com/en/4.2/ref/databases/#sqlite-string-matching
-        # (Arguments about case sensitivity in domain names emails not withstanding,
-        # this is a test of the filter)
-        if self.db_engine_is_sqlite():  # pragma: no cover
-            self.assert_get_elements("/iam/users/?email__endswith=com", 1)
-        else:
-            self.assert_get_elements("/iam/users/?email__endswith=com", 0)
 
         self.assert_get_elements("/iam/users/?email__iendswith=com", 1)
         self.assert_get_elements("/iam/users/?username__startswith=staff", 1)

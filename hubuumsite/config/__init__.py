@@ -1,0 +1,1 @@
+"""The Hubuum configuration package."""
