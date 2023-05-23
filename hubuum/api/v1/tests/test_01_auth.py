@@ -77,9 +77,14 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
         """Test logging in with invalid credentials."""
         self.client = APIClient()
         # Using wrong credentials should result in a 401 unauthorized
-        self.assert_post_and_401(
-            "/api/auth/login/", {"username": "someone", "password": "incorrect"}
-        )
+        plaintext = "django"
+        User.objects.get_or_create(
+            username="testuser", password=make_password(plaintext)
+        )  # nosec
+        auth = self.basic_auth("testuser", "almostdjango")
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=auth)
+        self.assert_post_and_401("/api/auth/login/")
         # TODO: #16 This returns 401, we should check inputs in the login view.
         #        """ Incorrect or missing arguments should still return 400 bad request """
         #        self.assert_post_and_400(

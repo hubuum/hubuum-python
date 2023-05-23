@@ -10,122 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-import logging
 import os
-import random
 from datetime import timedelta
 from pathlib import Path
 
-import sentry_sdk
 import structlog
 from structlog_sentry import SentryProcessor
 
 import hubuum.log
+from hubuumsite.config.base import HubuumBaseConfig
 
-# First let us determine if we are in production or not.
-# Default is development mode, as the only way to safely
-# be in production is to have a consistent SECRET_KEY.
-if os.environ.get("HUBUUM_SECRET_KEY"):
-    DEVELOPMENT_MODE = False
-else:
-    DEVELOPMENT_MODE = True
+config = HubuumBaseConfig(os.environ)
+# config.show_config()
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# We expect to be given the SECRET_KEY if we're in production. If not,
-# we'll generate a random one on server start (or restart) and use that.
-# Note that this generation will break all active sessions.
-if DEVELOPMENT_MODE:
-    DEBUG = True
-    CHARS = (
-        "abcdefghijklmnopqrstuvwxyz"
-        "ABCDEFGHIJKLMNOPQRSTUVXYZ"
-        "0123456789"
-        "#()^[]-_*%&=+/"
-    )
-    SECRET_KEY = "".join([random.SystemRandom().choice(CHARS) for _ in range(50)])
-    LOGGING_PRODUCTION = os.environ.get("HUBUUM_LOGGING_PRODUCTION", False)
-else:
-    SECRET_KEY = os.environ.get("HUBUUM_SECRET_KEY")
-    DEBUG = False
-    LOGGING_PRODUCTION = True
+DEBUG = config.is_development()
+SECRET_KEY = config.get_secret_key()
 
-# Logging configuration. We follow 12-factor app guidelines and *only* log to stdout.
-# By default we log everything at the CRITICAL level, but this can be overridden
-# globally or per source.
-logmap = {
-    "CRITICAL": logging.CRITICAL,
-    "ERROR": logging.ERROR,
-    "WARNING": logging.WARNING,
-    "INFO": logging.INFO,
-    "DEBUG": logging.DEBUG,
-}
+# Manage slow requests and their escalations. These values are
+# in milliseconds, and are used in the logging_http middleware.
+REQUESTS_THRESHOLD_SLOW = config.requests.get("THRESHOLD_SLOW")
+REQUESTS_LOG_LEVEL_SLOW = config.requests.get_log_level("LOG_LEVEL_SLOW")
 
-
-def valid_log_level(level: str) -> bool:
-    """Check if a log level is valid."""
-    return level in logmap
-
-
-LOGGING_LEVEL = os.environ.get("HUBUUM_LOGGING_LEVEL", "critical").upper()
-LOGGING_LEVEL_SOURCE = {}
-
-# "system" messages are informational messages about the system itself.
-# These are by default logged at the INFO level, and do NOT adhere to the
-# global logging level. To disable these messages, set HUBUUM_LOGGING_LEVEL_SYSTEM
-# to WARNING or higher.
-LOGGING_LEVEL_SOURCE["SYSTEM"] = os.environ.get(
-    "HUBUUM_LOGGING_LEVEL_SYSTEM", "info"
-).upper()
-
-for source in ["DJANGO", "API", "SIGNALS", "REQUEST", "MANUAL", "MIGRATION", "AUTH"]:
-    LOGGING_LEVEL_SOURCE[source] = os.environ.get(
-        f"HUBUUM_LOGGING_LEVEL_{source}", LOGGING_LEVEL
-    ).upper()
-
-# SENTRY support, enable by setting HUBUUM_SENTRY_DSN.
-# Set HUBUUM_SENTRY_LEVEL to the minimum level to report to sentry. This can get
-# noisy, and it does _not_ adhere to the global logging level.
-SENTRY_DSN = os.environ.get("HUBUUM_SENTRY_DSN", "")
-SENTRY_LEVEL = os.environ.get("HUBUUM_SENTRY_LEVEL", "critical").upper()
-
-if SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production,
-        traces_sample_rate=1.0,
-    )
-
-# Manage slow requests and their escalations.
-slow_requests_threshold = int(os.environ.get("HUBUUM_SLOW_REQUESTS_THRESHOLD", 1000))
-slow_requests_log_level = str(  # pylint: disable=invalid-name
-    os.environ.get("HUBUUM_SLOW_REQUESTS_LOG_LEVEL", "warning").upper()
-)
-
-very_slow_requests_threshold = int(
-    os.environ.get("HUBUUM_VERY_SLOW_REQUESTS_THRESHOLD", 5000)
-)
-very_slow_requests_log_level = str(  # pylint: disable=invalid-name
-    os.environ.get("HUBUUM_VERY_SLOW_REQUESTS_LOG_LEVEL", "error").upper()
-)
-
-if not valid_log_level(slow_requests_log_level):  # pragma: no cover
-    raise ValueError(f"Invalid log level: {slow_requests_log_level}")
-
-if not valid_log_level(very_slow_requests_log_level):  # pragma: no cover
-    raise ValueError(f"Invalid log level: {very_slow_requests_log_level}")
-
-if slow_requests_threshold > very_slow_requests_threshold:  # pragma: no cover
-    slow = f"HUBUUM_SLOW_REQUESTS_THRESHOLD ({slow_requests_threshold})"
-    very_slow = f"HUBUUM_VERY_SLOW_REQUESTS_THRESHOLD ({very_slow_requests_threshold})"
-    raise ValueError(f"{slow} must be less than {very_slow}")
-
-SLOW_REQUESTS_THRESHOLD = slow_requests_threshold
-SLOW_REQUESTS_LOG_LEVEL = logmap[slow_requests_log_level]
-
-VERY_SLOW_REQUESTS_THRESHOLD = very_slow_requests_threshold
-VERY_SLOW_REQUESTS_LOG_LEVEL = logmap[very_slow_requests_log_level]
+REQUESTS_THRESHOLD_VERY_SLOW = config.requests.get("THRESHOLD_VERY_SLOW")
+REQUESTS_LOG_LEVEL_VERY_SLOW = config.requests.get_log_level("LOG_LEVEL_VERY_SLOW")
 
 # from rest_framework.settings import api_settings
 
@@ -217,14 +124,12 @@ REST_KNOX = {
 
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get(
-            "HUBUUM_DATABASE_ENGINE", "django.db.backends.postgresql"
-        ),
-        "NAME": os.environ.get("HUBUUM_DATABASE_NAME", "hubuum"),
-        "USER": os.environ.get("HUBUUM_DATABASE_USER", "hubuum"),
-        "PASSWORD": os.environ.get("HUBUUM_DATABASE_PASSWORD"),
-        "HOST": os.environ.get("HUBUUM_DATABASE_HOST", "localhost"),
-        "PORT": int(os.environ.get("HUBUUM_DATABASE_PORT", 5432)),
+        "ENGINE": config.database.get("ENGINE"),
+        "NAME": config.database.get("NAME"),
+        "USER": config.database.get("USER"),
+        "PASSWORD": config.database.get("PASSWORD"),
+        "HOST": config.database.get("HOST"),
+        "PORT": config.database.get("PORT"),
     }
 }
 
@@ -261,24 +166,10 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
-
-# Configure logging based on the logging environment variables set above.
-output_type = structlog.dev.ConsoleRenderer(colors=True)
-if LOGGING_PRODUCTION or not DEBUG:
-    output_type = structlog.processors.JSONRenderer()
-
-SENTRY_LEVEL = os.environ.get("HUBUUM_SENTRY_LEVEL", "critical").upper()
-if not valid_log_level(SENTRY_LEVEL):  # pragma: no cover
-    raise ValueError(f"Invalid log level: {SENTRY_LEVEL}")
-
-# set sentry_level to logger.level depending on the value of SENTRY_LEVEL
-SENTRY_LOG_LEVEL = logmap[SENTRY_LEVEL]
-
 structlog.configure(
     processors=[
         hubuum.log.filter_sensitive_data,
@@ -290,8 +181,10 @@ structlog.configure(
         structlog.processors.format_exc_info,
         structlog.processors.StackInfoRenderer(),
         structlog.processors.UnicodeDecoder(),
-        SentryProcessor(event_level=SENTRY_LOG_LEVEL),
-        output_type,
+        SentryProcessor(event_level=config.sentry.get_log_level("SENTRY_LEVEL")),
+        # This sets either consolelogger or jsonlogger as the output type,
+        # depending on if we're running in prod or testing production logging.
+        config.logging.get_logging_output_type(),
     ],
     context_class=dict,
     logger_factory=structlog.stdlib.LoggerFactory(),
@@ -318,40 +211,40 @@ LOGGING = {
     "loggers": {
         "django_structlog": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["DJANGO"],
+            "level": config.logging.level_for_source("DJANGO"),
         },
-        "hubuum.system": {
+        "hubuum.internal": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["SYSTEM"],
+            "level": config.logging.level_for_source("INTERNAL"),
         },
         "hubuum.api.object": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["API"],
+            "level": config.logging.level_for_source("API"),
             "propagate": False,
         },
         "hubuum.signals.object": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["SIGNALS"],
+            "level": config.logging.level_for_source("SIGNALS"),
             "propagate": False,
         },
         "hubuum.request": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["REQUEST"],
+            "level": config.logging.level_for_source("REQUEST"),
             "propagate": False,
         },
         "hubuum.auth": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["AUTH"],
+            "level": config.logging.level_for_source("AUTH"),
             "propagate": False,
         },
         "hubuum.migration": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["MIGRATION"],
+            "level": config.logging.level_for_source("MIGRATION"),
             "propagate": False,
         },
         "hubuum.manual": {
             "handlers": ["console"],
-            "level": LOGGING_LEVEL_SOURCE["MANUAL"],
+            "level": config.logging.level_for_source("MANUAL"),
             "propagate": False,
         },
     },

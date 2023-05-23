@@ -102,7 +102,7 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  
 
         # Generating the openAPI specification can cause self.context["request"] to be None
         # This is a very weird corner case.
-        if not self.context["request"]:  # pragma: no cover
+        if not self.context["request"]:
             return
 
         if not self.context["request"].method == "GET":
