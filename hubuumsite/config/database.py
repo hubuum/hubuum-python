@@ -30,8 +30,3 @@ class HubuumDatabaseConfig(HubuumAbstractConfig):
                     f"Supported engines: {HubuumDatabaseConfig.SUPPORTED_ENGINES}"
                 )
             )
-
-        if engine != "django.db.backends.sqlite3":
-            if not self.get("PASSWORD"):
-                fq_key = self.fq_key("PASSWORD")
-                raise ValueError(f"Database password must be set in {fq_key}.")
