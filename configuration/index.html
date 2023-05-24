@@ -9,7 +9,7 @@
 <link href="../installation/" rel="prev"/>
 <link href="../permissions/" rel="next"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.4.3, mkdocs-material-9.1.12" name="generator"/>
+<meta content="mkdocs-1.4.3, mkdocs-material-9.1.14" name="generator"/>
 <title>Configuration - Hubuum</title>
 <link href="../assets/stylesheets/main.85bb2934.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.a6bdf11c.min.css" rel="stylesheet"/>
@@ -195,11 +195,31 @@
     </label>
 <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
 <li class="md-nav__item">
+<a class="md-nav__link" href="#core-options">
+    Core options
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#database-access">
+    Database Access
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#logging">
     Logging
   </a>
 <nav aria-label="Logging" class="md-nav">
 <ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#core-logging-options">
+    Core logging options
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#individual-loggers">
+    Individual loggers
+  </a>
+</li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#sentry-support">
     Sentry support
@@ -209,8 +229,8 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#database-access">
-    Database Access
+<a class="md-nav__link" href="#request-handling">
+    Request handling
   </a>
 </li>
 </ul>
@@ -318,39 +338,136 @@
 <article class="md-content__inner md-typeset">
 <h1 id="hubuum-django-app-environment-variables">Hubuum Django App Environment Variables<a class="headerlink" href="#hubuum-django-app-environment-variables" title="Permanent link">¶</a></h1>
 <p>This document provides an overview of the environment variables that can be set to influence the behavior of the Hubuum Django app.</p>
-<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">¶</a></h2>
-<p>For detailed information on logging, see the <a href="../logging/">logging documentation</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Hubuum validates all environment variables prefixed with HUBUUM_. Any unexpected environment variables under that prefix will be reported and the application will exit.</p>
+</div>
+<h2 id="core-options">Core options<a class="headerlink" href="#core-options" title="Permanent link">¶</a></h2>
 <ul>
-<li><code>HUBUUM_LOGGING_LEVEL</code>: Sets the default logging level for all sources. Defaults to "critical".</li>
-<li><code>HUBUUM_LOGGING_LEVEL_DJANGO</code>: Sets the logging level for the default Django loggers. Defaults to the value of <code>HUBUUM_LOGGING_LEVEL</code>.</li>
-<li><code>HUBUUM_LOGGING_LEVEL_API</code>: Sets the logging level for API actions such as direct object manipulation through the API. Defaults to the value of <code>HUBUUM_LOGGING_LEVEL</code>.</li>
-<li><code>HUBUUM_LOGGING_LEVEL_SIGNALS</code>: Sets the logging level for signals. This will include object manipulation of all sorts. Defaults to the value of <code>HUBUUM_LOGGING_LEVEL</code>.</li>
-<li><code>HUBUUM_LOGGING_LEVEL_REQUEST</code>: Sets the logging level for HTTP requests. Defaults to the value of <code>HUBUUM_LOGGING_LEVEL</code>.</li>
-<li><code>HUBUUM_LOGGING_LEVEL_MANUAL</code>: Sets the logging level for manual logs. These are explicit logging requests inn the code. Not recommended for production. Defaults to the value of <code>HUBUUM_LOGGING_LEVEL</code>.</li>
-<li><code>HUBUUM_LOGGING_LEVEL_AUTH</code>: Sets the logging level for authentication events (login/logout/failures). Defaults to the value of <code>HUBUUM_LOGGING_LEVEL</code>.</li>
-<li><code>HUBUUM_LOGGING_PRODUCTION</code>: Determines if logging is in production mode or not. In production we get no colored output. Defaults to <code>False</code>.</li>
-</ul>
-<h3 id="sentry-support">Sentry support<a class="headerlink" href="#sentry-support" title="Permanent link">¶</a></h3>
-<p>Hubuum supports <a href="https://sentry.io">Sentry</a> for log tracking. The following environment variables can be used to configure Sentry:</p>
-<ul>
-<li><code>HUBUUM_SENTRY_DSN</code>: Sets the Sentry DSN for log tracking. Defaults to an empty string. If this is set, Sentry will be enabled.</li>
-<li><code>HUBUUM_SENTRY_LEVEL</code>: Sets the Sentry logging level. Defaults to "critical".</li>
+<li><code>HUBUUM_SECRET_KEY</code>: Setting this sets the <a href="https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-SECRET_KEY">secret key</a> for the Django framework. If you do not set this yourself, a random key will be generated on startup. Setting this environment variable will put the application into production mode.</li>
 </ul>
 <h2 id="database-access">Database Access<a class="headerlink" href="#database-access" title="Permanent link">¶</a></h2>
+<p>Currently supported engines are "django.db.backends.postgresql" and "django.db.backends.sqlite3". If "django.db.backends.sqlite3" is chosen, the only other option used is <code>HUBUUM_DATABASE_NAME</code>.</p>
 <ul>
 <li><code>HUBUUM_DATABASE_ENGINE</code>: Sets the database engine. Defaults to "django.db.backends.postgresql".</li>
 <li><code>HUBUUM_DATABASE_NAME</code>: Sets the name of the database. Defaults to "hubuum".</li>
 <li><code>HUBUUM_DATABASE_USER</code>: Sets the database user. Defaults to "hubuum".</li>
-<li><code>HUBUUM_DATABASE_PASSWORD</code>: Sets the password for the database user. Defaults to <code>None</code>.</li>
+<li><code>HUBUUM_DATABASE_PASSWORD</code>: Sets the password for the database user. Defaults to <code>None</code>. Must be set if <code>HUBUUM_DATABASE_ENGINE</code> is "django.db.backends.postgresql".</li>
 <li><code>HUBUUM_DATABASE_HOST</code>: Sets the database host. Defaults to "localhost".</li>
 <li><code>HUBUUM_DATABASE_PORT</code>: Sets the port for the database. Defaults to 5432.</li>
 </ul>
+<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">¶</a></h2>
+<p>For detailed information on logging, see the <a href="../logging/">logging documentation</a>. Loggers that take log values as input accept the following values: DEBUG, INFO, WARNING, ERROR, CRITICAL. </p>
+<h3 id="core-logging-options">Core logging options<a class="headerlink" href="#core-logging-options" title="Permanent link">¶</a></h3>
+<ul>
+<li><code>HUBUUM_LOGGING_LEVEL</code>: Sets the default logging level for all sources. Defaults to "CRITICAL".</li>
+<li><code>HUBUUM_LOGGING_PRODUCTION</code>: Determines if logging is in production mode or not. In production we get no colored output and the JSON layout is compact. Defaults to <code>False</code>. Note that if <code>HUBUUM_SECRET_KEY</code> was set above, this defaults to <code>True</code>, but may be overridden explicitly. </li>
+</ul>
+<h3 id="individual-loggers">Individual loggers<a class="headerlink" href="#individual-loggers" title="Permanent link">¶</a></h3>
+<p>These are all loggers for different purposes. TThey default to the level of <code>HUBUUM_LOGGING_LEVEL</code>. They are all prefixed with <code>HUBUUM_LOGGING_LEVEL_</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Description</th>
+<th>Events</th>
+<th>Fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTH</code></td>
+<td>Authentication events</td>
+<td>login, logout, failure</td>
+<td>id</td>
+</tr>
+<tr>
+<td><code>API</code></td>
+<td>API actions such as direct object manipulation</td>
+<td>created, deleted, updated</td>
+<td>id, model, user</td>
+</tr>
+<tr>
+<td><code>DJANGO</code></td>
+<td>Structlog default Django request loggers</td>
+<td>request_started, request_finished</td>
+<td>request, user_agent / request, code</td>
+</tr>
+<tr>
+<td><code>INTERNAL</code></td>
+<td>Internal events in Hubuum</td>
+<td>Undefined</td>
+<td>Any</td>
+</tr>
+<tr>
+<td><code>MANUAL</code></td>
+<td>Manual log events</td>
+<td>manual</td>
+<td>Any</td>
+</tr>
+<tr>
+<td><code>MIGRATIONS</code></td>
+<td>On startup database migrations, logged at the <code>DEBUG</code> level</td>
+<td>created</td>
+<td>id, model</td>
+</tr>
+<tr>
+<td><code>REQUESTS</code></td>
+<td>Request responses</td>
+<td>response</td>
+<td>content, method, run_time_ms, status_code, status_label</td>
+</tr>
+<tr>
+<td><code>SIGNALS</code></td>
+<td>Other signals, such as object manipulation</td>
+<td>created, deleted, updated</td>
+<td>id, model</td>
+</tr>
+</tbody>
+</table>
+<p>Why both <code>API</code> and <code>SIGNAL</code>? <code>API</code> gives us user information, as it is gathered from the View itself, but this will only log the direct effect of the requested API call. Ie, deleting a Host will be quite similar between the two loggers:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span><span class="p">:</span><span class="mf">53.420831</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">dele</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.api.objec</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">i</span><span class="kc">nstan</span><span class="err">ce=</span><span class="mi">1</span><span class="w"> </span><span class="err">model=Hos</span><span class="kc">t</span><span class="w"> </span><span class="err">user=</span><span class="kc">t</span><span class="err">mp</span>
+<span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span><span class="p">:</span><span class="mf">53.422447</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">dele</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.sig</span><span class="kc">nals</span><span class="err">.objec</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">id=</span><span class="mi">1</span><span class="w"> </span><span class="err">model=Hos</span><span class="kc">t</span>
+</code></pre></div>
+<p>However, if one deletes a Namespace, which causes a cascade on the items within, it looks quite different:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span><span class="p">:</span><span class="mf">53.356191</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">dele</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.api.objec</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">i</span><span class="kc">nstan</span><span class="err">ce=</span><span class="mi">1</span><span class="w"> </span><span class="err">model=Namespace</span><span class="w"> </span><span class="err">user=superuser</span>
+<span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span><span class="p">:</span><span class="mf">53.363781</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">dele</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.sig</span><span class="kc">nals</span><span class="err">.objec</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">id=</span><span class="mi">1</span><span class="w"> </span><span class="err">model=Permissio</span><span class="kc">n</span>
+<span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span><span class="p">:</span><span class="mf">53.364163</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">dele</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.sig</span><span class="kc">nals</span><span class="err">.objec</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">id=</span><span class="mi">1</span><span class="w"> </span><span class="err">model=Hos</span><span class="kc">t</span>
+<span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span><span class="p">:</span><span class="mf">53.364577</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">dele</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.sig</span><span class="kc">nals</span><span class="err">.objec</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">id=</span><span class="mi">1</span><span class="w"> </span><span class="err">model=Namespace</span>
+</code></pre></div>
+<p>Here, the <code>API</code> logger only sees the direct effect, the deletion of the Namespace itself, whilst <code>SIGNAL</code> also notifies us about the cascaded objects. To get a quick overview of the logging output, one can run a test with logging set to debug:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">HUBUUM_LOGGING_LEVEL</span><span class="o">=</span>DEBUG<span class="w"> </span>pytest<span class="w"> </span>hubuum/api/v1/tests/test_20_hosts.py<span class="w"> </span>-vv<span class="w"> </span>-s
+</code></pre></div>
+<h3 id="sentry-support">Sentry support<a class="headerlink" href="#sentry-support" title="Permanent link">¶</a></h3>
+<p>Hubuum supports <a href="https://sentry.io">Sentry</a> for log tracking. See their guide for <a href="https://docs.sentry.io/platforms/python/">python</a> for details. The following environment variables can be used to configure Sentry:</p>
+<ul>
+<li><code>HUBUUM_SENTRY_DSN</code>: Sets the Sentry DSN for log tracking. Defaults to an empty string. If this is set, Sentry will be enabled.</li>
+<li><code>HUBUUM_SENTRY_LEVEL</code>: Sets the Sentry logging level. Defaults to <code>ERROR</code>.</li>
+<li><code>HUBUUM_SENTRY_TRACES_SAMPLE_RATE</code>: Set the sample rate used. This number from 0 (0%) and 1 (100%) of the events passed to sentry. Defaults to <code>1.0</code> (100%).</li>
+<li><code>HUBUUM_SENTRY_PII</code>: Send personal identifiable information (PII). Default is <code>False</code>.</li>
+<li><code>HUBUUM_SENTRY_ENVIRONMENT</code>: Set the environment label used, defaults to <code>production</code>.</li>
+</ul>
+<h2 id="request-handling">Request handling<a class="headerlink" href="#request-handling" title="Permanent link">¶</a></h2>
+<p>Hubuum supports logging slow and very slow requests. This manipulates the events logged by the <code>REQUEST</code> logger.</p>
+<ul>
+<li><code>HUBUUM_REQUEST_THRESHOLD_SLOW</code>: The amount of time, in milliseconds, a request can take before it is considered slow. Defaults to <code>1000</code> (1s).</li>
+<li><code>HUBUUM_REQUEST_THRESHOLD_VERY_SLOW</code>: The amount of time, in milliseconds, a request can take before it is considered very slow. Defaults to <code>5000</code> (5s).</li>
+<li><code>HUBUUM_REQUEST_LOG_LEVEL_SLOW</code>: The log level a slow request gets escalated to, defaults to <code>WARNING</code>.</li>
+<li><code>HUBUUM_REQUEST_LOG_LEVEL_VERY_SLOW</code>: The log level a very slow request gets escalated to, defaults to <code>ERROR</code>.</li>
+</ul>
+<p>In addition to escalating the <code>log_level</code>, the following fields are added to the event: 
+ - <code>original_log_level</code>: This is the original log level of the event.
+ - One of <code>slow_response</code> or <code>very_slow_response</code> is set to <code>True</code>.</p>
+<p>With the default setup, this can look something like this:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">11</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mf">27.353445</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">war</span><span class="kc">n</span><span class="err">i</span><span class="kc">n</span><span class="err">g</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">respo</span><span class="kc">nse</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.reques</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">co</span><span class="kc">ntent</span><span class="err">=...</span><span class="w"> </span><span class="err">me</span><span class="kc">t</span><span class="err">hod=GET</span><span class="w"> </span><span class="err">origi</span><span class="kc">nal</span><span class="err">_log_level=</span><span class="mi">10</span><span class="w"> </span><span class="err">pa</span><span class="kc">t</span><span class="err">h=/api/v</span><span class="mi">1</span><span class="err">/resources/hos</span><span class="kc">ts</span><span class="err">/</span><span class="w"> </span><span class="err">ru</span><span class="kc">n</span><span class="err">_</span><span class="kc">t</span><span class="err">ime_ms=</span><span class="mf">1438.51</span><span class="w"> </span><span class="err">slow_respo</span><span class="kc">nse</span><span class="err">=True</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_code=</span><span class="mi">200</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_label=OK</span>
+<span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">11</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mf">33.020905</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">error</span><span class="w">   </span><span class="p">]</span><span class="w"> </span><span class="err">respo</span><span class="kc">nse</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.reques</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">co</span><span class="kc">ntent</span><span class="err">=...</span><span class="w"> </span><span class="err">me</span><span class="kc">t</span><span class="err">hod=GET</span><span class="w"> </span><span class="err">origi</span><span class="kc">nal</span><span class="err">_log_level=</span><span class="mi">10</span><span class="w"> </span><span class="err">pa</span><span class="kc">t</span><span class="err">h=/api/v</span><span class="mi">1</span><span class="err">/resources/hos</span><span class="kc">ts</span><span class="err">/</span><span class="w"> </span><span class="err">ru</span><span class="kc">n</span><span class="err">_</span><span class="kc">t</span><span class="err">ime_ms=</span><span class="mf">5664.79</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_code=</span><span class="mi">200</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_label=OK</span><span class="w"> </span><span class="err">very_slow_respo</span><span class="kc">nse</span><span class="err">=True</span>
+</code></pre></div>
 <hr/>
 <div class="md-source-file">
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">May 19, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">May 23, 2023</span>
 </small>
 </div>
 </article>
@@ -380,7 +497,7 @@
 <div class="md-dialog__inner md-typeset"></div>
 </div>
 <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.top", "navigation.tracking", "toc.follow", "toc.integrate", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
-<script src="../assets/javascripts/bundle.c2be25ad.min.js"></script>
+<script src="../assets/javascripts/bundle.b4d07000.min.js"></script>
 <script>document$.subscribe(() => {
             window.update_swagger_ui_iframe_height = function (id) {
                 var iFrameID = document.getElementById(id);
