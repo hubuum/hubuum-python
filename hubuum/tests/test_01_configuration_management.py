@@ -10,7 +10,10 @@ from django.test import TestCase
 
 from hubuumsite.config.abstract import valid_logging_levels
 from hubuumsite.config.base import HubuumBaseConfig
+from hubuumsite.config.database import HubuumDatabaseConfig
 from hubuumsite.config.logging import HubuumLoggingConfig
+from hubuumsite.config.request import HubuumRequestConfig
+from hubuumsite.config.sentry import HubuumSentryConfig
 
 
 class HubuumBaseConfigTestCase(TestCase):
@@ -28,9 +31,15 @@ class HubuumBaseConfigTestCase(TestCase):
         )
 
     def test_empty_configuration(self) -> None:
-        """Test without any configuration. Defaults to postgres, needs a passowrd."""
-        with pytest.raises(ValueError):
-            HubuumBaseConfig({})
+        """Test without any configuration. Defaults to postgres."""
+        config = HubuumBaseConfig({})
+        self.assertIsNotNone(config)
+        self.assertIsInstance(config, HubuumBaseConfig)
+        self.assertIsInstance(config.logging, HubuumLoggingConfig)
+        self.assertIsInstance(config.database, HubuumDatabaseConfig)
+        self.assertIsInstance(config.sentry, HubuumSentryConfig)
+        self.assertIsInstance(config.requests, HubuumRequestConfig)
+        self.assertEqual(config.database.get("ENGINE"), "django.db.backends.postgresql")
 
     def test_production_vs_developement(self) -> None:
         """Test the mode of operation."""
