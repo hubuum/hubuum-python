@@ -110,7 +110,7 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
     def _get_model(self, model_name: Union[str, None]) -> Model:
         """Get the model, or raise 404."""
         if model_name is None:
-            raise NotFound(detail=f"No model passed to _get_model.")
+            raise NotFound(detail="No model passed to _get_model.")
 
         model_name_lower = model_name.lower()
         model = get_model(model_name_lower)
