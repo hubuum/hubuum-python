@@ -6,5 +6,5 @@ from django import http
 
 
 def typed_query_params(request: http.HttpRequest) -> Dict[str, str]:
-    """Returns a str, str-typed dictionary of query parameters."""
+    """Return a str, str-typed dictionary of query parameters."""
     return cast(Dict[str, str], request.query_params)
