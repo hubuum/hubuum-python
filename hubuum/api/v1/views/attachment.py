@@ -1,6 +1,6 @@
 """Attachment views for API v1."""
 
-from typing import Any, Dict, Union, cast
+from typing import Any, Dict, cast
 
 import structlog
 from django.contrib.contenttypes.models import ContentType
@@ -30,6 +30,7 @@ from hubuum.models.core import (
     model_supports_attachments,
 )
 from hubuum.models.permissions import Namespace, NamespacedHubuumModelWithExtensions
+from hubuum.typing import typed_query_params
 
 from .base import HubuumDetail, HubuumList, LoggingMixin, MultipleFieldLookupORMixin
 
@@ -107,11 +108,8 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
     serializer_class = AttachmentSerializer
     filterset_class = AttachmentFilterSet
 
-    def _get_model(self, model_name: Union[str, None]) -> Model:
+    def _get_model(self, model_name: str) -> Model:
         """Get the model, or raise 404."""
-        if model_name is None:
-            raise NotFound(detail="No model passed to _get_model.")
-
         model_name_lower = model_name.lower()
         model = get_model(model_name_lower)
 
@@ -138,7 +136,7 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
             model_filter: Dict[str, str] = {}
             attachment_filter: Dict[str, str] = {}
 
-            for key, value in cast(Dict[str, str], self.request.query_params).items():
+            for key, value in typed_query_params(request).items():
                 if key.startswith("sha256"):
                     attachment_filter[key] = value
                 else:
@@ -161,7 +159,7 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
             # Be helpful and translate model= to content_type=.
             # QueryDict is immutable, so we need to make a copy.
             modified_query_dict: Dict[str, str] = {}
-            for key, value in cast(Dict[str, str], self.request.query_params).items():
+            for key, value in typed_query_params(request).items():
                 if key == "model":
                     model = self._get_model(value)
                     content_type = ContentType.objects.get_for_model(model)
@@ -223,6 +221,9 @@ class AttachmentDetail(HubuumDetail):
         self, request: Request, *args: Any, **kwargs: Any
     ) -> Attachment:
         """Get an attachment object, or raise 404."""
+        # This view is called by the URL pattern that includes the part:
+        # /data/<model>/... as such there is now way to get here and have
+        # the model kwarg be None.
         model_name = self.kwargs.get("model").lower()
         obj_id = self.kwargs.get("instance")
         attachment_id = self.kwargs.get("attachment")
@@ -285,6 +286,9 @@ class AttachmentDetail(HubuumDetail):
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Add an attachment metadata."""
+        # This view is called by the URL pattern that includes the part:
+        # /data/<model>/... as such there is now way to get here and have
+        # the model kwarg be None.
         model_name = kwargs["model"]
 
         model = get_model(model_name)
