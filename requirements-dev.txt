@@ -7,7 +7,7 @@ knox==0.1.14
 
 rich==13.3.5 # Used for console logging.
 
-typing_extensions==4.5.0
+typing_extensions==4.6.2
 
 sentry-sdk[django]==1.23.1
 structlog_sentry==2.0.2
