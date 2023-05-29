@@ -9,7 +9,7 @@ rich==13.3.5 # Used for console logging.
 
 typing_extensions==4.6.2
 
-sentry-sdk[django]==1.23.1
+sentry-sdk[django]==1.24.0
 structlog_sentry==2.0.2
 
 python-dateutil==2.8.2
