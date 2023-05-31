@@ -1,6 +1,6 @@
 """Extension-related views for the API v1."""
 
-from typing import Any
+from typing import Any, cast
 
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
@@ -52,9 +52,9 @@ class ExtensionDataList(HubuumList):
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Handle posting duplicates as a patch."""
-        extension = request.data["extension"]
-        object_id = request.data["object_id"]
-        model_name = request.data["content_type"]
+        extension = cast(str, request.data["extension"])
+        object_id = cast(str, request.data["object_id"])
+        model_name = cast(str, request.data["content_type"])
         content_type = ContentType.objects.get(model=model_name).id
 
         existing_object_entry = ExtensionData.objects.filter(

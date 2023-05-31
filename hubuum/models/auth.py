@@ -2,10 +2,11 @@
 # pyright: reportIncompatibleVariableOverride=false
 """Authentication-related models for the hubuum project."""
 import re
-from typing import List, Union
+from typing import List, Union, cast
 
 from django.contrib.auth.models import AbstractUser, AnonymousUser, Group
 from django.db.models import Model
+from django.http import HttpRequest
 from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import MissingParam
@@ -23,6 +24,10 @@ class User(AbstractUser):
     lookup_fields = ["id", "username", "email"]
 
     _group_list = None
+
+    def get_auto_id(self) -> int:
+        """Return the auto id of the user."""
+        return cast(int, self.id)
 
     def is_admin(self):
         """Check if the user is any type of admin (staff/superadmin) (or in a similar group?)."""
@@ -187,3 +192,8 @@ def get_group(group_identifier: str, raise_exception: bool = True) -> Group:
         lookup_fields=["id", "name"],
         raise_exception=raise_exception,
     )
+
+
+def typed_user(request: HttpRequest) -> User:
+    """Return a User from a request."""
+    return cast(User, request.user)

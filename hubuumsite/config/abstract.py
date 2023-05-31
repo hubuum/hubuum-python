@@ -25,8 +25,8 @@ def valid_logging_levels() -> List[str]:
 class HubuumAbstractConfig:
     """Abstract base class for Hubuum configuration."""
 
-    ROOT_PREFIX = "HUBUUM"
-    VALID_KEYS = {}
+    ROOT_PREFIX: str = "HUBUUM"
+    VALID_KEYS: Dict[str, Union[None, int, float, str, bool]] = {}
 
     def __init__(self, prefix: str, env: Dict[str, Any]):
         """Initialize the configuration class."""
@@ -58,7 +58,7 @@ class HubuumAbstractConfig:
             fq_key = self.fq_key(f"{prefix}_{key}")
             value = env.get(fq_key, default)
 
-            if "LEVEL" in key:
+            if "LEVEL" in key and isinstance(value, str):
                 value = value.upper()
 
             prefixed_pairs[fq_key] = value

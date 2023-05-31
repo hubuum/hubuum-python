@@ -1,5 +1,5 @@
 """IAM views for the API v1."""
-from typing import Any
+from typing import Any, Dict, cast
 
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
@@ -27,7 +27,7 @@ from hubuum.filters import (
     PermissionFilterSet,
     UserFilterSet,
 )
-from hubuum.models.auth import User, get_group, get_user
+from hubuum.models.auth import User, get_group, get_user, typed_user
 from hubuum.models.permissions import Namespace, Permission
 from hubuum.permissions import (
     IsSuperOrAdminOrReadOnly,
@@ -208,7 +208,7 @@ class NamespaceList(HubuumList):
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Process creation of new namespaces."""
-        user = request.user
+        user = typed_user(request)
         group = None
         if "group" in request.data:
             # We want to pop the group since it's not part of the model.
@@ -305,7 +305,7 @@ class NamespaceMembersGroup(
 
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get a group that has access to a namespace."""
-        namespace = self.get_object()
+        namespace = cast(Namespace, self.get_object())
         group = get_group(kwargs["groupid"])
         permission = namespace.get_permissions_for_group(group)
 
@@ -314,7 +314,7 @@ class NamespaceMembersGroup(
     # TODO: Should be used to update a groups permissions for the namespace.
     def patch(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Patch the permissions of an existing group for a namespace."""
-        namespace = self.get_object()
+        namespace = cast(Namespace, self.get_object())
         group = get_group(kwargs["groupid"])
         instance = namespace.get_permissions_for_group(group)
 
@@ -337,7 +337,7 @@ class NamespaceMembersGroup(
 
         Transparently creates a permission object.
         """
-        namespace = self.get_object()
+        namespace = cast(Namespace, self.get_object())
         group = get_group(kwargs["groupid"])
         instance = namespace.get_permissions_for_group(group, raise_exception=False)
 
@@ -349,7 +349,11 @@ class NamespaceMembersGroup(
         if instance:
             raise Conflict()
 
-        params = {"namespace": namespace.id, "group": group.id, **request.data}
+        params: Dict[str, Any] = {
+            "namespace": namespace.id,
+            "group": group.id,
+            **request.data,
+        }
         serializer = self.get_serializer(data=params, partial=False)
         serializer.is_valid(raise_exception=True)
 
@@ -366,9 +370,12 @@ class NamespaceMembersGroup(
 
         Transparently deletes the permission object.
         """
-        namespace = self.get_object()
+        namespace = cast(Namespace, self.get_object())
         group = get_group(kwargs["groupid"])
         permission = namespace.get_permissions_for_group(group)
 
-        permission.delete()
-        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        if permission:
+            permission.delete()
+            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
+        raise NotFound(f"Group {group.name} does not have permissions for namespace.")

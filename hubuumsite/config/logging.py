@@ -69,7 +69,7 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
 
         for source in self.SOURCES:
             value = self.get(f"LEVEL_{source}")
-            if value:
+            if value and isinstance(value, str):
                 value = value.upper()
 
             if not validator_valid_logging_level(value):

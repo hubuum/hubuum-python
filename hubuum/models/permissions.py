@@ -100,11 +100,11 @@ class Permission(HubuumModel):
     """
 
     # If the namespace the permission points to goes away, clear the entry.
-    namespace = models.ForeignKey(
+    namespace: int = models.ForeignKey(
         "Namespace", related_name="p_namespace", on_delete=models.CASCADE
     )
     # If the group the permission uses goes away, clear the entry.
-    group = models.ForeignKey(
+    group: int = models.ForeignKey(
         "auth.Group", related_name="p_group", on_delete=models.CASCADE
     )
 
@@ -122,4 +122,4 @@ class Permission(HubuumModel):
 
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
-        return str(self.id)
+        return str(self.get_auto_id())

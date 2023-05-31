@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 import structlog
 from django.contrib.auth.signals import (
@@ -32,7 +32,7 @@ def _log_user_event(
     """Log user events."""
     user_label = None
     if user:
-        user_label = user.id
+        user_label = cast(int, user.id)
 
     user_logger.bind(id=user_label).log(level, event)
 
@@ -40,7 +40,7 @@ def _log_user_event(
 def _identifier(instance: object) -> str:
     """Return an identifier for an instance."""
     if hasattr(instance, "id"):
-        return instance.id
+        return cast(int, instance.id)
     return str(instance)
 
 
@@ -50,7 +50,7 @@ def log_object_creation(
 ) -> None:
     """Log object creation."""
     identifier = _identifier(instance)
-    model_name = sender.__name__
+    model_name = cast(str, sender.__name__)
     if created:
         if model_name == "Migration":
             migration_logger.bind(model=model_name, id=identifier).debug("created")
@@ -104,5 +104,6 @@ def auto_delete_file_on_delete(
         path=instance.attachment.path,
     ).debug("deleted")
     if instance.attachment:
-        if os.path.isfile(instance.attachment.path):
-            os.remove(instance.attachment.path)
+        path = cast(str, instance.attachment.path)
+        if os.path.isfile(path):
+            os.remove(path)
