@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from knox.auth import AuthToken
 from rest_framework.test import APIClient
 
-from hubuum.models.auth import User
+from hubuum.models.iam import User
 
 from .base import HubuumAPITestCase
 
@@ -63,14 +63,14 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
     def test_is_active_false(self):
         """Test using an inactive user."""
         self.assert_get("/resources/hosts/")
-        self.user.is_active = False  # type: ignore
-        self.user.save()  # type: ignore
+        self.user.is_active = False
+        self.user.save()
         self.assert_get_and_401("/resources/hosts/")
 
     def test_is_deleted(self):
         """Test using a deleted user."""
         self.assert_get("/resources/hosts/")
-        self.user.delete()  # type: ignore
+        self.user.delete()
         self.assert_get_and_401("/resources/hosts/")
 
     def test_login_with_invalid_credentials(self):

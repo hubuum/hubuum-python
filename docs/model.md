@@ -1,14 +1,5 @@
 # References
 
-## User model
-
-::: hubuum.models.auth.User
-    :members:
-    :undoc-members:
-    :fields:
-    :show-inheritance:
-    :exclude-members: __str__
-
 ## Core models
 
 Core models for hubuum. These are the foundation that permissions and resources are built on.
@@ -20,11 +11,11 @@ Core models for hubuum. These are the foundation that permissions and resources 
     :show-inheritance:
     :exclude-members: __str__
 
-## Permissions
+## IAM
 
-Models related to the permissions system.
+Models related to the identity management and permissions.
 
-::: hubuum.models.permissions
+::: hubuum.models.iam
     :members:
     :undoc-members:
     :fields:

@@ -13,7 +13,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
 from hubuum.exceptions import Conflict
-from hubuum.models.auth import User
 from hubuum.models.core import (
     Attachment,
     AttachmentManager,
@@ -21,10 +20,11 @@ from hubuum.models.core import (
     ExtensionData,
     ExtensionsModel,
 )
-from hubuum.models.permissions import (
+from hubuum.models.iam import (
     Namespace,
     NamespacedHubuumModelWithExtensions,
     Permission,
+    User,
 )
 from hubuum.models.resources import (
     Host,

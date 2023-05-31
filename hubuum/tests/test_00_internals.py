@@ -1,12 +1,18 @@
 """Test module: Users and Groups."""
+from typing import List
+
 import pytest
 from rest_framework.exceptions import NotFound, ValidationError
 
 from hubuum.exceptions import InvalidParam, MissingParam
 from hubuum.log import filter_sensitive_data
-from hubuum.models.auth import User
 from hubuum.models.core import model_supports_attachments, model_supports_extensions
-from hubuum.models.permissions import Namespace
+from hubuum.models.iam import (
+    Namespace,
+    User,
+    namespace_operation_exists,
+    namespace_operations,
+)
 from hubuum.models.resources import Host
 from hubuum.tools import get_object
 from hubuum.validators import (
@@ -20,6 +26,23 @@ from .base import HubuumModelTestCase
 
 class InternalsTestCase(HubuumModelTestCase):
     """This class defines the test suite for internal structures."""
+
+    def test_user_get_auto_id(self):
+        """Test that the user get_auto_id method works."""
+        self.assertEqual(self.user.get_auto_id(), self.user.id)
+
+    def test_namespace_operations(self):
+        """Test that the namespaced operations are correct."""
+        expected: List[str] = ["create", "read", "update", "delete", "namespace"]
+        self.assertListEqual(expected, namespace_operations())
+        fq_expected = [f"has_{x}" for x in expected]
+        self.assertListEqual(fq_expected, namespace_operations(fully_qualified=True))
+
+        for operation in expected:
+            self.assertTrue(namespace_operation_exists(operation))
+
+        for operation in fq_expected:
+            self.assertTrue(namespace_operation_exists(operation, fully_qualified=True))
 
     def test_exception_missing_param(self):
         """Test the MissingParam exception."""

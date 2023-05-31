@@ -27,13 +27,16 @@ from hubuum.filters import (
     PermissionFilterSet,
     UserFilterSet,
 )
-from hubuum.models.auth import User, get_group, get_user, typed_user
-from hubuum.models.permissions import Namespace, Permission
-from hubuum.permissions import (
-    IsSuperOrAdminOrReadOnly,
-    NameSpace,
-    fully_qualified_operations,
+from hubuum.models.iam import (
+    Namespace,
+    Permission,
+    User,
+    get_group,
+    get_user,
+    namespace_operations,
 )
+from hubuum.permissions import IsSuperOrAdminOrReadOnly, NameSpace
+from hubuum.typing import typed_user_from_request
 
 from .base import HubuumDetail, HubuumList, LoggingMixin, MultipleFieldLookupORMixin
 
@@ -208,7 +211,7 @@ class NamespaceList(HubuumList):
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Process creation of new namespaces."""
-        user = typed_user(request)
+        user = typed_user_from_request(request)
         group = None
         if "group" in request.data:
             # We want to pop the group since it's not part of the model.
@@ -326,7 +329,7 @@ class NamespaceMembersGroup(
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Put associates a group with a namespace.
 
-        /namespace/<namespaceid>/groups/<groupid>
+        /iam/namespace/<namespaceid>/groups/<groupid>
             {
                 has_read = 1,
                 has_delete = 0,
@@ -341,9 +344,11 @@ class NamespaceMembersGroup(
         group = get_group(kwargs["groupid"])
         instance = namespace.get_permissions_for_group(group, raise_exception=False)
 
-        if set(request.data.keys()).isdisjoint(fully_qualified_operations()):
+        if set(request.data.keys()).isdisjoint(
+            namespace_operations(fully_qualified=True)
+        ):
             raise ParseError(
-                detail=f"Missing at least one of '{fully_qualified_operations()}'"
+                detail=f"Missing at least one of '{namespace_operations(fully_qualified=True)}'"
             )
 
         if instance:
@@ -372,10 +377,9 @@ class NamespaceMembersGroup(
         """
         namespace = cast(Namespace, self.get_object())
         group = get_group(kwargs["groupid"])
+
+        # Note, get_permissions_for_group by default will raise a 404 if the group
+        # does not have permissions for the namespace. This confuses typing.
         permission = namespace.get_permissions_for_group(group)
-
-        if permission:
-            permission.delete()
-            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-
-        raise NotFound(f"Group {group.name} does not have permissions for namespace.")
+        permission.delete()
+        return HttpResponse(status=status.HTTP_204_NO_CONTENT)

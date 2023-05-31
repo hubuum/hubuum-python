@@ -8,7 +8,7 @@ from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
 from hubuum.models.core import Attachment, AttachmentManager, Extension
-from hubuum.models.permissions import Namespace
+from hubuum.models.iam import Namespace
 from hubuum.models.resources import Person, PurchaseOrder, Room, Vendor
 
 

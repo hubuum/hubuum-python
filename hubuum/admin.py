@@ -5,7 +5,7 @@ from typing import List, Type
 from django.contrib import admin
 
 from hubuum.models.core import Extension, ExtensionData
-from hubuum.models.permissions import HubuumModel, Namespace, Permission
+from hubuum.models.iam import HubuumModel, Namespace, Permission, User
 from hubuum.models.resources import (
     Host,
     HostType,
@@ -17,6 +17,7 @@ from hubuum.models.resources import (
 )
 
 models: List[Type[HubuumModel]] = [
+    User,
     Host,
     HostType,
     Person,

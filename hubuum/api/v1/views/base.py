@@ -10,8 +10,8 @@ from rest_framework import generics, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.schemas.openapi import AutoSchema
 
-from hubuum.models.auth import typed_user
 from hubuum.permissions import NameSpace
+from hubuum.typing import typed_user_from_request
 
 object_logger = structlog.get_logger("hubuum.api.object")
 
@@ -37,7 +37,7 @@ class LoggingMixin:
         """Log creates."""
         super().perform_create(serializer)
         instance = cast(Model, serializer.instance)
-        user = typed_user(cast(HttpRequest, self.request))
+        user = typed_user_from_request(cast(HttpRequest, self.request))
         if instance:
             self._log("created", instance.__class__.__name__, user, instance)
 
@@ -45,13 +45,13 @@ class LoggingMixin:
         """Log updates."""
         super().perform_update(serializer)
         instance = cast(Model, serializer.instance)
-        user = typed_user(cast(HttpRequest, self.request))
+        user = typed_user_from_request(cast(HttpRequest, self.request))
         if instance:
             self._log("updated", instance.__class__.__name__, user, instance)
 
     def perform_destroy(self, instance: Model) -> None:
         """Log deletes."""
-        user = typed_user(cast(HttpRequest, self.request))
+        user = typed_user_from_request(cast(HttpRequest, self.request))
         self._log("deleted", instance.__class__.__name__, user, instance)
         super().perform_destroy(instance)
 

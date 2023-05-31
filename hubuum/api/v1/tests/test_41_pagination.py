@@ -4,7 +4,7 @@ from urllib.parse import parse_qs, urlparse
 
 from rest_framework.response import Response
 
-from hubuum.models.permissions import Namespace
+from hubuum.models.iam import Namespace
 from hubuum.models.resources import Host
 
 from .base import HubuumAPITestCase

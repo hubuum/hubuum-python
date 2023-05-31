@@ -1,7 +1,6 @@
 """Test hubuum attachments."""
 
 import hashlib
-import os
 from typing import Union
 from unittest.mock import MagicMock, Mock, patch
 
@@ -14,7 +13,7 @@ from structlog.testing import capture_logs
 from hubuum.api.v1.views.attachment import AttachmentAutoSchema, AttachmentDetail
 from hubuum.api.v1.views.base import HubuumDetail
 from hubuum.models.core import Attachment, HubuumModel
-from hubuum.models.permissions import Namespace
+from hubuum.models.iam import Namespace
 from hubuum.models.resources import Host, Person
 
 from .base import HubuumAPITestCase
@@ -509,9 +508,3 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
                             and it.get("file_status") == "missing"
                         ),
                     )
-
-
-def tearDownModule():  # pylint: disable=invalid-name # pragma: no cover
-    """Global teardown for this test module, cleans up attachments directory."""
-    for file in os.scandir("attachments/file/"):
-        os.remove(file.path)

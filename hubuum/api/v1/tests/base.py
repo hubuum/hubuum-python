@@ -24,7 +24,9 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
 
     def setUp(self):
         """By default setUp sets up an APIClient for the superuser with a token."""
-        self.user = None
+        self.user, _ = get_user_model().objects.get_or_create(  # nosec
+            username="superuser", password="test"
+        )
         self.namespace = None
         self.client = self.get_superuser_client()
 

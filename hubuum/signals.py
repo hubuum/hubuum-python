@@ -14,8 +14,8 @@ from django.db.models import Model
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from hubuum.models.auth import User
 from hubuum.models.core import Attachment
+from hubuum.models.iam import User
 
 user_logger = structlog.getLogger("hubuum.auth")
 object_logger = structlog.getLogger("hubuum.signals.object")

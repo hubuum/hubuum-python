@@ -29,8 +29,8 @@ from hubuum.models.core import (
     get_model,
     model_supports_attachments,
 )
-from hubuum.models.permissions import Namespace, NamespacedHubuumModelWithExtensions
-from hubuum.typing import typed_query_params
+from hubuum.models.iam import Namespace, NamespacedHubuumModelWithExtensions
+from hubuum.typing import typed_query_params_from_request
 
 from .base import HubuumDetail, HubuumList, LoggingMixin, MultipleFieldLookupORMixin
 
@@ -136,7 +136,7 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
             model_filter: Dict[str, str] = {}
             attachment_filter: Dict[str, str] = {}
 
-            for key, value in typed_query_params(request).items():
+            for key, value in typed_query_params_from_request(request).items():
                 if key.startswith("sha256"):
                     attachment_filter[key] = value
                 else:
@@ -159,7 +159,7 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
             # Be helpful and translate model= to content_type=.
             # QueryDict is immutable, so we need to make a copy.
             modified_query_dict: Dict[str, str] = {}
-            for key, value in typed_query_params(request).items():
+            for key, value in typed_query_params_from_request(request).items():
                 if key == "model":
                     model = self._get_model(value)
                     content_type = ContentType.objects.get_for_model(model)

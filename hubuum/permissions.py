@@ -12,6 +12,8 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from typing_extensions import Literal
 
+from hubuum.typing import typed_user_from_request
+
 
 class CustomObjectPermissions(DjangoObjectPermissions):
     """Map permissions towards CRUD."""
@@ -27,27 +29,6 @@ class CustomObjectPermissions(DjangoObjectPermissions):
     }
 
 
-def operations():
-    """Define the list of valid operations."""
-    return ("create", "read", "update", "delete", "namespace")
-
-
-def fully_qualified_operations():
-    """Define the list of valid operations, fully qualified with the has_-prefix."""
-    return ["has_" + s for s in operations()]
-
-
-def operation_exists(permission: str, fully_qualified: bool = False) -> bool:
-    """Check if a permission label is valid."""
-    if fully_qualified:
-        return permission in fully_qualified_operations()
-
-    return permission in operations()
-
-
-# We can't import this from models.auth because of circular imports
-# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
-# suggest a solution, but it breaks at runtime. :()
 def is_super_or_admin(user: AbstractUser) -> bool:
     """Check to see if a user is superuser or admin (staff)."""
     return user.is_staff or user.is_superuser
@@ -77,7 +58,7 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
 
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if we're super/admin otherwise authenticated readonly."""
-        if is_super_or_admin(cast(AbstractUser, request.user)):
+        if is_super_or_admin(typed_user_from_request(request)):
             return True
         return super().has_permission(request, view)
 
@@ -85,7 +66,7 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
         self, request: Request, view: APIView, obj: object
     ) -> Literal[True]:
         """Check if we're super/admin otherwise authenticated readonly."""
-        if is_super_or_admin(cast(AbstractUser, request.user)):
+        if is_super_or_admin(typed_user_from_request(request)):
             return True
         return super().has_object_permission(request, view, obj)
 
@@ -109,7 +90,7 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if superuser or admin by delegation, then check user, otherwise false."""
         # First check if we are superuser or asking for read-only (listing), if so, return true.
-        user = cast(AbstractUser, request.user)
+        user = typed_user_from_request(request)
         if user.is_anonymous:
             return False
 
@@ -151,8 +132,8 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
             else:
                 name = cast(str, request.data["namespace"])
 
-            user = request.user  # type: ignore
-            return user.has_namespace(name, write_perm)  # type: ignore
+            user = typed_user_from_request(request)
+            return user.has_namespace(name, write_perm)
 
         return True
 
@@ -165,7 +146,7 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
         # if request.user.is_anonymous:
         #    return False
 
-        if is_super_or_admin(cast(AbstractUser, request.user)):
+        if is_super_or_admin(typed_user_from_request(request)):
             return True
 
         perms_map = {
@@ -193,8 +174,8 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
         else:
             perm = perms_map[request.method]
 
-        user = request.user  # type: ignore
+        user = typed_user_from_request(request)
         if hasattr(obj, "namespace"):
-            return user.namespaced_can(perm, cast(int, obj.namespace))  # type: ignore
+            return user.namespaced_can(perm, cast(int, obj.namespace))
 
-        return user.namespaced_can(perm, obj)  # type: ignore
+        return user.namespaced_can(perm, obj)
