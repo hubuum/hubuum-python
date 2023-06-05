@@ -9,7 +9,7 @@ gunicorn==20.1.0
 
 rich==13.4.1 # Used for console logging.
 
-typing_extensions==4.6.2
+typing_extensions==4.6.3
 
 sentry-sdk[django]==1.25.0
 structlog_sentry==2.0.2
