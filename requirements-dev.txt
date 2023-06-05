@@ -5,7 +5,7 @@ django_filter==23.2
 django-structlog==5.1.0
 knox==0.1.14
 
-rich==13.3.5 # Used for console logging.
+rich==13.4.1 # Used for console logging.
 
 typing_extensions==4.6.2
 
