@@ -1,6 +1,13 @@
 """Filters for hubuum permissions."""
 from django.contrib.auth.models import Group
-from django.db.models import Model, Q, QuerySet
+from django.db.models import (
+    ForeignKey,
+    ManyToManyField,
+    Model,
+    OneToOneField,
+    Q,
+    QuerySet,
+)
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
@@ -56,8 +63,88 @@ _hubuum_fields = {
     "created_at": _date_lookups,
     "updated_at": _date_lookups,
 }
-_namespace_fields = {"namespace": _key_lookups}
-_namespace_fields.update(_hubuum_fields)
+
+
+class RaiseBadRequestOnBadFilter(filters.FilterSet):
+    """Mixin to throw 400 Bad request on bad filters.
+
+    Bad filters are defined as any filter that tries to use a field that is not
+    defined in the filter set, or any filter that tries to use a lookup that is
+    not defined for the field.
+    """
+
+    base_fields = [
+        # Pagination related fields
+        "page_size",
+        "page",
+        "limit",
+        # Ordering related fields
+        "ordering",
+        # JSON related fields, using JSONFieldLookupFilter
+        # This could / should be validated via a field lookup on json_data
+        # for the model, but it should suffice.
+        "json_data_lookup",
+    ]
+
+    def filter_queryset(self, queryset: QuerySet[Model]) -> QuerySet[Model]:
+        """Validate the lookups and fields in the request.
+
+        Returns:
+            QuerySet: The filtered queryset.
+
+        Raises:
+            ValidationError: If an invalid field or lookup is found in the request.
+        """
+        self._validate_fields_and_lookups()
+        return super().filter_queryset(queryset)
+
+    def _validate_fields_and_lookups(self) -> None:
+        """Validate that fields and lookups in the request are valid for filtering."""
+        for field in self.request.GET:
+            field_name, lookup = self._get_field_and_lookup(field)
+            self._validate_field(field_name)
+            self._validate_lookup(field_name, lookup)
+
+    def _get_field_and_lookup(self, field: str) -> tuple[str, str]:
+        """Split the field from the request into field_name and lookup."""
+        if "__" in field:
+            return field.split("__", 1)
+        return field, None
+
+    def _validate_field(self, field_name: str) -> None:
+        """Check if the field name is valid."""
+        if not self._is_valid_field(field_name):
+            raise ValidationError(f"Invalid field for filtering: {field_name}")
+
+    def _validate_lookup(self, field_name: str, lookup: str) -> None:
+        """Check if the lookup is valid for the field."""
+        if (
+            lookup
+            and field_name in self.Meta.fields  # pylint: disable=no-member
+            and lookup not in self.Meta.fields[field_name]  # pylint: disable=no-member
+        ):
+            raise ValidationError(f"Invalid lookup ({lookup}) for field ({field_name})")
+
+    def _is_valid_field(self, field_name: str) -> bool:
+        """Check if the field name is valid for filtering."""
+        return (
+            field_name in self.base_fields
+            or field_name in self.Meta.fields  # pylint: disable=no-member
+            or field_name in self._get_relational_fields()
+        )
+
+    def _get_relational_fields(self) -> list[str]:
+        """Get the names of a model's related fields."""
+        return [
+            field.name
+            for field in self.Meta.model._meta.get_fields()  # pylint: disable=no-member
+            if isinstance(field, (ForeignKey, ManyToManyField, OneToOneField))
+        ]
+
+    class Meta:
+        """Meta class."""
+
+        abstract = True
 
 
 class JSONFieldLookupFilter(filters.CharFilter):
@@ -120,7 +207,7 @@ class JSONFieldLookupFilter(filters.CharFilter):
         return qs.filter(json_lookup)
 
 
-class NamespacePermissionFilter(filters.FilterSet):
+class NamespacePermissionFilter(RaiseBadRequestOnBadFilter):
     """Return viewable objects for a user.
 
     This filter returns (request.)user-visible objects of a model in question.
@@ -169,7 +256,7 @@ class NamespaceFilterSet(NamespacePermissionFilter):
         fields.update(_hubuum_fields)
 
 
-class UserFilterSet(filters.FilterSet):
+class UserFilterSet(RaiseBadRequestOnBadFilter):
     """FilterSet class for User."""
 
     class Meta:
@@ -188,7 +275,7 @@ class UserFilterSet(filters.FilterSet):
         }
 
 
-class GroupFilterSet(filters.FilterSet):
+class GroupFilterSet(RaiseBadRequestOnBadFilter):
     """FilterSet class for Group."""
 
     class Meta:
@@ -203,7 +290,7 @@ class GroupFilterSet(filters.FilterSet):
         }
 
 
-class PermissionFilterSet(filters.FilterSet):
+class PermissionFilterSet(RaiseBadRequestOnBadFilter):
     """FilterSet class for Permission."""
 
     class Meta:
@@ -211,8 +298,6 @@ class PermissionFilterSet(filters.FilterSet):
 
         model = Permission
         fields = {
-            "namespace": _key_lookups,
-            "group": _key_lookups,
             "has_create": _boolean_lookups,
             "has_read": _boolean_lookups,
             "has_update": _boolean_lookups,
@@ -222,7 +307,7 @@ class PermissionFilterSet(filters.FilterSet):
         fields.update(_hubuum_fields)
 
 
-class AttachmentManagerFilterSet(filters.FilterSet):
+class AttachmentManagerFilterSet(RaiseBadRequestOnBadFilter):
     """FilterSet class for AttachmentManagers."""
 
     class Meta:
@@ -246,13 +331,12 @@ class AttachmentFilterSet(NamespacePermissionFilter):
 
         model = Attachment
         fields = {
-            "content_type": _key_lookups,
             "object_id": _numeric_lookups,
             "sha256": _textual_lookups,
             "size": _numeric_lookups,
             "original_filename": _textual_lookups,
         }
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)
 
 
 class ExtensionFilterSet(NamespacePermissionFilter):
@@ -270,7 +354,7 @@ class ExtensionFilterSet(NamespacePermissionFilter):
             "header": _textual_lookups,
             "cache_time": _numeric_lookups,
         }
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)
 
 
 class ExtensionDataFilterSet(NamespacePermissionFilter):
@@ -282,7 +366,7 @@ class ExtensionDataFilterSet(NamespacePermissionFilter):
         """Meta class for ExtensionDataFilterSet."""
 
         model = ExtensionData
-        fields = ["extension", "content_type", "object_id"]
+        fields = ["extension", "content_type", "object_id", "namespace"]
 
 
 class HostFilterSet(NamespacePermissionFilter):
@@ -297,11 +381,8 @@ class HostFilterSet(NamespacePermissionFilter):
             "fqdn": _textual_lookups,
             "serial": _textual_lookups,
             "registration_date": _date_lookups,
-            "room": _key_lookups,
-            "jack": _key_lookups,
-            "purchase_order": _key_lookups,
-            "person": _key_lookups,
         }
+        fields.update(_hubuum_fields)
 
 
 class HostTypeFilterSet(NamespacePermissionFilter):
@@ -312,7 +393,7 @@ class HostTypeFilterSet(NamespacePermissionFilter):
 
         model = HostType
         fields = {"name": _textual_lookups, "description": _textual_lookups}
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)
 
 
 class JackFilterSet(NamespacePermissionFilter):
@@ -325,9 +406,8 @@ class JackFilterSet(NamespacePermissionFilter):
         fields = {
             "name": _textual_lookups,
             "building": _textual_lookups,
-            "room": _key_lookups,
         }
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)
 
 
 class PersonFilterSet(NamespacePermissionFilter):
@@ -344,9 +424,8 @@ class PersonFilterSet(NamespacePermissionFilter):
             "email": _textual_lookups,
             "office_phone": _textual_lookups,
             "mobile_phone": _textual_lookups,
-            "room": _key_lookups,
         }
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)
 
 
 class PurchaseOrderFilterSet(NamespacePermissionFilter):
@@ -357,11 +436,10 @@ class PurchaseOrderFilterSet(NamespacePermissionFilter):
 
         model = PurchaseOrder
         fields = {
-            "vendor": _key_lookups,
             "order_date": _date_lookups,
             "po_number": _textual_lookups,
         }
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)
 
 
 class RoomFilterSet(NamespacePermissionFilter):
@@ -376,7 +454,7 @@ class RoomFilterSet(NamespacePermissionFilter):
             "building": _textual_lookups,
             "floor": _textual_lookups,
         }
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)
 
 
 class VendorFilterSet(NamespacePermissionFilter):
@@ -394,4 +472,4 @@ class VendorFilterSet(NamespacePermissionFilter):
             "contact_email": _textual_lookups,
             "contact_phone": _textual_lookups,
         }
-        fields.update(_namespace_fields)
+        fields.update(_hubuum_fields)

@@ -148,6 +148,14 @@ class HubuumFilterTestCase(HubuumAPITestCase):
 
     #        self.assert_get_elements("/iam/users/?fqdn__contains=other", 2)
 
+    def test_bad_filters_returning_400(self):
+        """Test that using bad filters returns a 400."""
+        self.assert_get_and_400("/resources/hosts/?nosuchfield=foo")
+        self.assert_get_and_400("/resources/hosts/?nosuchfield__withlookup=foo")
+        self.assert_get_and_400("/resources/hosts/?name__nosuchlookup=foo")
+        # name__gt is not supported, it's a numeric lookup on a textual field
+        self.assert_get_and_400("/resources/hosts/?name__gt=foo")
+
     def test_host_filtering(self):
         """Test that filtering on fields in hosts works."""
         self.assert_get_elements("/resources/hosts/", 3)
