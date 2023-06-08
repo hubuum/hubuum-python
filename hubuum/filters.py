@@ -1,4 +1,6 @@
 """Filters for hubuum permissions."""
+from typing import List, Tuple
+
 from django.contrib.auth.models import Group
 from django.db.models import (
     ForeignKey,
@@ -105,7 +107,7 @@ class RaiseBadRequestOnBadFilter(filters.FilterSet):
             self._validate_field(field_name)
             self._validate_lookup(field_name, lookup)
 
-    def _get_field_and_lookup(self, field: str) -> tuple[str, str]:
+    def _get_field_and_lookup(self, field: str) -> Tuple[str, str]:
         """Split the field from the request into field_name and lookup."""
         if "__" in field:
             return field.split("__", 1)
@@ -133,7 +135,7 @@ class RaiseBadRequestOnBadFilter(filters.FilterSet):
             or field_name in self._get_relational_fields()
         )
 
-    def _get_relational_fields(self) -> list[str]:
+    def _get_relational_fields(self) -> List[str]:
         """Get the names of a model's related fields."""
         return [
             field.name
