@@ -2581,7 +2581,7 @@
       },
       "post": {
         "operationId": "createNamespaceMembersGroup",
-        "description": "Put associates a group with a namespace.\n\n/namespace/<namespaceid>/groups/<groupid>\n    {\n        has_read = 1,\n        has_delete = 0,\n        has_create = 0,\n        has_update = 0,\n        has_namespace = 0,\n    }\n\nTransparently creates a permission object.",
+        "description": "Put associates a group with a namespace.\n\n/iam/namespace/<namespaceid>/groups/<groupid>\n    {\n        has_read = 1,\n        has_delete = 0,\n        has_create = 0,\n        has_update = 0,\n        has_namespace = 0,\n    }\n\nTransparently creates a permission object.",
         "parameters": [
           {
             "name": "val",
