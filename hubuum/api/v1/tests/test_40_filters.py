@@ -148,6 +148,14 @@ class HubuumFilterTestCase(HubuumAPITestCase):
 
     #        self.assert_get_elements("/iam/users/?fqdn__contains=other", 2)
 
+    def test_bad_filters_returning_400(self):
+        """Test that using bad filters returns a 400."""
+        self.assert_get_and_400("/resources/hosts/?nosuchfield=foo")
+        self.assert_get_and_400("/resources/hosts/?nosuchfield__withlookup=foo")
+        self.assert_get_and_400("/resources/hosts/?name__nosuchlookup=foo")
+        # name__gt is not supported, it's a numeric lookup on a textual field
+        self.assert_get_and_400("/resources/hosts/?name__gt=foo")
+
     def test_host_filtering(self):
         """Test that filtering on fields in hosts works."""
         self.assert_get_elements("/resources/hosts/", 3)
@@ -159,6 +167,10 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         self.assert_get_elements(
             "/resources/hosts/?name__contains=test&fqdn__contains=domain", 1
         )
+        # Regex testing
+        self.assert_get_elements(r"/resources/hosts/?fqdn__regex=test[23]\.other", 2)
+        self.assert_get_elements(r"/resources/hosts/?fqdn__regex=test[13].*tld$", 1)
+        self.assert_get_elements(r"/resources/hosts/?fqdn__regex=^test[13]", 2)
 
     def test_extension_data_basic_filtering(self):
         """Test that we can filter into the JSON blobs that extensions deliver."""

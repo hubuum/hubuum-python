@@ -1,23 +1,45 @@
 # The hubuum API
 
-The generic lookup key is `val` for all models. Usually, any unique identifier for the object will be usable as the lookup key. For example, for a user, the username or email can be used as the lookup key. For a group, the group name can be used as the lookup key.
-
 ## Filtering
 
 Querying using the API is done via standard HTTP GET requests using django-filter. The API supports filtering, ordering, and pagination. The API also supports querying JSON fields of the models directly (see below).
+
+!!! note
+    Filtering on a field that does not exist, or using an unsupported lookup key for an existing, field will return `400 Bad Request`, with some information about the fields or lookups that failed.
 
 ## Operators
 
 ### Text or character fields
 
-For text fields, the following operators are supported:
+For text or character fields, the following operators are supported:
 
 - `exact` (default)
 - `startswith` (case-sensitive, string start with)
 - `endswith` (case-sensitive, string end with)
 - `contains` (case-sensitive, string contains)
+- `regex` (case-sensitive, regular expression)
 
 These may also be prefixed with `i` to make them case-insensitive, eg. `icontains`.
+
+#### Examples 
+
+```bash
+# These two are identical:
+/iam/users/?name=johndoe
+/iam/users/?name__exact=johndoe
+
+# Find all users with a username that ends with "doe"
+/iam/users/?name__endswith=doe
+/iam/users/?name__regex=doe$
+
+# Find all users that start with "john"
+/iam/users/?name__startswith=john
+/iam/users/?name__regex=^john
+
+# Find all users that start with "j", contains "do", and ends with "e"
+/iam/users/?name__regex=^j.*do.*e$
+```
+
 
 ### Numeric fields
 
@@ -29,6 +51,19 @@ For numeric fields, the following operators are supported:
 - `lt` (less than)
 - `lte` (less than or equal to)
 - `range` (between)
+
+#### Examples 
+
+```bash
+# These two are identical:
+/iam/users/?id=1
+/iam/users/?id__exact=1
+
+# Find all users with an ID over 5 but under 9, these three are identical
+/iam/users/?id__gt=5&id__lt=9
+/iam/users/?id__gte=6&id__lte=8
+/iam/users/?id__range=6,8
+```
 
 
 ### Date fields
@@ -44,6 +79,7 @@ For date fields, the following operators are supported:
 - `week_day` (day of the week)
 - `iso_week_day` (day of the week, ISO 8601)
 - `iso_year` (week of the year, ISO 8601)
+
 
 ### JSON fields
 

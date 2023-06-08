@@ -1323,24 +1323,6 @@
             }
           },
           {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "group",
-            "required": false,
-            "in": "query",
-            "description": "group",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "has_create",
             "required": false,
             "in": "query",
@@ -3165,15 +3147,6 @@
             }
           },
           {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": false,
             "in": "query",
@@ -3696,6 +3669,15 @@
             "required": false,
             "in": "query",
             "description": "object_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "required": false,
+            "in": "query",
+            "description": "namespace",
             "schema": {
               "type": "string"
             }
@@ -4467,15 +4449,6 @@
             }
           },
           {
-            "name": "content_type",
-            "required": false,
-            "in": "query",
-            "description": "content_type",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "object_id",
             "required": false,
             "in": "query",
@@ -4723,15 +4696,6 @@
             "required": false,
             "in": "query",
             "description": "original_filename__iexact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
             "schema": {
               "type": "string"
             }
@@ -5075,15 +5039,6 @@
             }
           },
           {
-            "name": "content_type",
-            "required": false,
-            "in": "query",
-            "description": "content_type",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "object_id",
             "required": false,
             "in": "query",
@@ -5331,15 +5286,6 @@
             "required": false,
             "in": "query",
             "description": "original_filename__iexact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
             "schema": {
               "type": "string"
             }
@@ -5895,15 +5841,6 @@
             }
           },
           {
-            "name": "content_type",
-            "required": false,
-            "in": "query",
-            "description": "content_type",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "object_id",
             "required": false,
             "in": "query",
@@ -6151,15 +6088,6 @@
             "required": false,
             "in": "query",
             "description": "original_filename__iexact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
             "schema": {
               "type": "string"
             }
@@ -7364,37 +7292,244 @@
             }
           },
           {
-            "name": "room",
+            "name": "id",
             "required": false,
             "in": "query",
-            "description": "room",
+            "description": "id",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "jack",
+            "name": "created_at__day",
             "required": false,
             "in": "query",
-            "description": "jack",
+            "description": "created_at__day",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "purchase_order",
+            "name": "created_at__month",
             "required": false,
             "in": "query",
-            "description": "purchase_order",
+            "description": "created_at__month",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "person",
+            "name": "created_at__quarter",
             "required": false,
             "in": "query",
-            "description": "person",
+            "description": "created_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at",
+            "required": false,
+            "in": "query",
+            "description": "created_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "created_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "created_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__range",
+            "required": false,
+            "in": "query",
+            "description": "created_at__range",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__month",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__month",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__quarter",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__quarter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at",
+            "required": false,
+            "in": "query",
+            "description": "updated_at",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_week_day",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_week_day",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__iso_year",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__iso_year",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__gte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lt",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__lte",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at__range",
+            "required": false,
+            "in": "query",
+            "description": "updated_at__range",
             "schema": {
               "type": "string"
             }
@@ -7796,15 +7931,6 @@
             "required": false,
             "in": "query",
             "description": "description__iexact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
             "schema": {
               "type": "string"
             }
@@ -8526,15 +8652,6 @@
             }
           },
           {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": false,
             "in": "query",
@@ -9174,24 +9291,6 @@
             "required": false,
             "in": "query",
             "description": "building__iexact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "room",
-            "required": false,
-            "in": "query",
-            "description": "room",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
             "schema": {
               "type": "string"
             }
@@ -10129,24 +10228,6 @@
             }
           },
           {
-            "name": "room",
-            "required": false,
-            "in": "query",
-            "description": "room",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": false,
             "in": "query",
@@ -11079,15 +11160,6 @@
             }
           },
           {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": false,
             "in": "query",
@@ -11588,15 +11660,6 @@
             }
           },
           {
-            "name": "vendor",
-            "required": false,
-            "in": "query",
-            "description": "vendor",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "order_date__day",
             "required": false,
             "in": "query",
@@ -11781,15 +11844,6 @@
             "required": false,
             "in": "query",
             "description": "po_number__iexact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "namespace",
-            "required": false,
-            "in": "query",
-            "description": "namespace",
             "schema": {
               "type": "string"
             }

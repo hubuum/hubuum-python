@@ -23,9 +23,9 @@ from hubuum.tools import get_model, get_object
 def namespace_operations(fully_qualified: bool = False) -> List[str]:
     """Return a list of valid namespace permission operations.
 
-    args: fully_qualified (bool) - if True, the list will be fully qualified
+    :param: fully_qualified (bool) - if True, the list will be fully qualified
 
-    returns: (list) - a list of valid namespace permission operations
+    :returns: (list) - a list of valid namespace permission operations
     """
     operations: List[str] = ["create", "read", "update", "delete", "namespace"]
     if fully_qualified:
@@ -37,11 +37,11 @@ def namespace_operations(fully_qualified: bool = False) -> List[str]:
 def namespace_operation_exists(permission: str, fully_qualified: bool = False) -> bool:
     """Check if a permission operation for a namespace exists.
 
-    args: permission (str) - the permission operation to check
-    args: fully_qualified (bool) - if True, the operation will be checked
+    :param: permission (str) - the permission operation to check
+    :param: fully_qualified (bool) - if True, the operation will be checked
         against the fully qualified list of operations
 
-    returns: (bool) - True if the operation exists, False otherwise
+    :returns: (bool) - True if the operation exists, False otherwise
     """
     if fully_qualified:
         return permission in namespace_operations(fully_qualified=True)
@@ -324,11 +324,11 @@ def get_user(user_identifier: str, raise_exception: bool = True) -> User:
 def get_group(group_identifier: str, raise_exception: bool = True) -> Group:
     """Try to find a group based on the identifier.
 
-    param: group_identifier
+    :param: group_identifier
 
-    return: group object
+    :return: group object
 
-    raises: NotFound if no object found.
+    :raises: NotFound if no object found.
     """
     return get_object(
         Group,
