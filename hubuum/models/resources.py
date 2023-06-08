@@ -7,7 +7,7 @@ These models are the ones used by end users to create objects in Hubuum.
 
 from django.db import models
 
-from hubuum.models.permissions import NamespacedHubuumModelWithExtensions
+from hubuum.models.iam import NamespacedHubuumModelWithExtensions
 
 
 class Host(NamespacedHubuumModelWithExtensions):

@@ -1,8 +1,7 @@
 """Test the filter interface."""
 from typing import Any, Dict
 
-from hubuum.models.auth import User
-from hubuum.models.permissions import Namespace
+from hubuum.models.iam import Namespace, User
 from hubuum.models.resources import Host, Room
 
 from .base import HubuumAPITestCase

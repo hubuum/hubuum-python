@@ -2,7 +2,7 @@
 # pyright: reportIncompatibleVariableOverride=false
 """Versioned (v1) serializers of the hubuum models."""
 import hashlib
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
@@ -13,16 +13,19 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
 from hubuum.exceptions import Conflict
-from hubuum.models.auth import User
 from hubuum.models.core import (
     Attachment,
     AttachmentManager,
     Extension,
     ExtensionData,
     ExtensionsModel,
-    HubuumModel,
 )
-from hubuum.models.permissions import Namespace, Permission
+from hubuum.models.iam import (
+    Namespace,
+    NamespacedHubuumModelWithExtensions,
+    Permission,
+    User,
+)
 from hubuum.models.resources import (
     Host,
     HostType,
@@ -48,14 +51,14 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
 
     def run_validation(self, data: Dict[str, Any] = empty) -> Dict[str, Any]:
         """Run the validation of the input."""
-        if not isinstance(data, dict):
+        if not isinstance(data, dict):  # type: ignore as we have user input.
             raise ValidationError(
                 code="expected_dict",
                 detail={"typeerror": "API expected a dictionary."},
             )
 
         provided_keys = data.keys()
-        items = self.fields.items()
+        items = cast(Dict[str, Any], self.fields.items())
 
         for fieldname, field in items:
             if field.read_only and fieldname in provided_keys:
@@ -66,7 +69,7 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
                     },
                 )
 
-        extra_keys = set(provided_keys) - set(self.fields.keys())
+        extra_keys = set(provided_keys) - set(cast(List[str], self.fields.keys()))
         if extra_keys:
             raise ValidationError(
                 code="write_on_non_existent_field",
@@ -75,7 +78,7 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
                 },
             )
 
-        return super().run_validation(data)
+        return cast(Dict[str, Any], super().run_validation(data))
 
 
 # run_validation type mismatch. From DRF there is no typing, so we get the following:
@@ -114,15 +117,19 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  
             self.fields["extension_urls"] = serializers.SerializerMethodField()
         return
 
-    def get_extension_urls(self, obj: HubuumModel) -> Dict[str, str]:
+    def get_extension_urls(
+        self, obj: NamespacedHubuumModelWithExtensions
+    ) -> Dict[str, str]:
         """Deliver the endpoint for the URL for this specific object."""
         return obj.extension_urls()
 
-    def get_extension_data(self, obj: HubuumModel) -> Dict[str, Any]:
+    def get_extension_data(
+        self, obj: NamespacedHubuumModelWithExtensions
+    ) -> Dict[str, Any]:
         """Display extension data."""
         return obj.extension_data()
 
-    def get_extensions(self, obj: HubuumModel) -> List[str]:
+    def get_extensions(self, obj: NamespacedHubuumModelWithExtensions) -> List[str]:
         """Display active extensions for the object."""
         return sorted(o.name for o in obj.extensions())
 
@@ -146,7 +153,7 @@ class UserSerializer(HubuumMetaSerializer):
     def create(self, validated_data: Dict[str, Any]) -> User:
         """Ensure the password is hashed on user creation."""
         validated_data["password"] = make_password(validated_data.get("password"))
-        return super().create(validated_data)
+        return cast(Dict[str, Any], super().create(validated_data))
 
     class Meta:
         """How to serialize the object."""
@@ -176,7 +183,7 @@ class ExtensionSerializer(HubuumMetaSerializer):
         require_interpolation = True  # This should fetch the default for the field
 
         model = None
-        if self.partial and self.instance:
+        if self.partial and self.instance and isinstance(self.instance, Extension):
             require_interpolation = self.instance.require_interpolation
             url = self.instance.url
             model = self.instance.model
@@ -266,7 +273,7 @@ class AttachmentManagerSerializer(HubuumMetaSerializer):
         _per_object_total_size_limit = 0
         _per_object_individual_size_limit = 0
 
-        if self.instance:
+        if self.instance and isinstance(self.instance, AttachmentManager):
             obj = self.instance
             _per_object_total_size_limit = int(obj.per_object_total_size_limit)
             _per_object_individual_size_limit = int(

@@ -1,10 +1,12 @@
 """Non-versioned URLs for hubuum."""
 
-from django.urls import re_path
+from typing import List
+
+from django.urls import re_path, resolvers
 
 from . import views
 
-urlpatterns = [
+urlpatterns: List[resolvers.URLPattern] = [
     re_path(r"auth/login/", views.LoginView.as_view(), name="knox_login"),
     re_path(r"auth/logout/", views.LogoutView.as_view(), name="knox_logout"),
     re_path(

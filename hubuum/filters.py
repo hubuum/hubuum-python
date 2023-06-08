@@ -4,7 +4,6 @@ from django.db.models import Model, Q, QuerySet
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
-from hubuum.models.auth import User
 from hubuum.models.core import (
     Attachment,
     AttachmentManager,
@@ -12,7 +11,7 @@ from hubuum.models.core import (
     ExtensionData,
     model_is_open,
 )
-from hubuum.models.permissions import Namespace, Permission
+from hubuum.models.iam import Namespace, Permission, User
 from hubuum.models.resources import (
     Host,
     HostType,
@@ -22,6 +21,7 @@ from hubuum.models.resources import (
     Room,
     Vendor,
 )
+from hubuum.typing import typed_user_from_request
 
 _key_lookups = ["exact"]  # in?
 _boolean_lookups = _key_lookups
@@ -129,7 +129,7 @@ class NamespacePermissionFilter(filters.FilterSet):
     def filter_queryset(self, queryset: QuerySet[Model]) -> QuerySet[Model]:
         """Perform the filtering."""
         queryset = super().filter_queryset(queryset)
-        user = self.request.user  # type: ignore
+        user = typed_user_from_request(self.request)
         # model = queryset.model._meta.model_name
         #        permission = self.perm_format % {
         #            "app_label": queryset.model._meta.app_label,

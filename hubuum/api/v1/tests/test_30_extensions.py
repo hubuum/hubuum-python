@@ -2,7 +2,7 @@
 from typing import Any, Dict
 
 from hubuum.models.core import ExtensionData
-from hubuum.models.permissions import Namespace
+from hubuum.models.iam import Namespace
 from hubuum.models.resources import Host
 
 from .base import HubuumAPITestCase

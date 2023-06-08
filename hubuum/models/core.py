@@ -4,7 +4,7 @@
 
 import hashlib
 import re
-from typing import Any, Dict, List, Match, Tuple, Union
+from typing import Any, Dict, List, Match, Tuple, Union, cast
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -66,6 +66,10 @@ class HubuumModel(models.Model):
         "updated_at",
     )
 
+    def get_auto_id(self) -> int:
+        """Get the auto ID of the object."""
+        return cast(int, self.id)
+
     class Meta:
         """Meta data for the class."""
 
@@ -77,7 +81,7 @@ class NamespacedHubuumModel(HubuumModel):
 
     # When we delete a namespace, do we want *all* the objects to disappear?
     # That'd be harsh. But, well... What is the realistic option?
-    namespace = models.ForeignKey(
+    namespace: int = models.ForeignKey(
         "Namespace",
         on_delete=models.CASCADE,
         blank=False,
@@ -93,7 +97,7 @@ class NamespacedHubuumModel(HubuumModel):
 class AttachmentManager(HubuumModel):
     """A model for attachments to objects."""
 
-    model = models.CharField(
+    model: str = models.CharField(
         max_length=255,
         null=False,
         validators=[validate_model_can_have_attachments],
@@ -113,7 +117,7 @@ class AttachmentManager(HubuumModel):
 
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
-        return str(self.id)
+        return str(self.get_auto_id())
 
 
 class Attachment(NamespacedHubuumModel):
@@ -147,7 +151,7 @@ class Attachment(NamespacedHubuumModel):
 
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
-        return str(self.id)
+        return str(self.get_auto_id())
 
 
 class AttachmentModel(models.Model):
@@ -205,14 +209,14 @@ class Extension(NamespacedHubuumModel):
     For now, it is implied that the extension uses REST.
     """
 
-    name = models.CharField(max_length=255, null=False, unique=True)
-    model = models.CharField(
+    name: str = models.CharField(max_length=255, null=False, unique=True)
+    model: str = models.CharField(
         max_length=255, null=False, validators=[validate_model_can_have_extensions]
     )
-    url = models.CharField(max_length=255, null=False, validators=[validate_url])
-    require_interpolation = models.BooleanField(default=True, null=False)
-    header = models.CharField(max_length=512)
-    cache_time = models.PositiveSmallIntegerField(default=60)
+    url: str = models.CharField(max_length=255, null=False, validators=[validate_url])
+    require_interpolation: bool = models.BooleanField(default=True, null=False)
+    header: str = models.CharField(max_length=512)
+    cache_time: int = models.PositiveSmallIntegerField(default=60)
 
     class Meta:
         """Meta for the model."""
@@ -231,10 +235,12 @@ class ExtensionData(NamespacedHubuumModel):
     https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relations
     """
 
-    extension = models.ForeignKey("Extension", on_delete=models.CASCADE, null=False)
+    extension: int = models.ForeignKey(
+        "Extension", on_delete=models.CASCADE, null=False
+    )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type: int = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id: int = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
 
     json_data = models.JSONField(null=True)
@@ -247,7 +253,7 @@ class ExtensionData(NamespacedHubuumModel):
 
     def __str__(self):
         """Stringify the object, used to represent the object towards users."""
-        return str(self.id)
+        return str(self.get_auto_id())
 
 
 class ExtensionsModel(models.Model):
@@ -264,7 +270,7 @@ class ExtensionsModel(models.Model):
 
     def extension_data(self) -> Dict[str, Any]:
         """Return the data for each extension the object has."""
-        extension_data = {}
+        extension_data: Dict[str, Any] = {}
 
         for extension in self.extensions():
             extension_data[extension.name] = None
@@ -278,7 +284,7 @@ class ExtensionsModel(models.Model):
 
     def extension_urls(self) -> Dict[str, str]:
         """Return the URLs for each extension the object has."""
-        url_map = {}
+        url_map: Dict[str, str] = {}
         for extension in self.extensions():
             url_map[extension.name] = self.interpolate(extension.url)
 

@@ -1,17 +1,162 @@
+"""IAM-related models for the hubuum project."""
 # Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
 # pyright: reportIncompatibleVariableOverride=false
-"""Authentication-related models for the hubuum project."""
+
 import re
-from typing import List, Union
+from typing import List, Union, cast
 
 from django.contrib.auth.models import AbstractUser, AnonymousUser, Group
+from django.db import models
 from django.db.models import Model
 from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.permissions import Namespace, Permission
-from hubuum.permissions import operation_exists
+from hubuum.models.core import (
+    AttachmentModel,
+    ExtensionsModel,
+    HubuumModel,
+    NamespacedHubuumModel,
+)
 from hubuum.tools import get_model, get_object
+
+
+def namespace_operations(fully_qualified: bool = False) -> List[str]:
+    """Return a list of valid namespace permission operations.
+
+    args: fully_qualified (bool) - if True, the list will be fully qualified
+
+    returns: (list) - a list of valid namespace permission operations
+    """
+    operations: List[str] = ["create", "read", "update", "delete", "namespace"]
+    if fully_qualified:
+        operations = ["has_" + s for s in operations]
+
+    return operations
+
+
+def namespace_operation_exists(permission: str, fully_qualified: bool = False) -> bool:
+    """Check if a permission operation for a namespace exists.
+
+    args: permission (str) - the permission operation to check
+    args: fully_qualified (bool) - if True, the operation will be checked
+        against the fully qualified list of operations
+
+    returns: (bool) - True if the operation exists, False otherwise
+    """
+    if fully_qualified:
+        return permission in namespace_operations(fully_qualified=True)
+
+    return permission in namespace_operations()
+
+
+class NamespacedHubuumModelWithExtensions(
+    NamespacedHubuumModel, AttachmentModel, ExtensionsModel
+):
+    """An abstract model that provides Namespaces and Extensions."""
+
+    class Meta:
+        """Meta data for the class."""
+
+        abstract = True
+
+
+class Permission(HubuumModel):
+    """Permissions in Hubuum.
+
+    - Permissions are set by group.
+    - Objects belong to a namespace.
+    - Every namespace has zero or more groups with permissions for the namespace.
+
+    The permission `has_namespace` allows for the group to create new namespaces scoped
+    under the current one.
+    """
+
+    # If the namespace the permission points to goes away, clear the entry.
+    namespace: int = models.ForeignKey(
+        "Namespace", related_name="p_namespace", on_delete=models.CASCADE
+    )
+    # If the group the permission uses goes away, clear the entry.
+    group: int = models.ForeignKey(
+        "auth.Group", related_name="p_group", on_delete=models.CASCADE
+    )
+
+    has_create = models.BooleanField(null=False, default=False)
+    has_read = models.BooleanField(null=False, default=False)
+    has_update = models.BooleanField(null=False, default=False)
+    has_delete = models.BooleanField(null=False, default=False)
+    has_namespace = models.BooleanField(null=False, default=False)
+
+    class Meta:
+        """Metadata permissions."""
+
+        unique_together = ("namespace", "group")
+        ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return str(self.get_auto_id())
+
+
+class Namespace(HubuumModel):
+    """The namespace ('domain') of an object."""
+
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
+
+    def get_permissions_for_group(
+        self, group: Group, raise_exception: bool = True
+    ) -> Permission:
+        """Try to find a permission object for the given group.
+
+        param: group (Group instance)
+        param: raise_exception (True)
+
+        returns:
+            success (Permission): Permission object
+            failure (None): None
+
+        raises:
+            exception: NotFound if raise_exception is True and no permission object is found
+        """
+        try:
+            obj = Permission.objects.get(namespace=self, group=group)
+            return obj
+        except Permission.DoesNotExist as exc:
+            if raise_exception:
+                raise NotFound() from exc
+
+        return None
+
+    def grant_all(self, group: Group) -> bool:
+        """Grant all permissions to the namespace to the given group."""
+        create = {}
+        create["namespace"] = self
+        create["group"] = group
+        for perm in namespace_operations(fully_qualified=True):
+            create[perm] = True
+        Permission.objects.update_or_create(**create)
+        return True
+
+    def groups_that_can(self, perm: str) -> List[Group]:
+        """Fetch groups that can perform a specific permission.
+
+        param: perm (permission string, 'has_[read|create|update|delete|namespace])
+        return [group objects] (may be empty)
+        """
+        qs = Permission.objects.filter(namespace=self.id, **{perm: True}).values(
+            "group"
+        )
+        groups = Group.objects.filter(id__in=qs)
+        return groups
+
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
+    def __str__(self):
+        """Stringify the object, used to represent the object towards users."""
+        return self.name
 
 
 class User(AbstractUser):
@@ -23,6 +168,10 @@ class User(AbstractUser):
     lookup_fields = ["id", "username", "email"]
 
     _group_list = None
+
+    def get_auto_id(self) -> int:
+        """Return the auto id of the user."""
+        return cast(int, self.id)
 
     def is_admin(self):
         """Check if the user is any type of admin (staff/superadmin) (or in a similar group?)."""
@@ -68,7 +217,7 @@ class User(AbstractUser):
         param: namespace (namespace object)
         return True|False
         """
-        if not operation_exists(perm, fully_qualified=True):
+        if not namespace_operation_exists(perm, fully_qualified=True):
             raise MissingParam(f"Unknown permission '{perm}' passed to namespaced_can.")
 
         # We need to check if the user is a member of a group
@@ -143,7 +292,7 @@ class User(AbstractUser):
                 f"Unknown permission '{perm}' passed to has_perm"
             ) from exc
 
-        if operation_exists(operation) and get_model(model):
+        if namespace_operation_exists(operation) and get_model(model):
             field = "has_" + operation
         else:
             raise MissingParam(

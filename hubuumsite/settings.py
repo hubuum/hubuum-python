@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
+from typing import Any, Dict
 
 import structlog
 from structlog_sentry import SentryProcessor
@@ -95,7 +96,7 @@ WSGI_APPLICATION = "hubuumsite.wsgi.application"
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-REST_FRAMEWORK = {
+REST_FRAMEWORK: Dict[str, Any] = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("knox.auth.TokenAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
@@ -107,7 +108,7 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",  # this is default
 )
 
-REST_KNOX = {
+REST_KNOX: Dict[str, Any] = {
     "TOKEN_TTL": timedelta(hours=24),
     "AUTO_REFRESH": True,
 }
@@ -192,7 +193,7 @@ structlog.configure(
     cache_logger_on_first_use=True,
 )
 
-LOGGING = {
+LOGGING: Dict[str, Any] = {
     "version": 1,
     "disable_existing_loggers": True,
     "formatters": {

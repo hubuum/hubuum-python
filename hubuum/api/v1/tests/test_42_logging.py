@@ -14,8 +14,7 @@ from structlog.types import EventDict
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.log import critical, debug, error, info, warning
 from hubuum.middleware.logging_http import LogHttpResponseMiddleware
-from hubuum.models.auth import User
-from hubuum.models.permissions import HubuumModel, Namespace
+from hubuum.models.iam import HubuumModel, Namespace, User
 from hubuum.models.resources import Host
 
 

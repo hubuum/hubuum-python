@@ -1,16 +1,17 @@
 """Base view classes for Hubuum API v1."""
 
-from typing import Type
+from typing import List, Type, cast
 
 import structlog
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Model
-from django.http import HttpResponse
+from django.db.models import Model, QuerySet
+from django.http import HttpRequest, HttpResponse
 from rest_framework import generics, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.schemas.openapi import AutoSchema
 
 from hubuum.permissions import NameSpace
+from hubuum.typing import typed_user_from_request
 
 object_logger = structlog.get_logger("hubuum.api.object")
 
@@ -35,24 +36,23 @@ class LoggingMixin:
     def perform_create(self, serializer: serializers.ModelSerializer) -> None:
         """Log creates."""
         super().perform_create(serializer)
-        instance = serializer.instance
+        instance = cast(Model, serializer.instance)
+        user = typed_user_from_request(cast(HttpRequest, self.request))
         if instance:
-            self._log(
-                "created", instance.__class__.__name__, self.request.user, instance
-            )
+            self._log("created", instance.__class__.__name__, user, instance)
 
     def perform_update(self, serializer: serializers.ModelSerializer) -> None:
         """Log updates."""
         super().perform_update(serializer)
-        instance = serializer.instance
+        instance = cast(Model, serializer.instance)
+        user = typed_user_from_request(cast(HttpRequest, self.request))
         if instance:
-            self._log(
-                "updated", instance.__class__.__name__, self.request.user, instance
-            )
+            self._log("updated", instance.__class__.__name__, user, instance)
 
     def perform_destroy(self, instance: Model) -> None:
         """Log deletes."""
-        self._log("deleted", instance.__class__.__name__, self.request.user, instance)
+        user = typed_user_from_request(cast(HttpRequest, self.request))
+        self._log("deleted", instance.__class__.__name__, user, instance)
         super().perform_destroy(instance)
 
 
@@ -83,15 +83,15 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
         raises: 404 if not found.
         return: object
         """
-        if model is None:
-            queryset = self.get_queryset()
-            fields = self.lookup_fields
+        if model is None:  # type: ignore
+            queryset = cast(QuerySet[Model], self.get_queryset())
+            fields = cast(List[str], self.lookup_fields)
         else:
             queryset = model.objects.all()
             fields = ("id",)
 
         obj = None
-        value = self.kwargs[lookup_identifier]
+        value = cast(str, self.kwargs[lookup_identifier])
         for field in fields:
             try:
                 # https://stackoverflow.com/questions/9122169/calling-filter-with-a-variable-for-field-name

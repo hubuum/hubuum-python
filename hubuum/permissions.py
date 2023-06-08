@@ -1,4 +1,7 @@
 """Permissions module for hubuum."""
+from typing import Dict, List, cast
+
+from django.contrib.auth.models import AbstractUser
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import (
     SAFE_METHODS,
@@ -9,11 +12,13 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from typing_extensions import Literal
 
+from hubuum.typing import typed_user_from_request
+
 
 class CustomObjectPermissions(DjangoObjectPermissions):
     """Map permissions towards CRUD."""
 
-    perms_map = {
+    perms_map: Dict[str, List[str]] = {
         "GET": ["%(app_label)s.read_%(model_name)s"],
         "OPTIONS": ["%(app_label)s.read_%(model_name)s"],
         "HEAD": ["%(app_label)s.read_%(model_name)s"],
@@ -24,30 +29,9 @@ class CustomObjectPermissions(DjangoObjectPermissions):
     }
 
 
-def operations():
-    """Define the list of valid operations."""
-    return ("create", "read", "update", "delete", "namespace")
-
-
-def fully_qualified_operations():
-    """Define the list of valid operations, fully qualified with the has_-prefix."""
-    return ["has_" + s for s in operations()]
-
-
-def operation_exists(permission: str, fully_qualified: bool = False) -> bool:
-    """Check if a permission label is valid."""
-    if fully_qualified:
-        return permission in fully_qualified_operations()
-
-    return permission in operations()
-
-
-# We can't import this from models.auth because of circular imports
-# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
-# suggest a solution, but it breaks at runtime. :()
-def is_super_or_admin(user: object) -> bool:
+def is_super_or_admin(user: AbstractUser) -> bool:
     """Check to see if a user is superuser or admin (staff)."""
-    return user.is_staff or user.is_superuser  # type: ignore
+    return user.is_staff or user.is_superuser
 
 
 class IsAuthenticatedAndReadOnly(IsAuthenticated):
@@ -74,7 +58,7 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
 
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if we're super/admin otherwise authenticated readonly."""
-        if is_super_or_admin(request.user):
+        if is_super_or_admin(typed_user_from_request(request)):
             return True
         return super().has_permission(request, view)
 
@@ -82,7 +66,7 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
         self, request: Request, view: APIView, obj: object
     ) -> Literal[True]:
         """Check if we're super/admin otherwise authenticated readonly."""
-        if is_super_or_admin(request.user):
+        if is_super_or_admin(typed_user_from_request(request)):
             return True
         return super().has_object_permission(request, view, obj)
 
@@ -106,7 +90,8 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if superuser or admin by delegation, then check user, otherwise false."""
         # First check if we are superuser or asking for read-only (listing), if so, return true.
-        if request.user.is_anonymous:
+        user = typed_user_from_request(request)
+        if user.is_anonymous:
             return False
 
         if super().has_permission(request, view):
@@ -134,18 +119,21 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
                 if not view.namespace_post:
                     raise MethodNotAllowed(method=request.method)
 
+            # This breaks typing as it's not statically possible to resolve the attribute
+            # at this point. This ends up propagating through the rest of this code block.
             if hasattr(view, "namespace_write_permission"):
-                write_perm = view.namespace_write_permission
+                write_perm = cast(str, view.namespace_write_permission)
 
             if write_perm == "has_namespace":
-                name = request.data["name"]
+                name = cast(str, request.data["name"])
                 # We are creating a new namespace as a normal user.
                 # We need to create a permission object for the namespace, and that requires us
                 # to have a group identifier to allocate the permissions towards.
             else:
-                name = request.data["namespace"]
+                name = cast(str, request.data["namespace"])
 
-            return request.user.has_namespace(name, write_perm)
+            user = typed_user_from_request(request)
+            return user.has_namespace(name, write_perm)
 
         return True
 
@@ -158,7 +146,7 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
         # if request.user.is_anonymous:
         #    return False
 
-        if is_super_or_admin(request.user):
+        if is_super_or_admin(typed_user_from_request(request)):
             return True
 
         perms_map = {
@@ -186,7 +174,8 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
         else:
             perm = perms_map[request.method]
 
+        user = typed_user_from_request(request)
         if hasattr(obj, "namespace"):
-            return request.user.namespaced_can(perm, obj.namespace)
+            return user.namespaced_can(perm, cast(int, obj.namespace))
 
-        return request.user.namespaced_can(perm, obj)
+        return user.namespaced_can(perm, obj)

@@ -2,7 +2,7 @@
 
 This package is NOT allowed to import anything from internally in hubuum.
 """
-from typing import List, Union
+from typing import List, Union, cast
 
 from django.apps import apps
 from django.db.models import Model
@@ -42,11 +42,11 @@ def get_object(
     if lookup_fields:
         fields = lookup_fields
     elif hasattr(cls, "lookup_fields"):
-        fields = cls.lookup_fields
+        fields = cast(List[str], cls.lookup_fields)
 
     for field in fields:
         try:
-            obj = cls.objects.get(**{field: lookup_value})
+            obj = cast(Model, cls.objects.get(**{field: lookup_value}))
             if obj:
                 return obj
 

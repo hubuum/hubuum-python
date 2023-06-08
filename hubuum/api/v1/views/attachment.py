@@ -1,6 +1,6 @@
 """Attachment views for API v1."""
 
-from typing import Any
+from typing import Any, Dict, cast
 
 import structlog
 from django.contrib.contenttypes.models import ContentType
@@ -29,7 +29,8 @@ from hubuum.models.core import (
     get_model,
     model_supports_attachments,
 )
-from hubuum.models.permissions import Namespace
+from hubuum.models.iam import Namespace, NamespacedHubuumModelWithExtensions
+from hubuum.typing import typed_query_params_from_request
 
 from .base import HubuumDetail, HubuumList, LoggingMixin, MultipleFieldLookupORMixin
 
@@ -54,10 +55,10 @@ class AttachmentAutoSchema(AutoSchema):
         Returns:
             str: The unique operation ID for the route.
         """
-        operation_id_base = super().get_operation_id(path, method)
+        operation_id_base = cast(str, super().get_operation_id(path, method))
 
         # Order is relevant, so use a list of tuples and not a dict.
-        path_mapping = [
+        path_mapping: Dict[str, str] = [
             ("{model}", "Model"),
             ("{instance}", "Instance"),
             ("{instance}/", "Object"),
@@ -107,10 +108,10 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
     serializer_class = AttachmentSerializer
     filterset_class = AttachmentFilterSet
 
-    def _get_model(self, model: str) -> Model:
+    def _get_model(self, model_name: str) -> Model:
         """Get the model, or raise 404."""
-        model_name = model.lower()
-        model = get_model(model_name)
+        model_name_lower = model_name.lower()
+        model = get_model(model_name_lower)
 
         if model is None:
             raise NotFound(detail=f"Model {model_name} does not exist.")
@@ -132,14 +133,14 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
             # Get all attachments for the content_type, ie, the model in question.
             # But filter out the attachments that belong to objects that match the
             # query parameters.
-            model_filter = {}
-            attachment_filter = {}
+            model_filter: Dict[str, str] = {}
+            attachment_filter: Dict[str, str] = {}
 
-            for key in self.request.query_params:
+            for key, value in typed_query_params_from_request(request).items():
                 if key.startswith("sha256"):
-                    attachment_filter[key] = self.request.query_params[key]
+                    attachment_filter[key] = value
                 else:
-                    model_filter[key] = self.request.query_params[key]
+                    model_filter[key] = value
 
             if self.kwargs.get("instance"):
                 model_filter["id"] = self.kwargs.get("instance")
@@ -157,14 +158,14 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
         else:
             # Be helpful and translate model= to content_type=.
             # QueryDict is immutable, so we need to make a copy.
-            modified_query_dict = {}
-            for key in self.request.query_params:
+            modified_query_dict: Dict[str, str] = {}
+            for key, value in typed_query_params_from_request(request).items():
                 if key == "model":
-                    model = self._get_model(self.request.query_params[key])
+                    model = self._get_model(value)
                     content_type = ContentType.objects.get_for_model(model)
                     modified_query_dict["content_type"] = content_type
                 else:
-                    modified_query_dict[key] = self.request.query_params[key]
+                    modified_query_dict[key] = value
 
             try:
                 attachments = Attachment.objects.filter(
@@ -187,26 +188,31 @@ class AttachmentDetail(HubuumDetail):
         tags=["Attachment"],
     )
 
-    def _ensure_size_limits(self, obj: object, request: Request) -> bool:
+    def _ensure_size_limits(
+        self, instance: NamespacedHubuumModelWithExtensions, request: Request
+    ) -> bool:
         """Ensure adding the attachment won't exceed size limits."""
-        attachment = request.data.get(
-            "attachment", ParseError(detail="No attachment provided.")
+        attachment = cast(
+            Attachment,
+            request.data.get(
+                "attachment", ParseError(detail="No attachment provided.")
+            ),
         )
-        size = len(attachment.read())
+        size = len(cast(bytes, attachment.read()))
         attachment.seek(0)
 
-        max_attachments = obj.attachment_count_limit()
-        max_attachment_size = obj.attachment_individual_size_limit()
-        max_total_size = obj.attachment_total_size_limit()
+        max_attachments = instance.attachment_count_limit()
+        max_attachment_size = instance.attachment_individual_size_limit()
+        max_total_size = instance.attachment_total_size_limit()
 
         # Check limits
-        if max_attachments and obj.attachment_count() >= max_attachments:
+        if max_attachments and instance.attachment_count() >= max_attachments:
             raise AttachmentCountLimitExceededError()
 
         if max_attachment_size and size > max_attachment_size:
             raise AttachmentTooBig()
 
-        if max_total_size and size + obj.attachment_size() > max_total_size:
+        if max_total_size and size + instance.attachment_size() > max_total_size:
             raise AttachmentSizeLimitExceededError()
 
         return True
@@ -215,6 +221,9 @@ class AttachmentDetail(HubuumDetail):
         self, request: Request, *args: Any, **kwargs: Any
     ) -> Attachment:
         """Get an attachment object, or raise 404."""
+        # This view is called by the URL pattern that includes the part:
+        # /data/<model>/... as such there is now way to get here and have
+        # the model kwarg be None.
         model_name = self.kwargs.get("model").lower()
         obj_id = self.kwargs.get("instance")
         attachment_id = self.kwargs.get("attachment")
@@ -277,6 +286,9 @@ class AttachmentDetail(HubuumDetail):
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Add an attachment metadata."""
+        # This view is called by the URL pattern that includes the part:
+        # /data/<model>/... as such there is now way to get here and have
+        # the model kwarg be None.
         model_name = kwargs["model"]
 
         model = get_model(model_name)
@@ -294,7 +306,7 @@ class AttachmentDetail(HubuumDetail):
         # present in the request data, but we got them from the URL, so we
         # have to manually add them back into the request data.
         request.data["content_type"] = content_type.id
-        request.data["object_id"] = obj.id
+        request.data["object_id"] = cast(int, obj.id)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

@@ -19,7 +19,7 @@ class HubuumBaseConfig(HubuumAbstractConfig):
 
     # List of accepted environment variables and their defaults.
     # These are keys without the prefix listed above.
-    VALID_KEYS: Dict[str, Union[None, int, str]] = {
+    VALID_KEYS: Dict[str, Union[None, int, str, bool]] = {
         "SECRET_KEY": None,
         # Used by tox during testing
         "TESTING_PARALLEL": 2,
