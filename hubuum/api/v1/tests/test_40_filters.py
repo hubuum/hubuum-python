@@ -167,6 +167,10 @@ class HubuumFilterTestCase(HubuumAPITestCase):
         self.assert_get_elements(
             "/resources/hosts/?name__contains=test&fqdn__contains=domain", 1
         )
+        # Regex testing
+        self.assert_get_elements("/resources/hosts/?fqdn__regex=test[23]\.other", 2)
+        self.assert_get_elements("/resources/hosts/?fqdn__regex=test[13].*tld$", 1)
+        self.assert_get_elements("/resources/hosts/?fqdn__regex=^test[13]", 2)
 
     def test_extension_data_basic_filtering(self):
         """Test that we can filter into the JSON blobs that extensions deliver."""

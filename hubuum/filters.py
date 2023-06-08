@@ -46,6 +46,8 @@ _textual_lookups = [
     "istartswith",
     "exact",
     "iexact",
+    "regex",
+    "iregex",
 ]
 _numeric_lookups = ["exact", "gt", "gte", "lt", "lte", "range"]
 _date_lookups = [
