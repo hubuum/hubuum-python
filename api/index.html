@@ -234,11 +234,29 @@
 <a class="md-nav__link" href="#text-or-character-fields">
     Text or character fields
   </a>
+<nav aria-label="Text or character fields" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#examples">
+    Examples
+  </a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#numeric-fields">
     Numeric fields
   </a>
+<nav aria-label="Numeric fields" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#examples_1">
+    Examples
+  </a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#date-fields">
@@ -332,19 +350,39 @@
 <div class="md-content" data-md-component="content">
 <article class="md-content__inner md-typeset">
 <h1 id="the-hubuum-api">The hubuum API<a class="headerlink" href="#the-hubuum-api" title="Permanent link">¶</a></h1>
-<p>The generic lookup key is <code>val</code> for all models. Usually, any unique identifier for the object will be usable as the lookup key. For example, for a user, the username or email can be used as the lookup key. For a group, the group name can be used as the lookup key.</p>
 <h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¶</a></h2>
 <p>Querying using the API is done via standard HTTP GET requests using django-filter. The API supports filtering, ordering, and pagination. The API also supports querying JSON fields of the models directly (see below).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Filtering on a field that does not exist, or using an unsupported lookup key for an existing, field will return <code>400 Bad Request</code>, with some information about the fields or lookups that failed.</p>
+</div>
 <h2 id="operators">Operators<a class="headerlink" href="#operators" title="Permanent link">¶</a></h2>
 <h3 id="text-or-character-fields">Text or character fields<a class="headerlink" href="#text-or-character-fields" title="Permanent link">¶</a></h3>
-<p>For text fields, the following operators are supported:</p>
+<p>For text or character fields, the following operators are supported:</p>
 <ul>
 <li><code>exact</code> (default)</li>
 <li><code>startswith</code> (case-sensitive, string start with)</li>
 <li><code>endswith</code> (case-sensitive, string end with)</li>
 <li><code>contains</code> (case-sensitive, string contains)</li>
+<li><code>regex</code> (case-sensitive, regular expression)</li>
 </ul>
 <p>These may also be prefixed with <code>i</code> to make them case-insensitive, eg. <code>icontains</code>.</p>
+<h4 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># These two are identical:</span>
+/iam/users/?name<span class="o">=</span>johndoe
+/iam/users/?name__exact<span class="o">=</span>johndoe
+
+<span class="c1"># Find all users with a username that ends with "doe"</span>
+/iam/users/?name__endswith<span class="o">=</span>doe
+/iam/users/?name__regex<span class="o">=</span>doe$
+
+<span class="c1"># Find all users that start with "john"</span>
+/iam/users/?name__startswith<span class="o">=</span>john
+/iam/users/?name__regex<span class="o">=</span>^john
+
+<span class="c1"># Find all users that start with "j", contains "do", and ends with "e"</span>
+/iam/users/?name__regex<span class="o">=</span>^j.*do.*e$
+</code></pre></div>
 <h3 id="numeric-fields">Numeric fields<a class="headerlink" href="#numeric-fields" title="Permanent link">¶</a></h3>
 <p>For numeric fields, the following operators are supported:</p>
 <ul>
@@ -355,6 +393,16 @@
 <li><code>lte</code> (less than or equal to)</li>
 <li><code>range</code> (between)</li>
 </ul>
+<h4 id="examples_1">Examples<a class="headerlink" href="#examples_1" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># These two are identical:</span>
+/iam/users/?id<span class="o">=</span><span class="m">1</span>
+/iam/users/?id__exact<span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Find all users with an ID over 5 but under 9, these three are identical</span>
+/iam/users/?id__gt<span class="o">=</span><span class="m">5</span><span class="p">&amp;</span><span class="nv">id__lt</span><span class="o">=</span><span class="m">9</span>
+/iam/users/?id__gte<span class="o">=</span><span class="m">6</span><span class="p">&amp;</span><span class="nv">id__lte</span><span class="o">=</span><span class="m">8</span>
+/iam/users/?id__range<span class="o">=</span><span class="m">6</span>,8
+</code></pre></div>
 <h3 id="date-fields">Date fields<a class="headerlink" href="#date-fields" title="Permanent link">¶</a></h3>
 <p>For date fields, the following operators are supported:</p>
 <ul>
@@ -387,7 +435,7 @@
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 25, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 8, 2023</span>
 </small>
 </div>
 </article>

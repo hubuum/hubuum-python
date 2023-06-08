@@ -3393,8 +3393,9 @@ return True|False</p>
 <a class="headerlink" href="#hubuum.models.iam.get_group" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Try to find a group based on the identifier.</p>
-<p>param: group_identifier</p>
-<p>return: group object</p>
+<p>:param: group_identifier</p>
+<p>:return: group object</p>
+<p>:raises: NotFound if no object found.</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/iam.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
@@ -3414,11 +3415,11 @@ return True|False</p>
 <span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_group</span><span class="p">(</span><span class="n">group_identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">raise_exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Group</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Try to find a group based on the identifier.</span>
 
-<span class="sd">    param: group_identifier</span>
+<span class="sd">    :param: group_identifier</span>
 
-<span class="sd">    return: group object</span>
+<span class="sd">    :return: group object</span>
 
-<span class="sd">    raises: NotFound if no object found.</span>
+<span class="sd">    :raises: NotFound if no object found.</span>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">get_object</span><span class="p">(</span>
         <span class="n">Group</span><span class="p">,</span>
@@ -3460,6 +3461,10 @@ return True|False</p>
 <a class="headerlink" href="#hubuum.models.iam.namespace_operation_exists" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Check if a permission operation for a namespace exists.</p>
+<p>:param: permission (str) - the permission operation to check
+:param: fully_qualified (bool) - if True, the operation will be checked
+    against the fully qualified list of operations</p>
+<p>:returns: (bool) - True if the operation exists, False otherwise</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/iam.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
@@ -3477,11 +3482,11 @@ return True|False</p>
 <span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">namespace_operation_exists</span><span class="p">(</span><span class="n">permission</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fully_qualified</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check if a permission operation for a namespace exists.</span>
 
-<span class="sd">    args: permission (str) - the permission operation to check</span>
-<span class="sd">    args: fully_qualified (bool) - if True, the operation will be checked</span>
+<span class="sd">    :param: permission (str) - the permission operation to check</span>
+<span class="sd">    :param: fully_qualified (bool) - if True, the operation will be checked</span>
 <span class="sd">        against the fully qualified list of operations</span>
 
-<span class="sd">    returns: (bool) - True if the operation exists, False otherwise</span>
+<span class="sd">    :returns: (bool) - True if the operation exists, False otherwise</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">fully_qualified</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">permission</span> <span class="ow">in</span> <span class="n">namespace_operations</span><span class="p">(</span><span class="n">fully_qualified</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -3497,6 +3502,8 @@ return True|False</p>
 <a class="headerlink" href="#hubuum.models.iam.namespace_operations" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Return a list of valid namespace permission operations.</p>
+<p>:param: fully_qualified (bool) - if True, the list will be fully qualified</p>
+<p>:returns: (list) - a list of valid namespace permission operations</p>
 <details class="quote">
 <summary>Source code in <code>hubuum/models/iam.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
@@ -3513,9 +3520,9 @@ return True|False</p>
 <span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">namespace_operations</span><span class="p">(</span><span class="n">fully_qualified</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return a list of valid namespace permission operations.</span>
 
-<span class="sd">    args: fully_qualified (bool) - if True, the list will be fully qualified</span>
+<span class="sd">    :param: fully_qualified (bool) - if True, the list will be fully qualified</span>
 
-<span class="sd">    returns: (list) - a list of valid namespace permission operations</span>
+<span class="sd">    :returns: (list) - a list of valid namespace permission operations</span>
 <span class="sd">    """</span>
     <span class="n">operations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"create"</span><span class="p">,</span> <span class="s2">"read"</span><span class="p">,</span> <span class="s2">"update"</span><span class="p">,</span> <span class="s2">"delete"</span><span class="p">,</span> <span class="s2">"namespace"</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">fully_qualified</span><span class="p">:</span>
