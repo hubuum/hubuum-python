@@ -5,7 +5,7 @@
 Querying using the API is done via standard HTTP GET requests using django-filter. The API supports filtering, ordering, and pagination. The API also supports querying JSON fields of the models directly (see below).
 
 !!! note
-    Filter on a field that does not exist, or using an unsupported lookup key for the field will return `400 Bad Request`, with some information about the fields or lookups that failed.
+    Filtering on a field that does not exist, or using an unsupported lookup key for an existing, field will return `400 Bad Request`, with some information about the fields or lookups that failed.
 
 ## Operators
 
