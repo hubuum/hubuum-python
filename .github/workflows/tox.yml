@@ -104,7 +104,7 @@ jobs:
         with:
           name: coverage-${{ matrix.python-version }}
       - name: Install Coveralls
-        run: pip install coveralls[toml]
+        run: pip install coverage[toml] coveralls
       - name: Run Coveralls
         run: coveralls
         env:
@@ -122,6 +122,10 @@ jobs:
     container:
       image: thekevjames/coveralls
     steps:
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install coverage[toml]
       - name: Coveralls Finish
         run: coveralls --finish
         env:
@@ -144,7 +148,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install coverage
+          python -m pip install coverage[toml]
       - name: Convert coverage
         run: coverage xml
       - name: Upload coverage to Codacy
