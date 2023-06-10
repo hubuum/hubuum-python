@@ -48,7 +48,7 @@ sentry-sdk = {version = "1.25.0", extras = ["django"]}
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
-coverage = "*"
+coverage = { version = "*", extras = ["toml"] }
 black = "*"
 pytest = "*"
 pytest-django = "*"
