@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install tox tox-gh-actions
+          python -m pip install tox tox-gh-actions poetry
       # Dependencies are installed by tox
       #    python -m pip install -r requirements-test.txt
       # - name: Test tox itself
