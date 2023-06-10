@@ -5,7 +5,7 @@ from .base import HubuumModelTestCase
 
 
 class JackTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the Jack model."""
+    """Define the test suite for the Jack model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

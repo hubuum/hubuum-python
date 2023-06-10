@@ -71,6 +71,7 @@ jobs:
           -e HUBUUM_DATABASE_NAME=${{ env.HUBUUM_DATABASE_NAME }}
           -e HUBUUM_DATABASE_PASSWORD=${{ env.HUBUUM_DATABASE_PASSWORD }}
           -e HUBUUM_DATABASE_USER=${{ env.HUBUUM_DATABASE_USER }}
+          -e HUBUUM_LOGGING_LEVEL="CRITICAL"
           --platform ${{ matrix.platform }}
           hubuum:${{ env.PLATFORM_TAG }}
 

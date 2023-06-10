@@ -8,7 +8,7 @@ from hubuum.models.iam import User
 
 
 class UserAndGroupTestCase(TestCase):
-    """This class defines the test suite for the User and Group models."""
+    """Define the test suite for the User and Group models."""
 
     def setUp(self) -> None:
         """Set up defaults for the test object."""

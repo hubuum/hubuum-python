@@ -5,7 +5,7 @@ from .base import HubuumModelTestCase
 
 
 class HostTypeTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the HostType model."""
+    """Define the test suite for the HostType model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

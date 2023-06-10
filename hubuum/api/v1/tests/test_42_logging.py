@@ -90,11 +90,11 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
     ) -> None:
         """Check the JSON against expected_content.
 
-        Args:
-            content: The JSON content to check.
-            expected_content: The expected content.
-            count: Expect a list of this many elements.
-            element: The element to check in the list.
+        :param cls: The class of the model to check against.
+        :param content: The JSON content to check.
+        :param expected_content: The expected content.
+        :param element: The element to check in the list.
+        :param count: Expect a list of this many elements.
         """
         json_data = json.loads(content)
         if count:

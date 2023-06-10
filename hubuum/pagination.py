@@ -17,14 +17,10 @@ class HubuumFlexiblePagination(PageNumberPagination):
     page_size_query_param = "page_size"
 
     def get_paginated_response(self, data: ReturnList) -> Response:
-        """
-        Return a paginated response with count, next, and previous links as headers.
+        """Return a paginated response with count, next, and previous links as headers.
 
-        Args:
-            data (ReturnList): The data to be paginated.
-
-        Returns:
-            rest_framework.response.Response: The paginated response.
+        :param data: The data to be paginated.
+        :return: The paginated response.
         """
         response = Response(data)
         response["X-Total-Count"] = self.page.paginator.count
@@ -32,11 +28,9 @@ class HubuumFlexiblePagination(PageNumberPagination):
         return response
 
     def build_link_header(self) -> str:
-        """
-        Build the Link header value with next and previous links.
+        """Build the Link header value with next and previous links.
 
-        Returns:
-            str: The value of the Link header.
+        :return: The value of the Link header.
         """
         link_header = []
 

@@ -38,22 +38,18 @@ manual_logger = structlog.get_logger("hubuum.manual")
 
 
 class AttachmentAutoSchema(AutoSchema):
-    """
-    Custom AutoSchema for generating unique operation IDs for the Attachment views.
+    """Custom AutoSchema for generating unique operation IDs for the Attachment views.
 
     The generated operation IDs will utilize specific path parameters to ensure uniqueness.
     """
 
     def get_operation_id(self, path: str, method: str) -> str:
-        """
-        Generate a unique operation ID by appending specific path parameters to the base ID.
+        """Generate a unique operation ID by appending specific path parameters to the base ID.
 
-        Args:
-            path (str): The path of the current route.
-            method (str): The HTTP method of the current route.
+        :param path: The path of the current route.
+        :param method: The HTTP method of the current route.
 
-        Returns:
-            str: The unique operation ID for the route.
+        :return: The unique operation ID for the route.
         """
         operation_id_base = cast(str, super().get_operation_id(path, method))
 

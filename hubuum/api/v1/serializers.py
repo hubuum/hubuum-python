@@ -96,7 +96,7 @@ class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
 class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  # type: ignore
     """General Hubuum Serializer."""
 
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """For methods that are subclasses of ExtensionsModel, enable relevant fields."""
         super().__init__(*args, **kwargs)
 

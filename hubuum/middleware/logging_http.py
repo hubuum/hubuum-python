@@ -12,25 +12,22 @@ logger = structlog.getLogger("hubuum.request")
 
 
 class LogHttpResponseMiddleware:
-    """
-    Middleware to log HTTP responses with their status codes, messages, and URLs.
+    """Middleware to log HTTP responses with their status codes, messages, and URLs.
 
     This middleware checks the status code of the response and logs a message
     based on the response code range (success, redirection, client error, or server error).
     The time it took to process the response is also logged.
     """
 
-    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]):
-        """
-        Initialize the middleware.
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+        """Initialize the middleware.
 
         :param get_response: A reference to the next middleware or view in the chain.
         """
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        """
-        Process the request and log the response.
+        """Process the request and log the response.
 
         :param request: The incoming request.
         :return: A response object
