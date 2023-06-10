@@ -104,7 +104,7 @@ jobs:
         with:
           name: coverage-${{ matrix.python-version }}
       - name: Install Coveralls
-        run: pip install coveralls
+        run: pip install coveralls[toml]
       - name: Run Coveralls
         run: coveralls
         env:
