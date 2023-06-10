@@ -28,7 +28,7 @@ class HubuumAbstractConfig:
     ROOT_PREFIX: str = "HUBUUM"
     VALID_KEYS: Dict[str, Union[None, int, float, str, bool]] = {}
 
-    def __init__(self, prefix: str, env: Dict[str, Any]):
+    def __init__(self, prefix: str, env: Dict[str, Any]) -> None:
         """Initialize the configuration class."""
         self._prefix = prefix
         self._config = self.get_prefixed_pairs(prefix, env)

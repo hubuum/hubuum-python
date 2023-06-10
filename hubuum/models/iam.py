@@ -92,7 +92,7 @@ class Permission(HubuumModel):
         unique_together = ("namespace", "group")
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return str(self.get_auto_id())
 
@@ -111,11 +111,13 @@ class Namespace(HubuumModel):
         param: group (Group instance)
         param: raise_exception (True)
 
-        returns:
+        Returns
+        -------
             success (Permission): Permission object
             failure (None): None
 
-        raises:
+        Raises
+        ------
             exception: NotFound if raise_exception is True and no permission object is found
         """
         try:
@@ -154,7 +156,7 @@ class Namespace(HubuumModel):
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.name
 
@@ -276,8 +278,7 @@ class User(AbstractUser):
     def has_perm(
         self, perm: str, obj: Union[Model, AbstractUser, AnonymousUser, None] = None
     ) -> bool:
-        """
-        Model (?) permissions check for an object.
+        """Model (?) permissions check for an object.
 
         perm: see permissions.py
         obj: Hubuum Object

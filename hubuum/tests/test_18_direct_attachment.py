@@ -11,7 +11,7 @@ from .base import HubuumModelTestCase
 
 
 class AttachmentTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the Attachment model."""
+    """Define the test suite for the Attachment model."""
 
     def setUp(self):
         """Set up defaults for the test object."""
@@ -49,7 +49,7 @@ class AttachmentTestCase(HubuumModelTestCase):
 
 
 class AttachmentManagerTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the AttachmentManager model."""
+    """Define the test suite for the AttachmentManager model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

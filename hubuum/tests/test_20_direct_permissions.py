@@ -7,7 +7,7 @@ from hubuum.models.resources import Host
 
 
 class PermissionsTestCase(TestCase):
-    """This class defines the test suite for the Permission model."""
+    """Define the test suite for the Permission model."""
 
     def setUp(self) -> None:
         """Set up example users and groups."""
@@ -61,17 +61,17 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(str(self.twopermissions.id), str(self.twopermissions))
 
     def test_access_to_host_belonging_to_one(self):
-        """This object readable by one via onegroup, but not readable by two via twogroup."""
+        """Assure readable by one via onegroup, but not readable by two via twogroup."""
         self.assertTrue(self.one.has_perm(self.read_perm, self.onehost))
         self.assertFalse(self.two.has_perm(self.read_perm, self.onehost))
 
     def test_access_to_host_belonging_to_two(self):
-        """This object readable by two via twogroup, but not readable by one via onegroup."""
+        """Assure readable by two via twogroup, but not readable by one via onegroup."""
         self.assertFalse(self.one.has_perm(self.read_perm, self.twohost))
         self.assertTrue(self.two.has_perm(self.read_perm, self.twohost))
 
     def test_access_grant_and_revoke_read_to_two(self):
-        """This object readable by two via twogroup, but full access via onegroup."""
+        """Assure readable by two via twogroup, but full access via onegroup."""
         # 1. Find the namespace for the object.
         # 2. Add an entry to the permissions model where twogroup has read to the namespace.
         self.assertFalse(self.two.has_perm(self.read_perm, self.onehost))

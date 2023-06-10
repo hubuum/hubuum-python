@@ -6,7 +6,7 @@ from .base import HubuumModelTestCase
 
 
 class ExtensionTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the Extension model."""
+    """Define the test suite for the Extension model."""
 
     def setUp(self):
         """Set up defaults for the test object."""
@@ -27,7 +27,7 @@ class ExtensionTestCase(HubuumModelTestCase):
 
 
 class NamespaceTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the Namespace model."""
+    """Define the test suite for the Namespace model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

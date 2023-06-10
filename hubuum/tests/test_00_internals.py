@@ -25,7 +25,7 @@ from .base import HubuumModelTestCase
 
 
 class InternalsTestCase(HubuumModelTestCase):
-    """This class defines the test suite for internal structures."""
+    """Define the test suite for internal structures."""
 
     def test_user_get_auto_id(self):
         """Test that the user get_auto_id method works."""

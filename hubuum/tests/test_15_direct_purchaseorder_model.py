@@ -7,7 +7,7 @@ from .base import HubuumModelTestCase
 
 
 class PurchaseOrderTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the PurchaseOrder model."""
+    """Define the test suite for the PurchaseOrder model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

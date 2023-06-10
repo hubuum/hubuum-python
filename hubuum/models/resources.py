@@ -15,7 +15,8 @@ class Host(NamespacedHubuumModelWithExtensions):
 
     name = models.CharField(max_length=255)
     fqdn = models.CharField(max_length=255, blank=True)
-    type = models.ForeignKey(
+    # This may go away with tags...
+    type = models.ForeignKey(  # noqa: A003 (builtin-attribute-shadowing)
         "HostType",
         on_delete=models.DO_NOTHING,
         related_name="hosts",
@@ -51,7 +52,7 @@ class Host(NamespacedHubuumModelWithExtensions):
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.name
 
@@ -78,7 +79,7 @@ class HostType(NamespacedHubuumModelWithExtensions):
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.name
 
@@ -98,9 +99,9 @@ class Jack(NamespacedHubuumModelWithExtensions):
     room = models.ForeignKey(
         "Room", models.CASCADE, db_column="room", blank=True, null=True
     )
-    building = models.CharField(max_length=255, blank=True, null=True)
+    building = models.CharField(max_length=255, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.name
 
@@ -121,12 +122,12 @@ class Person(NamespacedHubuumModelWithExtensions):
         "Room", models.CASCADE, db_column="room", blank=True, null=True
     )
     section = models.IntegerField(blank=True, null=True)
-    department = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    office_phone = models.CharField(max_length=255, blank=True, null=True)
-    mobile_phone = models.CharField(max_length=255, blank=True, null=True)
+    department = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(blank=True)
+    office_phone = models.CharField(max_length=255, blank=True)
+    mobile_phone = models.CharField(max_length=255, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.username
 
@@ -155,7 +156,7 @@ class PurchaseOrder(NamespacedHubuumModelWithExtensions):
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return str(self.po_number)
 
@@ -169,15 +170,15 @@ class Room(NamespacedHubuumModelWithExtensions):
     """
 
     room_id = models.CharField(max_length=255)
-    building = models.CharField(max_length=255, blank=True, null=True)
-    floor = models.CharField(max_length=255, blank=True, null=True)
+    building = models.CharField(max_length=255, blank=True)
+    floor = models.CharField(max_length=255, blank=True)
 
     class Meta:
         """Meta for the model."""
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.room_id
 
@@ -190,16 +191,16 @@ class Vendor(NamespacedHubuumModelWithExtensions):
 
     vendor_name = models.CharField(max_length=255)
     vendor_url = models.URLField()
-    vendor_credentials = models.CharField(max_length=255, blank=True, null=True)
-    contact_name = models.CharField(max_length=255, blank=True, null=True)
+    vendor_credentials = models.CharField(max_length=255, blank=True)
+    contact_name = models.CharField(max_length=255, blank=True)
     contact_email = models.EmailField()
-    contact_phone = models.CharField(max_length=255, blank=True, null=True)
+    contact_phone = models.CharField(max_length=255, blank=True)
 
     class Meta:
         """Meta for the model."""
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.vendor_name

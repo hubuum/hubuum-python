@@ -13,7 +13,7 @@ from hubuum.models.resources import Person, PurchaseOrder, Room, Vendor
 
 
 class HubuumModelTestCase(TestCase):
-    """This class defines the test suite for a generic model."""
+    """Define the test suite for a generic model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

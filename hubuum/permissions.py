@@ -75,8 +75,7 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
 # 1. Tenant specific admin groups
 # 2. Limit visibility to a tenant's namespace / scope.
 class NameSpace(IsSuperOrAdminOrReadOnly):
-    """
-    Namespace access.
+    """Namespace access.
 
     Write access:
         - super or admin users

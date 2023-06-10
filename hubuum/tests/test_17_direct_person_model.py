@@ -5,7 +5,7 @@ from .base import HubuumModelTestCase
 
 
 class PersonTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the Person model."""
+    """Define the test suite for the Person model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

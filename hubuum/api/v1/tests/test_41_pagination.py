@@ -26,11 +26,12 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         return super().tearDown()
 
     def _create_hosts(self, num_hosts: int) -> None:
-        """
-        Create the specified number of Host objects.
+        """Create the specified number of Host objects.
 
-        Args:
-            num_hosts (int): The number of Host objects to create.
+        :param num_hosts: The number of Host objects to create.
+        :type num_hosts: int
+
+        :return: None
         """
         for i in range(num_hosts):
             Host.objects.create(
@@ -88,15 +89,13 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         expected_prev: Union[int, None],
         expected_next: Union[int, None],
     ) -> None:
-        """
-        Check the next and prev links in the Link header of the given response.
+        """Check the next and prev links in the Link header of the given response.
 
-        Args:
-            response (rest_framework.response.Response): The response to check the Link header.
-            expected_prev (int or None): The expected page number of the prev link or None if it
-                should not exist.
-            expected_next (int or None): The expected page number of the next link or None if it
-                should not exist.
+        :param response: The response to check the Link header.
+        :param expected_prev: The expected page number of the prev link or None if it should not
+            exist.
+        :param expected_next: The expected page number of the next link or None if it should not
+            exist.
         """
         link_header = response["Link"]
         links = self.parse_link_header(link_header)
@@ -118,14 +117,11 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
             self.assertNotIn("next", links)
 
     def parse_link_header(self, link_header: str) -> Dict[str, str]:
-        """
-        Parse the Link header into a dictionary.
+        """Parse the Link header into a dictionary.
 
-        Args:
-            link_header (str): The Link header value.
+        :param link_header: The Link header value.
 
-        Returns:
-            dict: A dictionary containing the parsed links with their relationship as keys.
+        :return: A dictionary containing the parsed links with their relationship as keys.
         """
         links = {}
         for link in link_header.split(","):
@@ -136,14 +132,11 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         return links
 
     def get_page_number_from_link(self, link: str) -> int:
-        """
-        Get the page number from a paginated link.
+        """Get the page number from a paginated link.
 
-        Args:
-            link (str): The paginated link.
+        :param link: The paginated link.
 
-        Returns:
-            int: The page number extracted from the link.
+        :return: The page number extracted from the link.
         """
         parsed_url = urlparse(link)
         query_params = parse_qs(parsed_url.query)

@@ -156,6 +156,24 @@
             }
           },
           {
+            "name": "username__regex",
+            "required": false,
+            "in": "query",
+            "description": "username__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "username__iregex",
+            "required": false,
+            "in": "query",
+            "description": "username__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "email__contains",
             "required": false,
             "in": "query",
@@ -223,6 +241,24 @@
             "required": false,
             "in": "query",
             "description": "email__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email__regex",
+            "required": false,
+            "in": "query",
+            "description": "email__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email__iregex",
+            "required": false,
+            "in": "query",
+            "description": "email__iregex",
             "schema": {
               "type": "string"
             }
@@ -759,6 +795,24 @@
             "required": false,
             "in": "query",
             "description": "name__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name__regex",
+            "required": false,
+            "in": "query",
+            "description": "name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "name__iregex",
             "schema": {
               "type": "string"
             }
@@ -1940,6 +1994,24 @@
             }
           },
           {
+            "name": "name__regex",
+            "required": false,
+            "in": "query",
+            "description": "name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "name__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "description__contains",
             "required": false,
             "in": "query",
@@ -2007,6 +2079,24 @@
             "required": false,
             "in": "query",
             "description": "description__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description__regex",
+            "required": false,
+            "in": "query",
+            "description": "description__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description__iregex",
+            "required": false,
+            "in": "query",
+            "description": "description__iregex",
             "schema": {
               "type": "string"
             }
@@ -2868,6 +2958,24 @@
             }
           },
           {
+            "name": "name__regex",
+            "required": false,
+            "in": "query",
+            "description": "name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "name__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "model__contains",
             "required": false,
             "in": "query",
@@ -2940,6 +3048,24 @@
             }
           },
           {
+            "name": "model__regex",
+            "required": false,
+            "in": "query",
+            "description": "model__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__iregex",
+            "required": false,
+            "in": "query",
+            "description": "model__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "url__contains",
             "required": false,
             "in": "query",
@@ -3007,6 +3133,24 @@
             "required": false,
             "in": "query",
             "description": "url__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "url__regex",
+            "required": false,
+            "in": "query",
+            "description": "url__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "url__iregex",
+            "required": false,
+            "in": "query",
+            "description": "url__iregex",
             "schema": {
               "type": "string"
             }
@@ -3088,6 +3232,24 @@
             "required": false,
             "in": "query",
             "description": "header__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "header__regex",
+            "required": false,
+            "in": "query",
+            "description": "header__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "header__iregex",
+            "required": false,
+            "in": "query",
+            "description": "header__iregex",
             "schema": {
               "type": "string"
             }
@@ -4021,6 +4183,24 @@
             }
           },
           {
+            "name": "model__regex",
+            "required": false,
+            "in": "query",
+            "description": "model__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model__iregex",
+            "required": false,
+            "in": "query",
+            "description": "model__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "enabled",
             "required": false,
             "in": "query",
@@ -4575,6 +4755,24 @@
             }
           },
           {
+            "name": "sha256__regex",
+            "required": false,
+            "in": "query",
+            "description": "sha256__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iregex",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "size",
             "required": false,
             "in": "query",
@@ -4696,6 +4894,24 @@
             "required": false,
             "in": "query",
             "description": "original_filename__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__regex",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iregex",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iregex",
             "schema": {
               "type": "string"
             }
@@ -5165,6 +5381,24 @@
             }
           },
           {
+            "name": "sha256__regex",
+            "required": false,
+            "in": "query",
+            "description": "sha256__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iregex",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "size",
             "required": false,
             "in": "query",
@@ -5286,6 +5520,24 @@
             "required": false,
             "in": "query",
             "description": "original_filename__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__regex",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iregex",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iregex",
             "schema": {
               "type": "string"
             }
@@ -5967,6 +6219,24 @@
             }
           },
           {
+            "name": "sha256__regex",
+            "required": false,
+            "in": "query",
+            "description": "sha256__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha256__iregex",
+            "required": false,
+            "in": "query",
+            "description": "sha256__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "size",
             "required": false,
             "in": "query",
@@ -6088,6 +6358,24 @@
             "required": false,
             "in": "query",
             "description": "original_filename__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__regex",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "original_filename__iregex",
+            "required": false,
+            "in": "query",
+            "description": "original_filename__iregex",
             "schema": {
               "type": "string"
             }
@@ -7031,6 +7319,24 @@
             }
           },
           {
+            "name": "name__regex",
+            "required": false,
+            "in": "query",
+            "description": "name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "name__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "fqdn__contains",
             "required": false,
             "in": "query",
@@ -7103,6 +7409,24 @@
             }
           },
           {
+            "name": "fqdn__regex",
+            "required": false,
+            "in": "query",
+            "description": "fqdn__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fqdn__iregex",
+            "required": false,
+            "in": "query",
+            "description": "fqdn__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "serial__contains",
             "required": false,
             "in": "query",
@@ -7170,6 +7494,24 @@
             "required": false,
             "in": "query",
             "description": "serial__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serial__regex",
+            "required": false,
+            "in": "query",
+            "description": "serial__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serial__iregex",
+            "required": false,
+            "in": "query",
+            "description": "serial__iregex",
             "schema": {
               "type": "string"
             }
@@ -7864,6 +8206,24 @@
             }
           },
           {
+            "name": "name__regex",
+            "required": false,
+            "in": "query",
+            "description": "name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "name__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "description__contains",
             "required": false,
             "in": "query",
@@ -7931,6 +8291,24 @@
             "required": false,
             "in": "query",
             "description": "description__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description__regex",
+            "required": false,
+            "in": "query",
+            "description": "description__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description__iregex",
+            "required": false,
+            "in": "query",
+            "description": "description__iregex",
             "schema": {
               "type": "string"
             }
@@ -8508,6 +8886,24 @@
             }
           },
           {
+            "name": "room_id__regex",
+            "required": false,
+            "in": "query",
+            "description": "room_id__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "room_id__iregex",
+            "required": false,
+            "in": "query",
+            "description": "room_id__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "building__contains",
             "required": false,
             "in": "query",
@@ -8580,6 +8976,24 @@
             }
           },
           {
+            "name": "building__regex",
+            "required": false,
+            "in": "query",
+            "description": "building__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "building__iregex",
+            "required": false,
+            "in": "query",
+            "description": "building__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "floor__contains",
             "required": false,
             "in": "query",
@@ -8647,6 +9061,24 @@
             "required": false,
             "in": "query",
             "description": "floor__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "floor__regex",
+            "required": false,
+            "in": "query",
+            "description": "floor__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "floor__iregex",
+            "required": false,
+            "in": "query",
+            "description": "floor__iregex",
             "schema": {
               "type": "string"
             }
@@ -9224,6 +9656,24 @@
             }
           },
           {
+            "name": "name__regex",
+            "required": false,
+            "in": "query",
+            "description": "name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "name__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "building__contains",
             "required": false,
             "in": "query",
@@ -9291,6 +9741,24 @@
             "required": false,
             "in": "query",
             "description": "building__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "building__regex",
+            "required": false,
+            "in": "query",
+            "description": "building__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "building__iregex",
+            "required": false,
+            "in": "query",
+            "description": "building__iregex",
             "schema": {
               "type": "string"
             }
@@ -9868,6 +10336,24 @@
             }
           },
           {
+            "name": "username__regex",
+            "required": false,
+            "in": "query",
+            "description": "username__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "username__iregex",
+            "required": false,
+            "in": "query",
+            "description": "username__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "section__contains",
             "required": false,
             "in": "query",
@@ -9935,6 +10421,24 @@
             "required": false,
             "in": "query",
             "description": "section__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "section__regex",
+            "required": false,
+            "in": "query",
+            "description": "section__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "section__iregex",
+            "required": false,
+            "in": "query",
+            "description": "section__iregex",
             "schema": {
               "type": "string"
             }
@@ -10012,6 +10516,24 @@
             }
           },
           {
+            "name": "department__regex",
+            "required": false,
+            "in": "query",
+            "description": "department__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "department__iregex",
+            "required": false,
+            "in": "query",
+            "description": "department__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "email__contains",
             "required": false,
             "in": "query",
@@ -10079,6 +10601,24 @@
             "required": false,
             "in": "query",
             "description": "email__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email__regex",
+            "required": false,
+            "in": "query",
+            "description": "email__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email__iregex",
+            "required": false,
+            "in": "query",
+            "description": "email__iregex",
             "schema": {
               "type": "string"
             }
@@ -10156,6 +10696,24 @@
             }
           },
           {
+            "name": "office_phone__regex",
+            "required": false,
+            "in": "query",
+            "description": "office_phone__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "office_phone__iregex",
+            "required": false,
+            "in": "query",
+            "description": "office_phone__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "mobile_phone__contains",
             "required": false,
             "in": "query",
@@ -10223,6 +10781,24 @@
             "required": false,
             "in": "query",
             "description": "mobile_phone__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mobile_phone__regex",
+            "required": false,
+            "in": "query",
+            "description": "mobile_phone__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mobile_phone__iregex",
+            "required": false,
+            "in": "query",
+            "description": "mobile_phone__iregex",
             "schema": {
               "type": "string"
             }
@@ -10800,6 +11376,24 @@
             }
           },
           {
+            "name": "vendor_name__regex",
+            "required": false,
+            "in": "query",
+            "description": "vendor_name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vendor_name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "vendor_name__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "vendor_url__contains",
             "required": false,
             "in": "query",
@@ -10867,6 +11461,24 @@
             "required": false,
             "in": "query",
             "description": "vendor_url__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vendor_url__regex",
+            "required": false,
+            "in": "query",
+            "description": "vendor_url__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vendor_url__iregex",
+            "required": false,
+            "in": "query",
+            "description": "vendor_url__iregex",
             "schema": {
               "type": "string"
             }
@@ -10944,6 +11556,24 @@
             }
           },
           {
+            "name": "vendor_credentials__regex",
+            "required": false,
+            "in": "query",
+            "description": "vendor_credentials__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vendor_credentials__iregex",
+            "required": false,
+            "in": "query",
+            "description": "vendor_credentials__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "contact_name__contains",
             "required": false,
             "in": "query",
@@ -11011,6 +11641,24 @@
             "required": false,
             "in": "query",
             "description": "contact_name__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contact_name__regex",
+            "required": false,
+            "in": "query",
+            "description": "contact_name__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contact_name__iregex",
+            "required": false,
+            "in": "query",
+            "description": "contact_name__iregex",
             "schema": {
               "type": "string"
             }
@@ -11088,6 +11736,24 @@
             }
           },
           {
+            "name": "contact_email__regex",
+            "required": false,
+            "in": "query",
+            "description": "contact_email__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contact_email__iregex",
+            "required": false,
+            "in": "query",
+            "description": "contact_email__iregex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "contact_phone__contains",
             "required": false,
             "in": "query",
@@ -11155,6 +11821,24 @@
             "required": false,
             "in": "query",
             "description": "contact_phone__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contact_phone__regex",
+            "required": false,
+            "in": "query",
+            "description": "contact_phone__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contact_phone__iregex",
+            "required": false,
+            "in": "query",
+            "description": "contact_phone__iregex",
             "schema": {
               "type": "string"
             }
@@ -11844,6 +12528,24 @@
             "required": false,
             "in": "query",
             "description": "po_number__iexact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "po_number__regex",
+            "required": false,
+            "in": "query",
+            "description": "po_number__regex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "po_number__iregex",
+            "required": false,
+            "in": "query",
+            "description": "po_number__iregex",
             "schema": {
               "type": "string"
             }
@@ -13115,12 +13817,10 @@
           },
           "building": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "floor": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {
@@ -13155,7 +13855,6 @@
           },
           "building": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {
@@ -13200,23 +13899,19 @@
           },
           "department": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "email": {
             "type": "string",
             "format": "email",
-            "nullable": true,
             "maxLength": 254
           },
           "office_phone": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "mobile_phone": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {
@@ -13257,16 +13952,14 @@
             "type": "string",
             "format": "uri",
             "maxLength": 200,
-            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)(?:\\.(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::[0-9]{1,5})?(?:[/?#][^\\s]*)?\\z"
+            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)(?:\\.(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\z"
           },
           "vendor_credentials": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "contact_name": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "contact_email": {
@@ -13276,7 +13969,6 @@
           },
           "contact_phone": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {

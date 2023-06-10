@@ -51,6 +51,16 @@ class HubuumModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+
+    class Meta:
+        """Meta data for the class."""
+
+        abstract = True
+
     @classmethod
     def supports_extensions(cls) -> bool:
         """Check if a class supports extensions."""
@@ -61,19 +71,9 @@ class HubuumModel(models.Model):
         """Check if a class supports attachments."""
         return issubclass(cls, AttachmentModel)
 
-    readonly_fields = (
-        "created_at",
-        "updated_at",
-    )
-
     def get_auto_id(self) -> int:
         """Get the auto ID of the object."""
         return cast(int, self.id)
-
-    class Meta:
-        """Meta data for the class."""
-
-        abstract = True
 
 
 class NamespacedHubuumModel(HubuumModel):
@@ -115,7 +115,7 @@ class AttachmentManager(HubuumModel):
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return str(self.get_auto_id())
 
@@ -131,6 +131,11 @@ class Attachment(NamespacedHubuumModel):
     size = models.PositiveIntegerField(editable=False)
     original_filename = models.CharField(max_length=255, editable=False)
 
+    class Meta:
+        """Meta for the model."""
+
+        ordering = ["id"]
+
     def generate_sha256_filename(self, sha256_hash: str):
         """Generate a custom filename for the uploaded file using its sha256 hash."""
         return f"attachments/file/{sha256_hash}"
@@ -144,12 +149,7 @@ class Attachment(NamespacedHubuumModel):
         self.attachment.name = self.generate_sha256_filename(self.sha256)
         super().save(*args, **kwargs)
 
-    class Meta:
-        """Meta for the model."""
-
-        ordering = ["id"]
-
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return str(self.get_auto_id())
 
@@ -160,6 +160,11 @@ class AttachmentModel(models.Model):
     attachment_data_objects = GenericRelation(
         Attachment, related_query_name="att_objects"
     )
+
+    class Meta:
+        """Meta for the model."""
+
+        abstract = True
 
     def attachments_are_enabled(self) -> bool:
         """Check if the model is ready to receive attachments."""
@@ -197,11 +202,6 @@ class AttachmentModel(models.Model):
             model=self.__class__.__name__.lower(), enabled=True
         ).per_object_count_limit
 
-    class Meta:
-        """Meta for the model."""
-
-        abstract = True
-
 
 class Extension(NamespacedHubuumModel):
     """An extension to a specific model.
@@ -223,7 +223,7 @@ class Extension(NamespacedHubuumModel):
 
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return self.name
 
@@ -251,7 +251,7 @@ class ExtensionData(NamespacedHubuumModel):
         unique_together = ("extension", "content_type", "object_id")
         ordering = ["id"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Stringify the object, used to represent the object towards users."""
         return str(self.get_auto_id())
 
@@ -262,6 +262,11 @@ class ExtensionsModel(models.Model):
     extension_data_objects = GenericRelation(
         ExtensionData, related_query_name="ext_objects"
     )
+
+    class Meta:
+        """Meta data for the class."""
+
+        abstract = True
 
     def extensions(self) -> List[Extension]:
         """List all extensions registered for the object."""
@@ -298,8 +303,3 @@ class ExtensionsModel(models.Model):
             return getattr(self, matchobj.group(1))
 
         return re.sub(url_interpolation_regexp, _get_value_from_match, string)
-
-    class Meta:
-        """Meta data for the class."""
-
-        abstract = True

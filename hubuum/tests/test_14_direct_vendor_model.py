@@ -5,7 +5,7 @@ from .base import HubuumModelTestCase
 
 
 class VendorTestCase(HubuumModelTestCase):
-    """This class defines the test suite for the Vendor model."""
+    """Define the test suite for the Vendor model."""
 
     def setUp(self):
         """Set up defaults for the test object."""

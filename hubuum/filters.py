@@ -93,11 +93,9 @@ class RaiseBadRequestOnBadFilter(filters.FilterSet):
     def filter_queryset(self, queryset: QuerySet[Model]) -> QuerySet[Model]:
         """Validate the lookups and fields in the request.
 
-        Returns:
-            QuerySet: The filtered queryset.
-
-        Raises:
-            ValidationError: If an invalid field or lookup is found in the request.
+        :param queryset: The queryset to filter.
+        :return: The filtered queryset.
+        :raises ValidationError: If an invalid field or lookup is found in the request.
         """
         self._validate_fields_and_lookups()
         return super().filter_queryset(queryset)
@@ -154,22 +152,20 @@ class RaiseBadRequestOnBadFilter(filters.FilterSet):
 class JSONFieldLookupFilter(filters.CharFilter):
     """Class to allow filtering on JSON fields.
 
-    Args:
-        field_name (str): The field name to filter on. Must be a JSON field.
+    :param field_name: The field name to filter on. Must be a JSON field.
     """
 
-    def filter(self, qs: QuerySet[Model], value: str) -> QuerySet[Model]:
+    def filter(  # noqa: A003 (builtin-attribute-shadowing), this has to be named filter
+        self, qs: QuerySet[Model], value: str
+    ) -> QuerySet[Model]:
         """Filter the queryset based on a JSON key, value, and optional lookup type.
 
-        Args:
-            qs (QuerySet): The queryset to filter.
-            value (str): The input value containing the key, value, and optional lookup type.
+        :param qs: The queryset to filter.
+        :param value: The input value containing the key, value, and optional lookup type.
 
-        Returns:
-            QuerySet: The filtered queryset.
+        :return: The filtered queryset.
 
-        Raises:
-            ValidationError: If an invalid lookup type for the value is provided.
+        :raises ValidationError: If an invalid lookup type for the value is provided.
         """
         if not value:
             return qs
