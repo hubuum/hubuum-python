@@ -52,15 +52,11 @@ jobs:
       - name: Test with tox
         run: tox r
       - name: Check migrations
-        run: python manage.py makemigrations --check
+        run: poetry run python manage.py makemigrations --check
       - name: Export OpenAPI schema
-        run: python manage.py generateschema > openapi.yml
-      - name: Pylint
-        run: pylint --recursive=y hubuum hubuumsite --load-plugins=pylint_django
-        env:
-          DJANGO_SETTINGS_MODULE: hubuumsite.settings
+        run: poetry run python manage.py generateschema > openapi.yml
       - name: Test coverage
-        run: coverage run manage.py test -v2
+        run: poetry run coverage run manage.py test -v2
       - name: Upload OpenAPI schema
         if: matrix.python-version == '3.10'
         uses: actions/upload-artifact@v3
