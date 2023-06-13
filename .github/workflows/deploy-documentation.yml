@@ -29,11 +29,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-            pip install -r requirements-dev.txt
-            mkdocs --version
+            python -m pip install poetry
+            poetry install 
+            poetry run mkdocs --version
 
       - name: Build docs, update swagger
         run: tox -e docs
 
       - name: Deploy
-        run: mkdocs gh-deploy --force
+        run: poetry run mkdocs gh-deploy --force
