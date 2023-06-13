@@ -13817,12 +13817,10 @@
           },
           "building": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "floor": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {
@@ -13857,7 +13855,6 @@
           },
           "building": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {
@@ -13902,23 +13899,19 @@
           },
           "department": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "email": {
             "type": "string",
             "format": "email",
-            "nullable": true,
             "maxLength": 254
           },
           "office_phone": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "mobile_phone": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {
@@ -13959,16 +13952,14 @@
             "type": "string",
             "format": "uri",
             "maxLength": 200,
-            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)(?:\\.(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::[0-9]{1,5})?(?:[/?#][^\\s]*)?\\z"
+            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)(?:\\.(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\z"
           },
           "vendor_credentials": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "contact_name": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "contact_email": {
@@ -13978,7 +13969,6 @@
           },
           "contact_phone": {
             "type": "string",
-            "nullable": true,
             "maxLength": 255
           },
           "namespace": {
