@@ -34,7 +34,7 @@ jobs:
             poetry run mkdocs --version
 
       - name: Build docs, update swagger
-        run: tox -e docs
+        run: poetry run tox -e docs
 
       - name: Deploy
         run: poetry run mkdocs gh-deploy --force
