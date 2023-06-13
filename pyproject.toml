@@ -44,7 +44,7 @@ structlog_sentry = "2.0.2"
 psycopg2-binary = "2.9.6"
 pyyaml = "6.0"
 uritemplate = "4.1.1"
-sentry-sdk = {version = "1.25.0", extras = ["django"]}
+sentry-sdk = {version = "1.25.1", extras = ["django"]}
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
