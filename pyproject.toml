@@ -40,7 +40,7 @@ rich = "13.4.2" # Used for console logging.
 typing_extensions = "4.6.3"
 validators = "0.20.0"
 
-structlog_sentry = "2.0.2"
+structlog_sentry = "2.0.3"
 psycopg2-binary = "2.9.6"
 pyyaml = "6.0"
 uritemplate = "4.1.1"
