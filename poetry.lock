@@ -530,13 +530,13 @@ djangorestframework = "*"
 
 [[package]]
 name = "django-structlog"
-version = "5.1.0"
+version = "5.3.0"
 description = "Structured Logging for Django"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "django-structlog-5.1.0.tar.gz", hash = "sha256:e7a86b01e11b32296095d35565b44f9f179acb9563aa3e85cae698539db07756"},
-    {file = "django_structlog-5.1.0-py3-none-any.whl", hash = "sha256:a2dbe27e4add95cd386bcdfd7e05fe4547b02061881b0ee743b84a3d55a5df89"},
+    {file = "django-structlog-5.3.0.tar.gz", hash = "sha256:078577c91e58cbaf66ecb47ec2b710ce4864b234f474691d29578e75c055ef8b"},
+    {file = "django_structlog-5.3.0-py3-none-any.whl", hash = "sha256:ab3e27671f6b6cea886eac86ab5b280c937adacff1a63bce9f716c7b3357571b"},
 ]
 
 [package.dependencies]
@@ -1880,4 +1880,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "285f6fe2cd9ea323f3294309b73383c27fd6df612d2acb8505b1bd0a15f6f67f"
+content-hash = "840397649f71745a8f56d8636528630271e8346c3d86732868e4a13791f844ed"
