@@ -1532,13 +1532,13 @@ files = [
 
 [[package]]
 name = "sentry-sdk"
-version = "1.26.0"
+version = "1.28.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.26.0.tar.gz", hash = "sha256:760e4fb6d01c994110507133e08ecd4bdf4d75ee4be77f296a3579796cf73134"},
-    {file = "sentry_sdk-1.26.0-py2.py3-none-any.whl", hash = "sha256:0c9f858337ec3781cf4851972ef42bba8c9828aea116b0dbed8f38c5f9a1896c"},
+    {file = "sentry-sdk-1.28.0.tar.gz", hash = "sha256:2281ba98011cfa9bc9bb15c1074b6dd9f7fdfce94033cd25b50f18f078ffed4c"},
+    {file = "sentry_sdk-1.28.0-py2.py3-none-any.whl", hash = "sha256:b8b363aaa3f3d6a3acc1aa571efa4db29fb440339fed03560bb1276b8d2c2509"},
 ]
 
 [package.dependencies]
@@ -1880,4 +1880,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "09ea74777012df534f3e9fd36756045681d1338c05a445c6748b85d1e367c3db"
+content-hash = "5256c9a5bbcfe98dc330a4a4fda3438b5e66e9312e31234524beb0fd6304e5e3"
