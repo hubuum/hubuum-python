@@ -1366,7 +1366,6 @@ files = [
 
 [package.dependencies]
 packaging = ">=23.1"
-packaging = ">=23.1"
 tomli = {version = ">=2.0.1", markers = "python_version < \"3.11\""}
 
 [package.extras]
