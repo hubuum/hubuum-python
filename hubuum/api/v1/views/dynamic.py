@@ -27,10 +27,7 @@ class DynamicAutoSchema(AutoSchema):
 
         :return: The unique operation ID for the route.
         """
-
         operation_id_base = super().get_operation_id(path, method)
-
-        print(f"operation_id_base: {operation_id_base} {path} {method}")
 
         # Order is relevant, so use a list of tuples and not a dict.
         path_mapping: Dict[str, str] = [
@@ -52,8 +49,6 @@ class DynamicAutoSchema(AutoSchema):
                 operation_id_base += postfix
 
         operation_id_base = f"{operation_id_base}_{method}"
-
-        print(f"operation_id_final: {operation_id_base}")
 
         return operation_id_base
 
