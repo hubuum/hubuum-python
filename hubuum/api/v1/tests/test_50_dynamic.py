@@ -2,9 +2,57 @@
 
 from copy import deepcopy
 from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase, HubuumAPITestCaseWithDynamics
+from hubuum.api.v1.views.dynamic import DynamicAutoSchema
 from hubuum.models.dynamic import DynamicClass, DynamicObject
+
+
+def create_mocked_view(action: str, model_name: str) -> Mock:
+    """Create a mocked view for testing the autoschema."""
+    mocked_view = Mock()
+    mocked_view.action = action
+
+    # Mock the model's __name__ attribute
+    mock_model = MagicMock()
+    mock_model.configure_mock(__name__=model_name)
+    mocked_view.queryset = Mock()
+    mocked_view.queryset.model = mock_model
+
+    return mocked_view
+
+
+class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
+    """Test the custom autoschema for operation IDs."""
+
+    def setUp(self):
+        """Set up the test environment for the class."""
+        self.action = "list"
+        self.model_name = "MockModel"
+        self.schema = DynamicAutoSchema()
+        self.schema.view = create_mocked_view(self.action, self.model_name)
+        return super().setUp()
+
+    def test_operation_id_generation_from_url(self):
+        """Test different URLs and see what we get back."""
+        operation = "GET"
+        # We're using lists rather than a dict because black refuses
+        # to break key-value pairs into multiple lines, causing the line
+        # length to exceed limits.
+        question = [
+            "/{id}",
+        ]
+
+        # The first three are the same because the prefix is stripped
+        answer = [
+            f"listMockModelsID_{operation}",
+        ]
+
+        # Enumerate through the lists and test each one
+        for i, value in enumerate(question):
+            operation_id = self.schema.get_operation_id(value, operation)
+            self.assertEqual(operation_id, answer[i])
 
 
 class DynamicBaseTestCase(HubuumAPITestCase):
