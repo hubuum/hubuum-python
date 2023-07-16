@@ -51,6 +51,16 @@ def log_object_creation(
     """Log object creation."""
     identifier = _identifier(instance)
     model_name = cast(str, sender.__name__)
+
+    extra_fields = {}
+
+    if model_name != "AuthToken":
+        extra_fields["_str"] = str(instance)
+
+    if model_name == "DynamicObject":
+        extra_fields["dynamic_class_id"] = instance.dynamic_class.id
+        extra_fields["dynamic_class_name"] = instance.dynamic_class.name
+
     if created:
         if model_name == "Migration":
             migration_logger.bind(model=model_name, id=identifier).debug("created")

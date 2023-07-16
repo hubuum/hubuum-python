@@ -20,6 +20,7 @@ from hubuum.models.core import (
     ExtensionData,
     ExtensionsModel,
 )
+from hubuum.models.dynamic import DynamicClass, DynamicObject
 from hubuum.models.iam import (
     Namespace,
     NamespacedHubuumModelWithExtensions,
@@ -321,6 +322,54 @@ class AttachmentSerializer(HubuumMetaSerializer):
         file.seek(0)
 
         return file
+
+
+class DynamicClassSerializer(HubuumMetaSerializer):
+    """Serialize a DynamicClass object."""
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = DynamicClass
+        fields = "__all__"
+
+    def update(self, instance: DynamicClass, validated_data: Dict[str, Any]):
+        """Update the DynamicClass instance with the proposed schema if validation succeeds."""
+        # Validating the schema to be additive implies validating
+        # that the schema in itself is valid
+        if "json_schema" in validated_data:
+            instance.validate_additive_schema_change(validated_data["json_schema"])
+
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+
+        instance.save()
+        return instance
+
+    def create(self, validated_data: Dict[str, Any]):
+        """Create a new DynamicClass instance with the proposed schema if validation succeeds."""
+        instance = DynamicClass(**validated_data)
+        proposed_schema = validated_data.get("json_schema", None)
+
+        # Proposed_schema may be false or empty, so we need to check for None
+        if proposed_schema is not None:
+            instance.validate_schema_correctness(proposed_schema)
+
+        instance.save()
+        return instance
+
+
+class DynamicObjectSerializer(HubuumMetaSerializer):
+    """Serialize a DynamicObject object."""
+
+    # Make the dynamic_class field read-only so that it's not required during initial validation
+    dynamic_class = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = DynamicObject
+        fields = "__all__"
 
 
 class HostSerializer(HubuumMetaSerializer):

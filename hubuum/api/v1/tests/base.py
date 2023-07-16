@@ -15,6 +15,8 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient, APITestCase
 
 from hubuum.exceptions import MissingParam
+from hubuum.models.dynamic import DynamicClass, DynamicObject
+from hubuum.models.iam import Namespace
 
 
 # This testsuite design is based on the testsuite for MREG:
@@ -61,6 +63,11 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         return self._get_token_client(
             staff=False, superuser=False, username=username, groupname=groupname
         )
+
+    def _create_namespace(self, namespacename: str = "namespace1") -> None:
+        """Get or create the given namespace directly."""
+        namespace, _ = Namespace.objects.get_or_create(name=namespacename)
+        return namespace
 
     def _get_token_client(
         self,
@@ -422,3 +429,93 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
 
 
 # TODO: For every endpoint we should have and check input validation.
+
+
+class HubuumAPITestCaseWithDynamics(HubuumAPITestCase):
+    """A base class for Hubuum API test cases with dynamic classes already active.
+
+    The following classes are created:
+    - Host
+    - Room
+    - Building
+
+    The following objects are created:
+    - Hosts (3, named host1, host2, host3)
+    - Rooms (2, named room1, room2, room3)
+    - Buildings (1, named building1)
+    """
+
+    def _create_dynamic_class(
+        self, name: str = "Test", namespace: Namespace = None
+    ) -> DynamicClass:
+        """Create a dynamic class."""
+        if not namespace:
+            namespace = self.namespace
+
+        attributes = {"name": name, "namespace": namespace}
+        return DynamicClass.objects.create(**attributes)
+
+    def _create_dynamic_object(
+        self,
+        dynamic_class: DynamicClass = None,
+        namespace: Namespace = None,
+        **kwargs: Any,
+    ) -> DynamicObject:
+        """Create a dynamic object."""
+        attributes = {
+            "json_data": {"key": "value", "listkey": [1, 2, 3]},
+            "namespace": namespace,
+        }
+
+        for key, value in kwargs.items():
+            attributes[key] = value
+
+        return DynamicObject.objects.create(dynamic_class=dynamic_class, **attributes)
+
+    def setUp(self):
+        """Set up a few dynamic classes for testing.
+
+        The following classes are created:
+        - Host
+        - Room
+        - Building
+
+        The following objects are created:
+        - Hosts (3, named host1, host2, host3)
+        - Rooms (2, named room1, room2, room3)
+        - Buildings (1, named building1)
+        """
+        super().setUp()
+
+        self.namespace = self._create_namespace()
+        self.host_class = self._create_dynamic_class(name="Host")
+        self.room_class = self._create_dynamic_class(name="Room")
+        self.building_class = self._create_dynamic_class(name="Building")
+
+        # Create an array of hosts with names host1, host2, host3
+        self.hosts = [
+            self._create_dynamic_object(
+                dynamic_class=self.host_class, namespace=self.namespace, name=f"host{i}"
+            )
+            for i in range(1, 4)
+        ]
+
+        # Create an array of rooms with names room1, room2, room3
+        self.rooms = [
+            self._create_dynamic_object(
+                dynamic_class=self.room_class, namespace=self.namespace, name=f"room{i}"
+            )
+            for i in range(1, 3)
+        ]
+
+        # Create a building with name building1
+        self.building = self._create_dynamic_object(
+            dynamic_class=self.building_class,
+            namespace=self.namespace,
+            name="building1",
+        )
+
+    def tearDown(self) -> None:
+        """Delete the namespace after the test."""
+        self.namespace.delete()
+        return super().tearDown()
