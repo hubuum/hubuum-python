@@ -60,8 +60,6 @@ class DynamicBaseView(LoggingMixin):
         tags=["Resources"],
     )
 
-    pass
-
 
 class DynamicListView(DynamicBaseView, ListCreateAPIView):  # type: ignore
     """List view for user defined classes and objects."""
