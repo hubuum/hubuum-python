@@ -1,12 +1,13 @@
 """Test the dynamic classes in hubuum."""
 
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 from unittest.mock import MagicMock, Mock
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase, HubuumAPITestCaseWithDynamics
 from hubuum.api.v1.views.dynamic import (
     DynamicAutoSchema,
+    DynamicBaseView,
     DynamicObjectDetail,
     DynamicObjectList,
 )
@@ -63,7 +64,11 @@ class DynamicGenerateSchemaTestCase(HubuumAPITestCase):
 
     def test_get_queryset_for_generateschema(self):
         """Test that get_queryset returns nothing when called from generateschema."""
-        for cls in [DynamicObjectDetail, DynamicObjectList]:
+        class_list: List[Type[DynamicBaseView]] = [
+            DynamicObjectDetail,
+            DynamicObjectList,
+        ]
+        for cls in class_list:
             view = cls()
             view.request = None
             self.assertEqual(view.get_queryset().count(), 0)
