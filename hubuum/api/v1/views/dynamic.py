@@ -1,7 +1,5 @@
 """Views for the resources in API v1."""
 
-from typing import Dict
-
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.schemas.openapi import AutoSchema
@@ -27,30 +25,18 @@ class DynamicAutoSchema(AutoSchema):
 
         :return: The unique operation ID for the route.
         """
-        operation_id_base = super().get_operation_id(path, method)
-
-        # Order is relevant, so use a list of tuples and not a dict.
-        path_mapping: Dict[str, str] = [
-            ("{id}", "ID"),
-            ("{classname}/", "Classname"),
-            ("{pk}/", "Instance"),
-            ("{object1}", "Object1"),
-            ("{object2}", "Object2"),
-            ("{class}", "Class"),
-            ("{objectid}", "Objectid"),
-            ("first", "First"),
-            ("all", "All"),
-            ("links", "Links"),
-            ("link", "Link"),
-        ]
-
-        for path_substr, postfix in path_mapping:
-            if path_substr in path:
-                operation_id_base += postfix
-
-        operation_id_base = f"{operation_id_base}_{method}"
-
-        return operation_id_base
+        path = (
+            path.strip("/")
+            .replace("/", "_")
+            .replace("<", "")
+            .replace(">", "")
+            .replace("{", "")
+            .replace("}", "")
+        )
+        name = self.view.get_view_name().lower().replace(" ", "_")
+        method_name = getattr(self.view, "action", method.lower())
+        operation_id = f"{name}_{method_name}_{path}"
+        return operation_id
 
 
 class DynamicBaseView(LoggingMixin):
@@ -129,11 +115,7 @@ class DynamicObjectList(DynamicListView):
     Requires a `classname` in the URL.
     """
 
-    schema = AutoSchema(
-        tags=["Resources"],
-    )
-
-    queryset = DynamicClass.objects.all().order_by("id")
+    queryset = DynamicObject.objects.all().order_by("id")
     serializer_class = DynamicObjectSerializer
     filterset_class = DynamicObjectFilterSet
 
@@ -143,6 +125,10 @@ class DynamicObjectList(DynamicListView):
         This is overridden to filter by the classname.
         Requires a `classname` in the URL.
         """
+        # This is an issue with generateschema, so we need to check if the request exists
+        if not self.request:
+            return DynamicObject.objects.none()
+
         classname = self.kwargs["classname"]
         return DynamicObject.objects.filter(dynamic_class__name=classname).order_by(
             "id"
@@ -186,6 +172,10 @@ class DynamicObjectDetail(DynamicDetailView):
         This is overridden to filter by the classname.
         Requires a `classname` in the URL along with the `pk`.
         """
+        # This is an issue with generateschema, so we need to check if the request exists
+        if not self.request:
+            return DynamicObject.objects.none()
+
         classname = self.kwargs["classname"]
         return DynamicObject.objects.filter(dynamic_class__name=classname).order_by(
             "id"

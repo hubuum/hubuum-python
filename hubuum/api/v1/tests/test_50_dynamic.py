@@ -19,6 +19,7 @@ def create_mocked_view(action: str, model_name: str) -> Mock:
     mock_model.configure_mock(__name__=model_name)
     mocked_view.queryset = Mock()
     mocked_view.queryset.model = mock_model
+    mocked_view.get_view_name = Mock(return_value=model_name)
 
     return mocked_view
 
@@ -36,22 +37,20 @@ class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
 
     def test_operation_id_generation_from_url(self):
         """Test different URLs and see what we get back."""
-        operation = "GET"
         # We're using lists rather than a dict because black refuses
         # to break key-value pairs into multiple lines, causing the line
         # length to exceed limits.
-        question = [
-            "/{id}",
-        ]
+        question = ["/{id}", "/<classname>/<pk>/link/<object1>/<object2>"]
 
         # The first three are the same because the prefix is stripped
         answer = [
-            f"listMockModelsID_{operation}",
+            "mockmodel_list_id",
+            "mockmodel_list_classname_pk_link_object1_object2",
         ]
 
         # Enumerate through the lists and test each one
         for i, value in enumerate(question):
-            operation_id = self.schema.get_operation_id(value, operation)
+            operation_id = self.schema.get_operation_id(value, "GET")
             self.assertEqual(operation_id, answer[i])
 
 
