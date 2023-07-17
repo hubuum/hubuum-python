@@ -5,7 +5,11 @@ from typing import Any, Dict, List
 from unittest.mock import MagicMock, Mock
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase, HubuumAPITestCaseWithDynamics
-from hubuum.api.v1.views.dynamic import DynamicAutoSchema
+from hubuum.api.v1.views.dynamic import (
+    DynamicAutoSchema,
+    DynamicObjectDetail,
+    DynamicObjectList,
+)
 from hubuum.models.dynamic import DynamicClass, DynamicObject
 
 
@@ -52,6 +56,17 @@ class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
         for i, value in enumerate(question):
             operation_id = self.schema.get_operation_id(value, "GET")
             self.assertEqual(operation_id, answer[i])
+
+
+class DynamicGenerateSchemaTestCase(HubuumAPITestCase):
+    """Test that generateschema specifics are handled correctly."""
+
+    def test_get_queryset_for_generateschema(self):
+        """Test that get_queryset returns nothing when called from generateschema."""
+        for cls in [DynamicObjectDetail, DynamicObjectList]:
+            view = cls()
+            view.request = None
+            self.assertEqual(view.get_queryset().count(), 0)
 
 
 class DynamicBaseTestCase(HubuumAPITestCase):
