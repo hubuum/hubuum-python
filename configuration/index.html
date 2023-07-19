@@ -364,7 +364,7 @@
 <li><code>HUBUUM_LOGGING_PRODUCTION</code>: Determines if logging is in production mode or not. In production we get no colored output and the JSON layout is compact. Defaults to <code>False</code>. Note that if <code>HUBUUM_SECRET_KEY</code> was set above, this defaults to <code>True</code>, but may be overridden explicitly. </li>
 </ul>
 <h3 id="individual-loggers">Individual loggers<a class="headerlink" href="#individual-loggers" title="Permanent link">¶</a></h3>
-<p>These are all loggers for different purposes. TThey default to the level of <code>HUBUUM_LOGGING_LEVEL</code>. They are all prefixed with <code>HUBUUM_LOGGING_LEVEL_</code>.</p>
+<p>These are all loggers for different purposes. They default to the level of <code>HUBUUM_LOGGING_LEVEL</code>. They are all prefixed with <code>HUBUUM_LOGGING_LEVEL_</code>.</p>
 <table>
 <thead>
 <tr>
@@ -406,13 +406,13 @@
 <td>Any</td>
 </tr>
 <tr>
-<td><code>MIGRATIONS</code></td>
+<td><code>MIGRATION</code></td>
 <td>On startup database migrations, logged at the <code>DEBUG</code> level</td>
 <td>created</td>
 <td>id, model</td>
 </tr>
 <tr>
-<td><code>REQUESTS</code></td>
+<td><code>REQUEST</code></td>
 <td>Request responses</td>
 <td>response</td>
 <td>content, method, run_time_ms, status_code, status_label</td>
@@ -467,7 +467,7 @@
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">May 23, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 19, 2023</span>
 </small>
 </div>
 </article>
