@@ -32,7 +32,7 @@ For detailed information on logging, see the [logging documentation](logging.md)
 
 ### Individual loggers 
 
-These are all loggers for different purposes. TThey default to the level of `HUBUUM_LOGGING_LEVEL`. They are all prefixed with `HUBUUM_LOGGING_LEVEL_`.
+These are all loggers for different purposes. They default to the level of `HUBUUM_LOGGING_LEVEL`. They are all prefixed with `HUBUUM_LOGGING_LEVEL_`.
 
 | Source       | Description                                                 | Events                            | Fields                                                    |
 | ------------ | ----------------------------------------------------------- | --------------------------------- | --------------------------------------------------------- |
@@ -42,7 +42,7 @@ These are all loggers for different purposes. TThey default to the level of `HUB
 | `INTERNAL`   | Internal events in Hubuum                                   | Undefined                         | Any                                                       |
 | `MANUAL`     | Manual log events                                           | manual                            | Any                                                       |
 | `MIGRATIONS` | On startup database migrations, logged at the `DEBUG` level | created                           | id, model                                                 |
-| `REQUESTS`   | Request responses                                           | response                          | content, method, run\_time\_ms, status_code, status_label |
+| `REQUEST`    | Request responses                                           | response                          | content, method, run\_time\_ms, status_code, status_label |
 | `SIGNALS`    | Other signals, such as object manipulation                  | created, deleted, updated         | id, model                                                 |
 
 Why both `API` and `SIGNAL`? `API` gives us user information, as it is gathered from the View itself, but this will only log the direct effect of the requested API call. Ie, deleting a Host will be quite similar between the two loggers:
