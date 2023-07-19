@@ -41,7 +41,7 @@ These are all loggers for different purposes. They default to the level of `HUBU
 | `DJANGO`     | Structlog default Django request loggers                    | request_started, request_finished | request, user_agent / request, code                       |
 | `INTERNAL`   | Internal events in Hubuum                                   | Undefined                         | Any                                                       |
 | `MANUAL`     | Manual log events                                           | manual                            | Any                                                       |
-| `MIGRATIONS` | On startup database migrations, logged at the `DEBUG` level | created                           | id, model                                                 |
+| `MIGRATION`  | On startup database migrations, logged at the `DEBUG` level | created                           | id, model                                                 |
 | `REQUEST`    | Request responses                                           | response                          | content, method, run\_time\_ms, status_code, status_label |
 | `SIGNALS`    | Other signals, such as object manipulation                  | created, deleted, updated         | id, model                                                 |
 
