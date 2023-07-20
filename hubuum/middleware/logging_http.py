@@ -73,7 +73,6 @@ class LogHttpResponseMiddleware:
         self, request: HttpRequest, response: HttpResponse, start_time: int
     ) -> HttpResponse:
         """Log the response."""
-
         end_time = time.time()
         status_code = response.status_code
         run_time_ms = (end_time - start_time) * 1000
@@ -108,11 +107,14 @@ class LogHttpResponseMiddleware:
         if "application/json" in response.headers.get("Content-Type", ""):
             content = response.content.decode("utf-8")
 
-        user = request.user
+        # For some events, like 301s against the Auth endpoints, we may not have a user.
+        username = ""
+        if hasattr(request, "user"):
+            username = request.user.username
 
         response_logger.bind(
             request_id=request.id,
-            user=user.username,
+            user=username,
             method=request.method,
             status_code=status_code,
             status_label=status_label,

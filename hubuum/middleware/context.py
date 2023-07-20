@@ -1,3 +1,4 @@
+"""Middleware for setting context variables."""
 import uuid
 from contextvars import ContextVar
 from typing import Callable
@@ -7,13 +8,8 @@ from django.http import HttpRequest, HttpResponse
 request_id_var = ContextVar("request_id", default=None)
 
 
-def get_request_id():
-    """
-    Return the current request ID, or generate a new one if not available.
-
-    Returns:
-        str: The request ID.
-    """
+def get_request_id() -> str:
+    """Return the current request ID, or generate a new one if not available."""
     request_id = request_id_var.get()
     if request_id is None:
         request_id = str(uuid.uuid4())
