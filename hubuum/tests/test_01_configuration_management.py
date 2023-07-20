@@ -230,6 +230,7 @@ class HubuumBaseConfigTestCase(TestCase):
                 "HUBUUM_LOGGING_LEVEL_MANUAL",
                 "HUBUUM_LOGGING_LEVEL_MIGRATION",
                 "HUBUUM_LOGGING_LEVEL_REQUEST",
+                "HUBUUM_LOGGING_LEVEL_RESPONSE",
                 "HUBUUM_LOGGING_LEVEL_SIGNALS",
             ],
         )

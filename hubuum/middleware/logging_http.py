@@ -8,7 +8,10 @@ import structlog
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
-logger = structlog.getLogger("hubuum.request")
+from hubuum.middleware.context import get_request_id
+
+request_logger = structlog.getLogger("hubuum.request")
+response_logger = structlog.getLogger("hubuum.response")
 
 
 class LogHttpResponseMiddleware:
@@ -33,7 +36,44 @@ class LogHttpResponseMiddleware:
         :return: A response object
         """
         start_time = time.time()
+
+        request.id = get_request_id()
+        self.log_request(request)
         response = self.get_response(request)
+        self.log_response(request, response, start_time)
+        return response
+
+    def log_request(self, request: HttpRequest) -> None:
+        """Log the request."""
+        remote_ip = request.META.get("REMOTE_ADDR")
+
+        # Check for a proxy address
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            proxy_ip = x_forwarded_for.split(",")[0]
+        else:
+            proxy_ip = ""
+
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
+
+        # Size of request
+        request_size = len(request.body)
+
+        request_logger.bind(
+            request_id=request.id,
+            method=request.method,
+            remote_ip=remote_ip,
+            proxy_ip=proxy_ip,
+            user_agent=user_agent,
+            path=request.path_info,
+            request_size=request_size,
+        ).debug("request")
+
+    def log_response(
+        self, request: HttpRequest, response: HttpResponse, start_time: int
+    ) -> HttpResponse:
+        """Log the response."""
+
         end_time = time.time()
         status_code = response.status_code
         run_time_ms = (end_time - start_time) * 1000
@@ -68,7 +108,11 @@ class LogHttpResponseMiddleware:
         if "application/json" in response.headers.get("Content-Type", ""):
             content = response.content.decode("utf-8")
 
-        logger.bind(
+        user = request.user
+
+        response_logger.bind(
+            request_id=request.id,
+            user=user.username,
             method=request.method,
             status_code=status_code,
             status_label=status_label,

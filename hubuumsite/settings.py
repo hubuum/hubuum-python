@@ -71,6 +71,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "hubuum.middleware.context.ContextMiddleware",
 ]
 
 ROOT_URLCONF = "hubuumsite.urls"
@@ -230,6 +231,11 @@ LOGGING: Dict[str, Any] = {
         "hubuum.request": {
             "handlers": ["console"],
             "level": config.logging.level_for_source("REQUEST"),
+            "propagate": False,
+        },
+        "hubuum.response": {
+            "handlers": ["console"],
+            "level": config.logging.level_for_source("RESPONSE"),
             "propagate": False,
         },
         "hubuum.auth": {

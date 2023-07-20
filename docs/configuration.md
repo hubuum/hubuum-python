@@ -32,33 +32,37 @@ For detailed information on logging, see the [logging documentation](logging.md)
 
 ### Individual loggers 
 
-These are all loggers for different purposes. They default to the level of `HUBUUM_LOGGING_LEVEL`. They are all prefixed with `HUBUUM_LOGGING_LEVEL_`.
+These are all the loggers for Hubuum. Their logging levels can be individually set using their logger name prefixed with `HUBUUM_LOGGING_LEVEL_`. All sources, except for `DJANGO`, default to the level of `HUBUUM_LOGGING_LEVEL`, so if one wants to see `AUTH` messages on the debug level, one can set `HUBUUM_LOGGING_LEVEL_AUTH=DEBUG` in the environment.
 
-| Source       | Description                                                 | Events                            | Fields                                                    |
-| ------------ | ----------------------------------------------------------- | --------------------------------- | --------------------------------------------------------- |
-| `AUTH`       | Authentication events                                       | login, logout, failure            | id                                                        |
-| `API`        | API actions such as direct object manipulation              | created, deleted, updated         | id, model, user                                           |
-| `DJANGO`     | Structlog default Django request loggers                    | request_started, request_finished | request, user_agent / request, code                       |
-| `INTERNAL`   | Internal events in Hubuum                                   | Undefined                         | Any                                                       |
-| `MANUAL`     | Manual log events                                           | manual                            | Any                                                       |
-| `MIGRATION`  | On startup database migrations, logged at the `DEBUG` level | created                           | id, model                                                 |
-| `REQUEST`    | Request responses                                           | response                          | content, method, run\_time\_ms, status_code, status_label |
-| `SIGNALS`    | Other signals, such as object manipulation                  | created, deleted, updated         | id, model                                                 |
+!!! note
+    `HUBUUM_LOGGING_LEVEL_DJANGO` is the default structlog Django logger but provides very little functionality for Hubuum. Due to this, this logger requires explicit logging levels to be set. Setting `HUBUUM_LOGGING_LEVEL` will *NOT* transfer this logging level to this logger. In the future, this logger may be disabled completely.
 
-Why both `API` and `SIGNAL`? `API` gives us user information, as it is gathered from the View itself, but this will only log the direct effect of the requested API call. Ie, deleting a Host will be quite similar between the two loggers:
+| Source      | Description                                                 | Events                            | Fields                                                                |
+| ----------- | ----------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------- |
+| `AUTH`      | Authentication events                                       | login, logout, failure            | id, request_id                                                        |
+| `API`       | API actions such as direct object manipulation              | created, deleted, updated         | id, model, user, request_id                                           |
+| `DJANGO`    | Structlog default Django request loggers                    | request_started, request_finished | request, user_agent / request, code                                   |
+| `INTERNAL`  | Internal events in Hubuum                                   | Undefined                         | Any                                                                   |
+| `MANUAL`    | Manual log events                                           | manual                            | Any                                                                   |
+| `MIGRATION` | On startup database migrations, logged at the `DEBUG` level | created                           | id, model, request_id                                                 |
+| `REQUEST`   | Requests                                                    | request                           | content, method, proxy_ip, remote_ip, request_id, request_size        |
+| `RESPONSE`  | Request responses                                           | response                          | content, method, run\_time\_ms, status_code, status_label, request_id |
+| `SIGNALS`   | Signals, such as object manipulation                        | created, deleted, updated         | id, model, request_id                                                 |
+
+Why both `API` and `SIGNALS`? `API` gives us user information, as it is gathered from the View itself, but this will only log the direct effect of the requested API call. Ie, deleting a Host will be quite similar between the two loggers:
 
 ````json
-2023-05-23T10:56:53.420831Z [info ] deleted [hubuum.api.object] instance=1 model=Host user=tmp
-2023-05-23T10:56:53.422447Z [info ] deleted [hubuum.signals.object] id=1 model=Host
+2023-05-23T10:56:53.420831Z [info ] deleted [hubuum.api.object] instance=1 model=Host user=tmp request_id=28926c59-68c9-4ae6-913b-766d321df69c
+2023-05-23T10:56:53.422447Z [info ] deleted [hubuum.signals.object] id=1 model=Host request_id=28926c59-68c9-4ae6-913b-766d321df69c
 ````
 
 However, if one deletes a Namespace, which causes a cascade on the items within, it looks quite different:
 
 ````json
-2023-05-23T10:56:53.356191Z [info ] deleted [hubuum.api.object] instance=1 model=Namespace user=superuser
-2023-05-23T10:56:53.363781Z [info ] deleted [hubuum.signals.object] id=1 model=Permission
-2023-05-23T10:56:53.364163Z [info ] deleted [hubuum.signals.object] id=1 model=Host
-2023-05-23T10:56:53.364577Z [info ] deleted [hubuum.signals.object] id=1 model=Namespace
+2023-05-23T10:56:53.356191Z [info ] deleted [hubuum.api.object] instance=1 model=Namespace user=superuser request_id=400d5fa1-fe05-41c9-81eb-d6dcedbe155d
+2023-05-23T10:56:53.363781Z [info ] deleted [hubuum.signals.object] id=1 model=Permission request_id=400d5fa1-fe05-41c9-81eb-d6dcedbe155d
+2023-05-23T10:56:53.364163Z [info ] deleted [hubuum.signals.object] id=1 model=Host request_id=400d5fa1-fe05-41c9-81eb-d6dcedbe155d
+2023-05-23T10:56:53.364577Z [info ] deleted [hubuum.signals.object] id=1 model=Namespace request_id=400d5fa1-fe05-41c9-81eb-d6dcedbe155d
 ````
 
 Here, the `API` logger only sees the direct effect, the deletion of the Namespace itself, whilst `SIGNAL` also notifies us about the cascaded objects. To get a quick overview of the logging output, one can run a test with logging set to debug:

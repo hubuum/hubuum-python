@@ -1,5 +1,6 @@
 """Test the logging in hubuum."""
 
+import io
 import json
 from typing import Any, Dict, List, Tuple, Type
 from unittest.mock import MagicMock, patch
@@ -63,6 +64,27 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertEqual(log["event"], "request_finished")
         self.assertEqual(log["request"], method_and_expected_path)
         self.assertEqual(log["code"], code)
+
+    def _check_request_response_uuids(self, cap_logs: EventDict) -> None:
+        """Check that the request and response have the same UUID."""
+        uuids = []
+        for log in cap_logs:
+            if log["event"] == "request" or log["event"] == "response":
+                uuids.append(log["request_id"])
+
+        # All UUIDs should be the same. Collapse the list to a set to check.
+        self.assertEqual(len(set(uuids)), 1)
+
+    def _check_request(
+        self,
+        log: Dict[str, Any],
+        method: str,
+        path: str,
+    ) -> None:
+        """Check the HTTP response log entry."""
+        self.assertEqual(log["event"], "request")
+        self.assertEqual(log["method"], method)
+        self.assertEqual(log["path"], path)
 
     def _check_response(  # pylint: disable=too-many-arguments
         self,
@@ -134,22 +156,24 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             get_logger().bind()
             self.assert_get("/iam/namespaces/")
 
-        self.assertEqual(len(cap_logs), 3)
+        self.assertEqual(len(cap_logs), 4)
 
+        self._check_request_response_uuids(cap_logs)
         self._check_events(
-            cap_logs, ["request_started", "response", "request_finished"]
+            cap_logs, ["request_started", "request", "response", "request_finished"]
         )
-        self._check_levels(cap_logs, ["info", "debug", "info"])
+        self._check_levels(cap_logs, ["info", "debug", "debug", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/")
-        self._check_response(cap_logs[1], "GET", "/api/v1/iam/namespaces/", 200, "OK")
+        self._check_request(cap_logs[1], "GET", "/api/v1/iam/namespaces/")
+        self._check_response(cap_logs[2], "GET", "/api/v1/iam/namespaces/", 200, "OK")
         self._check_json(
             Namespace,
-            cap_logs[1]["content"],
+            cap_logs[2]["content"],
             {"id": self.namespace.id, "name": self.namespace.name},
             element=0,
             count=1,
         )
-        self._check_request_finished(cap_logs[2], "GET /api/v1/iam/namespaces/", 200)
+        self._check_request_finished(cap_logs[3], "GET /api/v1/iam/namespaces/", 200)
 
     def test_logging_of_failed_namespace_get(self) -> None:
         """Test logging of a failed namespace retrieval."""
@@ -157,17 +181,19 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             get_logger().bind()
             self.assert_get_and_404("/iam/namespaces/nope")
 
-        self.assertEqual(len(cap_logs), 3)
+        self.assertEqual(len(cap_logs), 4)
+        self._check_request_response_uuids(cap_logs)
         self._check_events(
-            cap_logs, ["request_started", "response", "request_finished"]
+            cap_logs, ["request_started", "request", "response", "request_finished"]
         )
-        self._check_levels(cap_logs, ["info", "warning", "info"])
+        self._check_levels(cap_logs, ["info", "debug", "warning", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/nope")
+        self._check_request(cap_logs[1], "GET", "/api/v1/iam/namespaces/nope")
         self._check_response(
-            cap_logs[1], "GET", "/api/v1/iam/namespaces/nope", 404, "Not Found"
+            cap_logs[2], "GET", "/api/v1/iam/namespaces/nope", 404, "Not Found"
         )
         self._check_request_finished(
-            cap_logs[2], "GET /api/v1/iam/namespaces/nope", 404
+            cap_logs[3], "GET /api/v1/iam/namespaces/nope", 404
         )
 
     def test_logging_object_creation(self) -> None:
@@ -177,12 +203,13 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             host_blob = self.assert_post("/resources/hosts/", self.host_data)
             host_id = host_blob.data["id"]
 
-        self.assertEqual(len(cap_logs), 5)
+        self.assertEqual(len(cap_logs), 6)
 
         self._check_events(
             cap_logs,
             [
                 "request_started",
+                "request",
                 "created",
                 "created",
                 "response",
@@ -190,17 +217,20 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             ],
         )
 
-        self._check_levels(cap_logs, ["info", "info", "info", "debug", "info"])
+        self._check_request_response_uuids(cap_logs)
+
+        self._check_levels(cap_logs, ["info", "debug", "info", "info", "debug", "info"])
 
         self._check_request_started(cap_logs[0], "POST /api/v1/resources/hosts/")
-        self.assertTrue(cap_logs[1]["id"] == host_id)
-        self._check_object_change(cap_logs[2], "created", "Host", host_id, "superuser")
+        self._check_request(cap_logs[1], "POST", "/api/v1/resources/hosts/")
+        self.assertTrue(cap_logs[2]["id"] == host_id)
+        self._check_object_change(cap_logs[3], "created", "Host", host_id, "superuser")
         self._check_response(
-            cap_logs[3], "POST", "/api/v1/resources/hosts/", 201, "Created"
+            cap_logs[4], "POST", "/api/v1/resources/hosts/", 201, "Created"
         )
         self._check_json(
             Host,
-            cap_logs[3]["content"],
+            cap_logs[4]["content"],
             {
                 "id": host_id,
                 "name": "test",
@@ -208,7 +238,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "namespace": self.namespace.id,
             },
         )
-        self._check_request_finished(cap_logs[4], "POST /api/v1/resources/hosts/", 201)
+        self._check_request_finished(cap_logs[5], "POST /api/v1/resources/hosts/", 201)
 
     def test_manual_logging(self) -> None:
         """Test manual logging."""
@@ -248,17 +278,20 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/logout/",
             )
 
-        self.assertTrue(len(cap_logs) == 11)
+        self.assertTrue(len(cap_logs) == 13)
+
         self._check_events(
             cap_logs,
             [
                 "request_started",
+                "request",
                 "created",
                 "updated",
                 "login",
                 "response",
                 "request_finished",
                 "request_started",
+                "request",
                 "deleted",
                 "logout",
                 "response",
@@ -274,12 +307,14 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             cap_logs,
             [
                 "info",
+                "debug",
                 "info",
                 "info",
                 "info",
                 ["debug", "warning", "critical", "error"],
                 "info",
                 "info",
+                "debug",
                 "info",
                 "info",
                 "debug",
@@ -288,16 +323,16 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         )
 
         # Check that we're deleting the right token
-        self.assertTrue(cap_logs[1]["id"] == cap_logs[7]["id"])
+        self.assertTrue(cap_logs[2]["id"] == cap_logs[9]["id"])
 
         # Check that we have the right users.
-        self.assertTrue(cap_logs[2]["id"] == user.id == cap_logs[8]["id"])
+        self.assertTrue(cap_logs[4]["id"] == user.id == cap_logs[10]["id"])
 
-        json_data = json.loads(cap_logs[4]["content"])
+        json_data = json.loads(cap_logs[5]["content"])
         self.assertIn("token", json_data)
         self.assert_is_iso_date(json_data["expiry"])
 
-        self.assertEqual(cap_logs[4]["status_code"], 200)
+        self.assertEqual(cap_logs[5]["status_code"], 200)
 
         user.delete()
 
@@ -317,26 +352,28 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/login/",
             )
 
-        self.assertTrue(len(cap_logs) == 4)
+        self.assertTrue(len(cap_logs) == 5)
         self._check_events(
             cap_logs,
             [
                 "request_started",
+                "request",
                 "failure",
                 "response",
                 "request_finished",
             ],
         )
         self._check_levels(
-            cap_logs, ["info", "error", ["warning", "critical", "error"], "info"]
+            cap_logs,
+            ["info", "debug", "error", ["warning", "critical", "error"], "info"],
         )
 
-        self.assertIsNone(cap_logs[1]["id"])
+        self.assertIsNone(cap_logs[2]["id"])
 
-        json_data = json.loads(cap_logs[2]["content"])
+        json_data = json.loads(cap_logs[3]["content"])
         self.assertIn(json_data["detail"], "Invalid username/password.")
 
-        self.assertEqual(cap_logs[2]["status_code"], 401)
+        self.assertEqual(cap_logs[3]["status_code"], 401)
 
         user.delete()
 
@@ -364,8 +401,12 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             with patch("time.time", side_effect=[0, delay]):
                 with capture_logs() as cap_logs:
                     get_logger().bind()
-                    middleware(HttpRequest())
-                    self.assertEqual(cap_logs[0]["log_level"], expected_level)
+                    request = HttpRequest()
+                    request._body = b"Some request body"
+                    request.user = User.objects.get(username="superuser")
+                    middleware(request)
+                    # cap_logs[0] is the request, cap_logs[1] is the response
+                    self.assertEqual(cap_logs[1]["log_level"], expected_level)
 
     def test_return_500_error(self) -> None:
         """Test middleware returning 500 error."""
@@ -378,5 +419,28 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         with capture_logs() as cap_logs:
             get_logger().bind()
-            middleware(HttpRequest())
-            self.assertEqual(cap_logs[0]["status_code"], 500)
+            request = HttpRequest()
+            request._read_started = False
+            request._stream = io.BytesIO(b"request body")  # mock the _stream attribute
+            request.user = User.objects.get(username="superuser")
+            middleware(request)
+            self.assertEqual(cap_logs[1]["status_code"], 500)
+
+    def test_proxy_ip_in_logs(self) -> None:
+        """Check that a proxy IP is logged."""
+        middleware = LogHttpResponseMiddleware(MagicMock())
+
+        def mock_get_response(_):
+            return HttpResponse(status=500)
+
+        middleware.get_response = mock_get_response
+
+        with capture_logs() as cap_logs:
+            get_logger().bind()
+            request = HttpRequest()
+            request._read_started = False
+            request._stream = io.BytesIO(b"request body")
+            request.user = User.objects.get(username="superuser")
+            request.META["HTTP_X_FORWARDED_FOR"] = "192.0.2.0"  # set a proxy IP
+            middleware(request)
+            self.assertEqual(cap_logs[0]["proxy_ip"], "192.0.2.0")
