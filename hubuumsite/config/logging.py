@@ -29,6 +29,7 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
         "MANUAL",
         "MIGRATION",
         "REQUEST",
+        "RESPONSE",
         "SIGNALS",
     ]
 
@@ -44,6 +45,10 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
         fq_key = self.fq_key("LEVEL")
         if fq_key in env:
             for source in self.SOURCES:
+                # Do not set the default for the Django source, require it to be
+                # explicitly set.
+                if source == "DJANGO":
+                    continue
                 self.VALID_KEYS[f"LEVEL_{source}"] = env[fq_key]
 
         super().__init__(prefix, env)
