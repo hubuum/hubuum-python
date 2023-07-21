@@ -151,7 +151,7 @@ class DynamicObjectList(DynamicListView):
                 dynamic_class = DynamicClass.objects.get(name=classname)
             except DynamicClass.DoesNotExist as exc:
                 raise NotFound(
-                    f"No DynamicClass found with ID or name {classname}"
+                    f"No DynamicClass found with ID or name '{classname}'"
                 ) from exc
 
         serializer.save(dynamic_class=dynamic_class)

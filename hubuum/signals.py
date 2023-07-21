@@ -44,6 +44,20 @@ def _identifier(instance: object) -> str:
     return str(instance)
 
 
+def _extra_fields(sender: Model, instance: object) -> Dict[str, Any]:
+    """Return extra fields for logging."""
+    extra_fields = {}
+
+    if sender.__name__ != "AuthToken":
+        extra_fields["_str"] = str(instance)
+
+    if sender.__name__ == "DynamicObject":
+        extra_fields["dynamic_class_id"] = instance.dynamic_class.id
+        extra_fields["dynamic_class_name"] = instance.dynamic_class.name
+
+    return extra_fields
+
+
 @receiver(post_save)
 def log_object_creation(
     sender: Model, instance: object, created: bool, **kwargs: Dict[str, Any]
@@ -52,22 +66,21 @@ def log_object_creation(
     identifier = _identifier(instance)
     model_name = cast(str, sender.__name__)
 
-    extra_fields = {}
-
-    if model_name != "AuthToken":
-        extra_fields["_str"] = str(instance)
-
-    if model_name == "DynamicObject":
-        extra_fields["dynamic_class_id"] = instance.dynamic_class.id
-        extra_fields["dynamic_class_name"] = instance.dynamic_class.name
+    extra_fields = _extra_fields(sender, instance)
 
     if created:
         if model_name == "Migration":
-            migration_logger.bind(model=model_name, id=identifier).debug("created")
+            migration_logger.bind(
+                model=model_name, id=identifier, **extra_fields
+            ).debug("created")
         else:
-            object_logger.bind(model=sender.__name__, id=identifier).info("created")
+            object_logger.bind(model=model_name, id=identifier, **extra_fields).info(
+                "created"
+            )
     else:
-        object_logger.bind(model=sender.__name__, id=identifier).info("updated")
+        object_logger.bind(model=model_name, id=identifier, **extra_fields).info(
+            "updated"
+        )
 
 
 @receiver(post_delete)
@@ -75,7 +88,12 @@ def log_object_deletion(
     sender: Model, instance: object, **kwargs: Dict[str, Any]
 ) -> None:
     """Log object deletion."""
-    object_logger.bind(model=sender.__name__, id=_identifier(instance)).info("deleted")
+
+    extra_fields = _extra_fields(sender, instance)
+
+    object_logger.bind(
+        model=sender.__name__, id=_identifier(instance), **extra_fields
+    ).info("deleted")
 
 
 @receiver(user_logged_in)
