@@ -249,6 +249,7 @@ class HubuumBaseConfigTestCase(TestCase):
         )
 
     def test_get_prefixed_pairs_creating_booleans(self):
+        """Test that configuration booleans work."""
         # Define the environment
         env = {
             "HUBUUM_PREFIX_KEY1": "false",
