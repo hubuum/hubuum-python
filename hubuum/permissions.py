@@ -10,9 +10,12 @@ from rest_framework.permissions import (
 )
 from rest_framework.request import Request
 from rest_framework.views import APIView
+from structlog import get_logger
 from typing_extensions import Literal
 
 from hubuum.typing import typed_user_from_request
+
+auth_logger = get_logger("hubuum.auth")
 
 
 class CustomObjectPermissions(DjangoObjectPermissions):
@@ -59,6 +62,9 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if we're super/admin otherwise authenticated readonly."""
         if is_super_or_admin(typed_user_from_request(request)):
+            auth_logger.debug(
+                "has_perm", role="superuser or admin", user=request.user.username
+            )
             return True
         return super().has_permission(request, view)
 
@@ -67,6 +73,9 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
     ) -> Literal[True]:
         """Check if we're super/admin otherwise authenticated readonly."""
         if is_super_or_admin(typed_user_from_request(request)):
+            auth_logger.debug(
+                "has_object_p", role="superuser or admin", user=request.user.username
+            )
             return True
         return super().has_object_permission(request, view, obj)
 
@@ -88,6 +97,13 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
 
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if superuser or admin by delegation, then check user, otherwise false."""
+        auth_logger.debug(
+            "has_perm_n",
+            user=request.user.username,
+            view=view.__class__.__name__,
+            method=request.method,
+        )
+
         # First check if we are superuser or asking for read-only (listing), if so, return true.
         user = typed_user_from_request(request)
         if user.is_anonymous:
@@ -115,12 +131,22 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
             write_perm = "has_create"
 
             if hasattr(view, "namespace_post"):
+                auth_logger.debug(
+                    "has_perm_n",
+                    namespace_post_exists=True,
+                    namespace_post_value=view.namespace_post,
+                )
                 if not view.namespace_post:
                     raise MethodNotAllowed(method=request.method)
 
             # This breaks typing as it's not statically possible to resolve the attribute
             # at this point. This ends up propagating through the rest of this code block.
             if hasattr(view, "namespace_write_permission"):
+                auth_logger.debug(
+                    "has_perm_n_w",
+                    namespace_write_permission_exists=True,
+                    namespace_write_permission_value=view.namespace_write_permission,
+                )
                 write_perm = cast(str, view.namespace_write_permission)
 
             if write_perm == "has_namespace":

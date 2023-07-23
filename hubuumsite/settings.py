@@ -229,6 +229,7 @@ LOGGING: Dict[str, Any] = {
         "hubuum.internal": {
             "handlers": ["console"],
             "level": config.logging.level_for_source("INTERNAL"),
+            "propagate": False,
         },
         "hubuum.api": {
             "handlers": ["console"],

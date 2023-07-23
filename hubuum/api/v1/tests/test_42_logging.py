@@ -105,6 +105,15 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.namespace.delete()
         super().tearDown()
 
+    def _prune_permissions(self, cap_logs: EventDict) -> EventDict:
+        """Remove the permission logs from the log."""
+        return [
+            d
+            for d in cap_logs
+            if d.get("event")
+            not in {"has_perm_n", "has_perm", "m:get_object", "login_data"}
+        ]
+
     def _check_levels(self, cap_logs: EventDict, expected_levels: List[str]) -> None:
         """Check the log levels in the log."""
         for i, level in enumerate(expected_levels):
@@ -214,6 +223,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             get_logger().bind()
             self.assert_get("/iam/namespaces/")
 
+        cap_logs = self._prune_permissions(cap_logs)
         self.assertEqual(len(cap_logs), 4)
 
         self._check_events(
@@ -238,6 +248,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             get_logger().bind()
             self.assert_get_and_404("/iam/namespaces/nope")
 
+        cap_logs = self._prune_permissions(cap_logs)
         self.assertEqual(len(cap_logs), 4)
         self._check_events(
             cap_logs, ["request_started", "request", "response", "request_finished"]
@@ -259,6 +270,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             host_blob = self.assert_post("/resources/hosts/", self.host_data)
             host_id = host_blob.data["id"]
 
+        cap_logs = self._prune_permissions(cap_logs)
         self.assertEqual(len(cap_logs), 6)
 
         self._check_events(
@@ -331,6 +343,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             self.client.post(
                 "/api/auth/logout/",
             )
+
+        cap_logs = self._prune_permissions(cap_logs)
 
         self.assertTrue(len(cap_logs) == 13)
 
@@ -405,6 +419,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             auth = self.client.post(
                 "/api/auth/login/",
             )
+
+        cap_logs = self._prune_permissions(cap_logs)
 
         self.assertTrue(len(cap_logs) == 5)
         self._check_events(

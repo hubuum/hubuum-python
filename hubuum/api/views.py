@@ -1,10 +1,16 @@
 """Non-versioned views for hubuum."""
 
+from typing import Any
+
+from django.http import HttpRequest
 from knox.views import LoginView as KnoxLoginView
 from knox.views import LogoutAllView as KnoxLogoutAllView
 from knox.views import LogoutView as KnoxLogoutView
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.schemas.openapi import AutoSchema
+from structlog import get_logger
+
+logger = get_logger("hubuum.auth")
 
 # Note, we set schemas simply to ensure that openapi is generated correctly.
 
@@ -22,6 +28,13 @@ class LoginView(KnoxLoginView):
     )
 
     authentication_classes = [BasicAuthentication]
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        """Log the user in."""
+        auth_data = request.META.get("HTTP_AUTHORIZATION", "")
+
+        logger.debug("login_data", input=auth_data)
+        return super().post(request, *args, **kwargs)
 
 
 class LogoutView(KnoxLogoutView):
