@@ -23,6 +23,7 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
         "LEVEL": DEFAULT_LOG_LEVEL,
         "PRODUCTION": False,
         "BODY_LENGTH": 3000,
+        "COLLAPSE_REQUEST_ID": True,
     }
 
     SOURCES = [
@@ -110,10 +111,20 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
             # reorder_keys_processor comes first and ensures that request_id is first in the log
             # collapse_request_id shortens the request_id to make the logs more readable
             # RequestColorizer adds a colored bubble to the event message based on the request_id
-            return [
+            processors: List[
+                Union[
+                    Processor,
+                    structlog.dev.ConsoleRenderer,
+                    structlog.processors.JSONRenderer,
+                ]
+            ] = [
                 hubuum.log.add_request_id,
                 hubuum.log.reorder_keys_processor,
-                hubuum.log.collapse_request_id,
                 hubuum.log.RequestColorTracker(),
                 structlog.dev.ConsoleRenderer(colors=True, sort_keys=False),
             ]
+
+            if self.get("COLLAPSE_REQUEST_ID"):
+                processors.insert(2, hubuum.log.collapse_request_id)
+
+        return processors

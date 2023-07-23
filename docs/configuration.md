@@ -29,6 +29,8 @@ For detailed information on logging, see the [logging documentation](logging.md)
 
 - `HUBUUM_LOGGING_LEVEL`: Sets the default logging level for all sources. Defaults to "CRITICAL".
 - `HUBUUM_LOGGING_PRODUCTION`: Determines if logging is in production mode or not. In production we get no colored output and the JSON layout is compact. Defaults to `False`. Note that if `HUBUUM_SECRET_KEY` was set above, this defaults to `True`, but may be overridden explicitly. 
+- `HUBUUM_LOGGING_MAX_BODY_SIZE`: Sets the maximum size for the logging of the request.body. Defaults to 3k.
+- `HUBUUM_LOGGING_COLLAPSE_REQUEST_ID`: *Only applies to rich console output, never applies for production logging*. If set to True, collapse request_ids to `xxx...xxx` to save some screen real estate. Defaults to True.
 
 ### Individual loggers 
 
