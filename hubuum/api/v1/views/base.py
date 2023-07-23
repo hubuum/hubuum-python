@@ -10,11 +10,10 @@ from rest_framework import generics, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.schemas.openapi import AutoSchema
 
-from hubuum.middleware.context import get_request_id
 from hubuum.permissions import NameSpace
 from hubuum.typing import typed_user_from_request
 
-object_logger = structlog.get_logger("hubuum.api.object")
+object_logger = structlog.get_logger("hubuum.api")
 
 
 class LoggingMixin:
@@ -27,9 +26,8 @@ class LoggingMixin:
         self, operation: str, model: str, user: AbstractUser, instance: Model
     ) -> None:
         """Write the log string."""
-        object_logger.info(
+        object_logger.debug(
             operation,
-            request_id=get_request_id(),
             model=model,
             user=str(user),
             instance=instance.id,

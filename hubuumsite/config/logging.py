@@ -1,8 +1,11 @@
 """Configuration for the scope HUBUUM_LOGGING."""
 
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 import structlog
+from structlog.types import Processor
+
+import hubuum.log
 
 from .abstract import (
     HubuumAbstractConfig,
@@ -16,21 +19,22 @@ DEFAULT_LOG_LEVEL = "ERROR"
 class HubuumLoggingConfig(HubuumAbstractConfig):
     """A configuration class for logging."""
 
-    VALID_KEYS: Dict[str, Union[str, bool]] = {
+    VALID_KEYS: Dict[str, Union[str, bool]] = {  # type: ignore
         "LEVEL": DEFAULT_LOG_LEVEL,
         "PRODUCTION": False,
+        "BODY_LENGTH": 3000,
     }
 
     SOURCES = [
         "API",
         "AUTH",
-        "DJANGO",
+        "OBJECT",
+        "HTTP",
+        "SIGNAL",
         "INTERNAL",
         "MANUAL",
+        "DJANGO",
         "MIGRATION",
-        "REQUEST",
-        "RESPONSE",
-        "SIGNALS",
     ]
 
     # Add the logging levels for the different sources.
@@ -45,9 +49,9 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
         fq_key = self.fq_key("LEVEL")
         if fq_key in env:
             for source in self.SOURCES:
-                # Do not set the default for the Django source, require it to be
-                # explicitly set.
-                if source == "DJANGO":
+                # DJANGO and MIGRATION are special cases, and require their log
+                # levels to be set explicitly.
+                if source == "DJANGO" or source == "MIGRATION":
                     continue
                 self.VALID_KEYS[f"LEVEL_{source}"] = env[fq_key]
 
@@ -91,10 +95,25 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
         """Get the logging level for a source."""
         return self.get_log_level(f"LEVEL_{source.upper()}")
 
-    def get_logging_output_type(
+    def get_logging_output(
         self,
-    ) -> Union[structlog.processors.JSONRenderer, structlog.dev.ConsoleRenderer]:
-        """Get the logging output type."""
+    ) -> List[
+        Union[
+            Processor, structlog.dev.ConsoleRenderer, structlog.processors.JSONRenderer
+        ]
+    ]:
+        """Get the logging output type and any additional processors."""
         if self.get("LOGGING_PRODUCTION"):
-            return structlog.processors.JSONRenderer()
-        return structlog.dev.ConsoleRenderer(colors=True)
+            return [structlog.processors.JSONRenderer()]
+        else:
+            # Add development processors if not in production
+            # reorder_keys_processor comes first and ensures that request_id is first in the log
+            # collapse_request_id shortens the request_id to make the logs more readable
+            # RequestColorizer adds a colored bubble to the event message based on the request_id
+            return [
+                hubuum.log.add_request_id,
+                hubuum.log.reorder_keys_processor,
+                hubuum.log.collapse_request_id,
+                hubuum.log.RequestColorTracker(),
+                structlog.dev.ConsoleRenderer(colors=True, sort_keys=False),
+            ]

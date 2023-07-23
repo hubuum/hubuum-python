@@ -14,12 +14,11 @@ from django.db.models import Model
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from hubuum.middleware.context import get_request_id
 from hubuum.models.core import Attachment
 from hubuum.models.iam import User
 
 user_logger = structlog.getLogger("hubuum.auth")
-object_logger = structlog.getLogger("hubuum.signals.object")
+object_logger = structlog.getLogger("hubuum.object")
 migration_logger = structlog.getLogger("hubuum.migration")
 
 
@@ -35,7 +34,7 @@ def _log_user_event(
     if user:
         user_label = cast(int, user.id)
 
-    user_logger.bind(id=user_label, request_id=get_request_id()).log(level, event)
+    user_logger.bind(id=user_label).log(level, event)
 
 
 def _identifier(instance: object) -> str:
@@ -54,17 +53,11 @@ def log_object_creation(
     model_name = cast(str, sender.__name__)
     if created:
         if model_name == "Migration":
-            migration_logger.bind(
-                model=model_name, request_id=get_request_id(), id=identifier
-            ).debug("created")
+            migration_logger.bind(model=model_name, id=identifier).debug("created")
         else:
-            object_logger.bind(
-                model=sender.__name__, request_id=get_request_id(), id=identifier
-            ).info("created")
+            object_logger.bind(model=sender.__name__, id=identifier).info("created")
     else:
-        object_logger.bind(
-            model=sender.__name__, request_id=get_request_id(), id=identifier
-        ).info("updated")
+        object_logger.bind(model=sender.__name__, id=identifier).info("updated")
 
 
 @receiver(post_delete)
@@ -72,9 +65,7 @@ def log_object_deletion(
     sender: Model, instance: object, **kwargs: Dict[str, Any]
 ) -> None:
     """Log object deletion."""
-    object_logger.bind(
-        model=sender.__name__, request_id=get_request_id(), id=_identifier(instance)
-    ).info("deleted")
+    object_logger.bind(model=sender.__name__, id=_identifier(instance)).info("deleted")
 
 
 @receiver(user_logged_in)
@@ -108,7 +99,6 @@ def auto_delete_file_on_delete(
     """
     object_logger.bind(
         model=sender.__name__,
-        request_id=get_request_id(),
         id=_identifier(instance),
         sha256=instance.sha256,
         path=instance.attachment.path,

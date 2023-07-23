@@ -131,17 +131,17 @@ class HubuumBaseConfigTestCase(TestCase):
         """Test the logging output types for structlog."""
         # Default is JSON
         config = self._create_config()
-        logging_type = config.logging.get_logging_output_type()
+        logging_type = config.logging.get_logging_output()[-1]
         self.assertIsInstance(logging_type, structlog.dev.ConsoleRenderer)
 
         # Explicitly set to JSON
         config = self._create_config(HUBUUM_LOGGING_PRODUCTION=False)
-        logging_type = config.logging.get_logging_output_type()
+        logging_type = config.logging.get_logging_output()[-1]
         self.assertIsInstance(logging_type, structlog.dev.ConsoleRenderer)
 
         # Explicitly set to produciton
         config = self._create_config(HUBUUM_LOGGING_PRODUCTION=True)
-        logging_type = config.logging.get_logging_output_type()
+        logging_type = config.logging.get_logging_output()[-1]
         self.assertIsInstance(logging_type, structlog.processors.JSONRenderer)
 
     def test_testing_parallel(self) -> None:
@@ -223,15 +223,16 @@ class HubuumBaseConfigTestCase(TestCase):
             [
                 "HUBUUM_LOGGING_LEVEL",
                 "HUBUUM_LOGGING_PRODUCTION",
+                "HUBUUM_LOGGING_BODY_LENGTH",
                 "HUBUUM_LOGGING_LEVEL_API",
                 "HUBUUM_LOGGING_LEVEL_AUTH",
-                "HUBUUM_LOGGING_LEVEL_DJANGO",
+                "HUBUUM_LOGGING_LEVEL_OBJECT",
+                "HUBUUM_LOGGING_LEVEL_HTTP",
+                "HUBUUM_LOGGING_LEVEL_SIGNAL",
                 "HUBUUM_LOGGING_LEVEL_INTERNAL",
                 "HUBUUM_LOGGING_LEVEL_MANUAL",
+                "HUBUUM_LOGGING_LEVEL_DJANGO",
                 "HUBUUM_LOGGING_LEVEL_MIGRATION",
-                "HUBUUM_LOGGING_LEVEL_REQUEST",
-                "HUBUUM_LOGGING_LEVEL_RESPONSE",
-                "HUBUUM_LOGGING_LEVEL_SIGNALS",
             ],
         )
 

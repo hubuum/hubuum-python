@@ -61,7 +61,15 @@ class HubuumAbstractConfig:
             if "LEVEL" in key and isinstance(value, str):
                 value = value.upper()
 
-            prefixed_pairs[fq_key] = value
+            if isinstance(value, str):
+                if value.lower() == "false":
+                    prefixed_pairs[fq_key] = False
+                elif value.lower() == "true":
+                    prefixed_pairs[fq_key] = True
+                else:
+                    prefixed_pairs[fq_key] = value
+            else:
+                prefixed_pairs[fq_key] = value
 
         return prefixed_pairs
 
