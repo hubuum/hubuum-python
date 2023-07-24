@@ -161,7 +161,6 @@ class InternalsTestCase(HubuumModelTestCase):
 
     def test_request_color_tracker(self) -> None:
         """Test that the request color tracker works as expected."""
-
         color_tracker = RequestColorTracker()
 
         events = [
