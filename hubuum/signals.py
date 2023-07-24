@@ -88,7 +88,6 @@ def log_object_deletion(
     sender: Model, instance: object, **kwargs: Dict[str, Any]
 ) -> None:
     """Log object deletion."""
-
     extra_fields = _extra_fields(sender, instance)
 
     object_logger.bind(
