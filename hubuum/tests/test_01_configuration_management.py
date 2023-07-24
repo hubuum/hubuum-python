@@ -8,7 +8,7 @@ import pytest
 import structlog
 from django.test import TestCase
 
-from hubuumsite.config.abstract import valid_logging_levels
+from hubuumsite.config.abstract import HubuumAbstractConfig, valid_logging_levels
 from hubuumsite.config.base import HubuumBaseConfig
 from hubuumsite.config.database import HubuumDatabaseConfig
 from hubuumsite.config.logging import HubuumLoggingConfig
@@ -131,17 +131,17 @@ class HubuumBaseConfigTestCase(TestCase):
         """Test the logging output types for structlog."""
         # Default is JSON
         config = self._create_config()
-        logging_type = config.logging.get_logging_output_type()
+        logging_type = config.logging.get_logging_output()[-1]
         self.assertIsInstance(logging_type, structlog.dev.ConsoleRenderer)
 
         # Explicitly set to JSON
         config = self._create_config(HUBUUM_LOGGING_PRODUCTION=False)
-        logging_type = config.logging.get_logging_output_type()
+        logging_type = config.logging.get_logging_output()[-1]
         self.assertIsInstance(logging_type, structlog.dev.ConsoleRenderer)
 
         # Explicitly set to produciton
         config = self._create_config(HUBUUM_LOGGING_PRODUCTION=True)
-        logging_type = config.logging.get_logging_output_type()
+        logging_type = config.logging.get_logging_output()[-1]
         self.assertIsInstance(logging_type, structlog.processors.JSONRenderer)
 
     def test_testing_parallel(self) -> None:
@@ -223,15 +223,17 @@ class HubuumBaseConfigTestCase(TestCase):
             [
                 "HUBUUM_LOGGING_LEVEL",
                 "HUBUUM_LOGGING_PRODUCTION",
+                "HUBUUM_LOGGING_BODY_LENGTH",
+                "HUBUUM_LOGGING_COLLAPSE_REQUEST_ID",
                 "HUBUUM_LOGGING_LEVEL_API",
                 "HUBUUM_LOGGING_LEVEL_AUTH",
-                "HUBUUM_LOGGING_LEVEL_DJANGO",
+                "HUBUUM_LOGGING_LEVEL_OBJECT",
+                "HUBUUM_LOGGING_LEVEL_HTTP",
+                "HUBUUM_LOGGING_LEVEL_SIGNAL",
                 "HUBUUM_LOGGING_LEVEL_INTERNAL",
                 "HUBUUM_LOGGING_LEVEL_MANUAL",
+                "HUBUUM_LOGGING_LEVEL_DJANGO",
                 "HUBUUM_LOGGING_LEVEL_MIGRATION",
-                "HUBUUM_LOGGING_LEVEL_REQUEST",
-                "HUBUUM_LOGGING_LEVEL_RESPONSE",
-                "HUBUUM_LOGGING_LEVEL_SIGNALS",
             ],
         )
 
@@ -245,3 +247,25 @@ class HubuumBaseConfigTestCase(TestCase):
                 "HUBUUM_SENTRY_ENVIRONMENT",
             ],
         )
+
+    def test_get_prefixed_pairs_creating_booleans(self):
+        """Test that configuration booleans work."""
+        # Define the environment
+        env = {
+            "HUBUUM_PREFIX_KEY1": "false",
+            "HUBUUM_PREFIX_KEY2": "true",
+            "HUBUUM_PREFIX_KEY3": "value",
+        }
+
+        self.obj = HubuumAbstractConfig("PREFIX", env)
+
+        # Set VALID_KEYS in your object
+        self.obj.VALID_KEYS = {"KEY1": None, "KEY2": None, "KEY3": None}
+
+        # Run your function
+        result = self.obj.get_prefixed_pairs("PREFIX", env)
+
+        # Assert that the values are as expected
+        self.assertEqual(result["HUBUUM_PREFIX_KEY1"], False)
+        self.assertEqual(result["HUBUUM_PREFIX_KEY2"], True)
+        self.assertEqual(result["HUBUUM_PREFIX_KEY3"], "value")

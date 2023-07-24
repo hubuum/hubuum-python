@@ -8,10 +8,7 @@ import structlog
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
-from hubuum.middleware.context import get_request_id
-
-request_logger = structlog.getLogger("hubuum.request")
-response_logger = structlog.getLogger("hubuum.response")
+logger = structlog.getLogger("hubuum.http")
 
 
 class LogHttpResponseMiddleware:
@@ -37,11 +34,27 @@ class LogHttpResponseMiddleware:
         """
         start_time = time.time()
 
-        request.id = get_request_id()
         self.log_request(request)
         response = self.get_response(request)
         self.log_response(request, response, start_time)
         return response
+
+    def _get_body(self, request: HttpRequest) -> str:
+        """Get the request body as a string, or '<Binary Data>' if it's binary.
+
+        We currently do not support multipart/form-data requests.
+        """
+        try:
+            body = request.body.decode("utf-8")
+        except UnicodeDecodeError:
+            return "<Binary Data>"
+
+        # Try to remove the content-type line and leading line breaks
+        body = body.split("\n", 1)[-1]  # Removes the first line
+        body = body.lstrip()  # Removes leading line breaks
+
+        # Limit the size of the body logged
+        return body[: settings.LOGGING_MAX_BODY_LENGTH]
 
     def log_request(self, request: HttpRequest) -> None:
         """Log the request."""
@@ -59,15 +72,15 @@ class LogHttpResponseMiddleware:
         # Size of request
         request_size = len(request.body)
 
-        request_logger.bind(
-            request_id=request.id,
+        logger.bind(
             method=request.method,
             remote_ip=remote_ip,
             proxy_ip=proxy_ip,
             user_agent=user_agent,
             path=request.path_info,
             request_size=request_size,
-        ).debug("request")
+            body=self._get_body(request),
+        ).info("request")
 
     def log_response(
         self, request: HttpRequest, response: HttpResponse, start_time: int
@@ -79,15 +92,11 @@ class LogHttpResponseMiddleware:
 
         status_label = cast(str, http.client.responses[status_code])
 
-        if status_code == 201:
-            log_level = logging.DEBUG
-        elif 200 <= status_code < 300:
-            log_level = logging.DEBUG
-        elif 300 <= status_code < 400:
+        if status_code in range(200, 399):
             log_level = logging.INFO
         elif status_code == 400:
             log_level = logging.WARNING
-        elif 400 < status_code < 500:
+        elif status_code in range(401, 499):
             log_level = logging.WARNING
         else:
             log_level = logging.ERROR
@@ -103,18 +112,12 @@ class LogHttpResponseMiddleware:
             extra_data["slow_response"] = True
             log_level = settings.REQUESTS_LOG_LEVEL_SLOW
 
-        content = "[]"
+        content = ""
         if "application/json" in response.headers.get("Content-Type", ""):
             content = response.content.decode("utf-8")
 
-        # For some events, like 301s against the Auth endpoints, we may not have a user.
-        username = ""
-        if hasattr(request, "user"):
-            username = request.user.username
-
-        response_logger.bind(
-            request_id=request.id,
-            user=username,
+        logger.bind(
+            user=request.user.username,
             method=request.method,
             status_code=status_code,
             status_label=status_label,

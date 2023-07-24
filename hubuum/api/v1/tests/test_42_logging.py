@@ -13,10 +13,78 @@ from structlog.testing import capture_logs
 from structlog.types import EventDict
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
-from hubuum.log import critical, debug, error, info, warning
+from hubuum.log import (
+    add_request_id,
+    collapse_request_id,
+    critical,
+    debug,
+    error,
+    info,
+    reorder_keys_processor,
+    warning,
+)
 from hubuum.middleware.logging_http import LogHttpResponseMiddleware
 from hubuum.models.iam import HubuumModel, Namespace, User
 from hubuum.models.resources import Host
+
+
+class HubuumLoggingProcessorTestCase(HubuumAPITestCase):
+    """Test that our processors are doing their job."""
+
+    def test_add_request_id_processor(self) -> None:
+        """Test that the request ID is added properly."""
+        # Simulate a series of logging events
+        events = [
+            {"event": "Event 1"},
+            {"event": "Event 2"},
+            {"event": "Event 3"},
+        ]
+        processed_events = []
+
+        # Process each event
+        for event in events:
+            processed_event = add_request_id(None, None, event)
+            processed_events.append(processed_event)
+
+        # Check that the request ID has been added and is the same for all events
+        request_ids: List[str] = [event["request_id"] for event in processed_events]
+        self.assertEqual(len(set(request_ids)), 1)
+
+    def test_reorder_keys_processor(self) -> None:
+        """Test that the keys are reordered properly."""
+        # Simulate a logging event
+        event = {
+            "event": "Event 1",
+            "request_id": "request_id",
+            "another_key": "value",
+        }
+
+        # Process the event
+        processed_event = reorder_keys_processor(None, None, event)
+
+        # Check that request_id is the first key
+        first_key = next(iter(processed_event.keys()))
+        self.assertEqual(first_key, "request_id")
+
+    def test_collapse_request_id_processor(self) -> None:
+        """Test that the request ID is collapsed properly."""
+        testcases: List[Tuple[str, str]] = [
+            ("", "..."),  # length 0
+            ("12345", "..."),  # length 5
+            ("1234567890", "..."),  # length 10
+            ("12345678901", "123...901"),  # length 11
+            ("12345678901234567890", "123...890"),  # length 20
+        ]
+
+        for original_request_id, expected_request_id in testcases:
+            # Simulate a logging event
+            event = {"event": "Event 1", "request_id": original_request_id}
+
+            # Process the event
+            processed_event = collapse_request_id(None, None, event)
+
+            # Check that the request ID has been replaced and properly formatted
+            self.assertEqual(processed_event["request_id"], expected_request_id)
 
 
 class HubuumLoggingTestCase(HubuumAPITestCase):
@@ -36,6 +104,15 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         """Clean up after tests."""
         self.namespace.delete()
         super().tearDown()
+
+    def _prune_permissions(self, cap_logs: EventDict) -> EventDict:
+        """Remove the permission logs from the log."""
+        return [
+            d
+            for d in cap_logs
+            if d.get("event")
+            not in {"has_perm_n", "has_perm", "m:get_object", "login_data"}
+        ]
 
     def _check_levels(self, cap_logs: EventDict, expected_levels: List[str]) -> None:
         """Check the log levels in the log."""
@@ -64,16 +141,6 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertEqual(log["event"], "request_finished")
         self.assertEqual(log["request"], method_and_expected_path)
         self.assertEqual(log["code"], code)
-
-    def _check_request_response_uuids(self, cap_logs: EventDict) -> None:
-        """Check that the request and response have the same UUID."""
-        uuids = []
-        for log in cap_logs:
-            if log["event"] == "request" or log["event"] == "response":
-                uuids.append(log["request_id"])
-
-        # All UUIDs should be the same. Collapse the list to a set to check.
-        self.assertEqual(len(set(uuids)), 1)
 
     def _check_request(
         self,
@@ -156,13 +223,13 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             get_logger().bind()
             self.assert_get("/iam/namespaces/")
 
+        cap_logs = self._prune_permissions(cap_logs)
         self.assertEqual(len(cap_logs), 4)
 
-        self._check_request_response_uuids(cap_logs)
         self._check_events(
             cap_logs, ["request_started", "request", "response", "request_finished"]
         )
-        self._check_levels(cap_logs, ["info", "debug", "debug", "info"])
+        self._check_levels(cap_logs, ["info", "info", "info", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/")
         self._check_request(cap_logs[1], "GET", "/api/v1/iam/namespaces/")
         self._check_response(cap_logs[2], "GET", "/api/v1/iam/namespaces/", 200, "OK")
@@ -181,12 +248,12 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             get_logger().bind()
             self.assert_get_and_404("/iam/namespaces/nope")
 
+        cap_logs = self._prune_permissions(cap_logs)
         self.assertEqual(len(cap_logs), 4)
-        self._check_request_response_uuids(cap_logs)
         self._check_events(
             cap_logs, ["request_started", "request", "response", "request_finished"]
         )
-        self._check_levels(cap_logs, ["info", "debug", "warning", "info"])
+        self._check_levels(cap_logs, ["info", "info", "warning", "info"])
         self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/nope")
         self._check_request(cap_logs[1], "GET", "/api/v1/iam/namespaces/nope")
         self._check_response(
@@ -203,6 +270,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             host_blob = self.assert_post("/resources/hosts/", self.host_data)
             host_id = host_blob.data["id"]
 
+        cap_logs = self._prune_permissions(cap_logs)
         self.assertEqual(len(cap_logs), 6)
 
         self._check_events(
@@ -217,9 +285,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             ],
         )
 
-        self._check_request_response_uuids(cap_logs)
-
-        self._check_levels(cap_logs, ["info", "debug", "info", "info", "debug", "info"])
+        self._check_levels(cap_logs, ["info", "info", "info", "debug", "info", "info"])
 
         self._check_request_started(cap_logs[0], "POST /api/v1/resources/hosts/")
         self._check_request(cap_logs[1], "POST", "/api/v1/resources/hosts/")
@@ -278,6 +344,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/logout/",
             )
 
+        cap_logs = self._prune_permissions(cap_logs)
+
         self.assertTrue(len(cap_logs) == 13)
 
         self._check_events(
@@ -307,17 +375,17 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             cap_logs,
             [
                 "info",
-                "debug",
                 "info",
                 "info",
                 "info",
-                ["debug", "warning", "critical", "error"],
+                "info",
+                ["info", "warning", "critical", "error"],
                 "info",
                 "info",
-                "debug",
                 "info",
                 "info",
-                "debug",
+                "info",
+                "info",
                 "info",
             ],
         )
@@ -352,6 +420,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "/api/auth/login/",
             )
 
+        cap_logs = self._prune_permissions(cap_logs)
+
         self.assertTrue(len(cap_logs) == 5)
         self._check_events(
             cap_logs,
@@ -365,7 +435,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         )
         self._check_levels(
             cap_logs,
-            ["info", "debug", "error", ["warning", "critical", "error"], "info"],
+            ["info", "info", "error", ["warning", "critical", "error"], "info"],
         )
 
         self.assertIsNone(cap_logs[2]["id"])
@@ -389,8 +459,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         # test the behavior of the logging system with different delays
         delay_responses: List[Tuple[float, str]] = [
-            (0.1, "debug"),
-            (0.5, "debug"),
+            (0.1, "info"),
+            (0.5, "info"),
             (1.0, "warning"),
             (2.0, "warning"),
             (5.0, "error"),
@@ -444,3 +514,27 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             request.META["HTTP_X_FORWARDED_FOR"] = "192.0.2.0"  # set a proxy IP
             middleware(request)
             self.assertEqual(cap_logs[0]["proxy_ip"], "192.0.2.0")
+
+    def test_binary_request_body(self) -> None:
+        """Test logging of a request with a binary body."""
+        middleware = LogHttpResponseMiddleware(MagicMock())
+
+        def mock_get_response(_):
+            return HttpResponse(status=200)
+
+        middleware.get_response = mock_get_response
+
+        with capture_logs() as cap_logs:
+            get_logger().bind()
+            request = HttpRequest()
+            request._read_started = False
+            request.user = User.objects.get(username="superuser")
+
+            # Mock a binary request body
+            binary_body = b"\x80abc\x01\x02\x03\x04\x05"
+            request._stream = io.BytesIO(binary_body)
+
+            middleware(request)
+
+            # Check that the body was logged as '<Binary Data>'
+            self.assertEqual(cap_logs[0]["body"], "<Binary Data>")

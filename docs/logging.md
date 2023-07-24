@@ -1,5 +1,12 @@
 # Logging
 
+## Core logging options
+
+- `HUBUUM_LOGGING_LEVEL`: Sets the default logging level for all sources. Defaults to "CRITICAL".
+- `HUBUUM_LOGGING_PRODUCTION`: Determines if logging is in production mode or not. In production we get no colored output and the JSON layout is compact. Defaults to `False`. Note that if `HUBUUM_SECRET_KEY` is set above, this defaults to `True`, but may be overridden explicitly. 
+- `HUBUUM_LOGGING_MAX_BODY_SIZE`: Sets the maximum size for the logging of the request.body. Defaults to 3k.
+- `HUBUUM_LOGGING_COLLAPSE_REQUEST_ID`: *Only applies to rich console output, never applies for production logging*. If set to True, collapse request_ids to `xxx...xxx` to save some screen real estate. Defaults to True.
+
 ## Standard Logging
 
 Hubuum logs to the console as per the [12-factor app](https://12factor.net/logs) methodology.
@@ -16,9 +23,10 @@ One may also set the logging level for specific sources. The following environme
 
 - `HUBUUM_LOGGING_LEVEL_API`: Sets the logging level for the API. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
 - `HUBUUM_LOGGING_LEVEL_AUTH`: Sets the logging level for authentication. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
-- `HUBUUM_LOGGING_LEVEL_SIGNALS`: Sets the logging level for signals, typically used for object manipulation. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
-- `HUBUUM_LOGGING_LEVEL_RESPONSE`: Sets the logging level for responses. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
-- `HUBUUM_LOGGING_LEVEL_REQUEST`: Sets the logging level for requests. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
+- `HUBUUM_LOGGING_LEVEL_HTTP`: Sets the logging level for HTTP traffic, typically requests and responses. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
+- `HUBUUM_LOGGING_LEVEL_OBJECT`: Sets the logging level for object manipulation. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
+- `HUBUUM_LOGGING_LEVEL_SIGNAL`: Sets the logging level for signals, typically used for object manipulation. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
+- `HUBUUM_LOGGING_LEVEL_INTERNAL`: Sets the logging level for internal logging, typically used for introspection. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
 - `HUBUUM_LOGGING_LEVEL_MANUAL`: Sets the logging level for manual logs. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
 - `HUBUUM_LOGGING_LEVEL_MIGRATION`: Sets the logging level for migration logs. Defaults to the value of `HUBUUM_LOGGING_LEVEL`.
 - `HUBUUM_LOGGING_LEVEL_DJANGO`: Sets the logging level for Django. Defaults to `ERROR`. This logger is not recommended for use.
@@ -27,20 +35,22 @@ One may also set the logging level for specific sources. The following environme
 
 Hubuum applies a request_id to contextually related log entries. This request_id follows events from a request to a response, leading to logs such as these:
 
-```json
-2023-07-20T23:13:17.676391Z [debug ] request  [hubuum.request] method=PATCH path=/api/v1/resources/hosts/yes proxy_ip= remote_ip=127.0.0.1 request_id=402cfc7c-f8de-42d6-8f4e-6bbb7dd0b39c request_size=12 user_agent=
-2023-07-20T23:13:17.714942Z [info  ] updated  [hubuum.signals.object] id=8 model=Host request_id=402cfc7c-f8de-42d6-8f4e-6bbb7dd0b39c
-2023-07-20T23:13:17.715166Z [info  ] updated  [hubuum.api.object] instance=8 model=Host request_id=402cfc7c-f8de-42d6-8f4e-6bbb7dd0b39c user=tmp
-2023-07-20T23:13:17.715638Z [debug ] response [hubuum.response] content={...} method=PATCH path=/api/v1/resources/hosts/yes request_id=402cfc7c-f8de-42d6-8f4e-6bbb7dd0b39c run_time_ms=39.25 status_code=200 status_label=OK user=tmp
-2023-07-20T23:13:17.735291Z [debug ] request  [hubuum.request] method=DELETE path=/api/v1/iam/namespaces/namespace1 proxy_ip= remote_ip=127.0.0.1 request_id=65b430d5-e8ec-45dd-90de-4fb4732b132b request_size=0 user_agent=
-2023-07-20T23:13:17.752319Z [info  ] deleted  [hubuum.api.object] instance=7 model=Namespace request_id=65b430d5-e8ec-45dd-90de-4fb4732b132b user=superuser
-2023-07-20T23:13:17.811455Z [info  ] deleted  [hubuum.signals.object] id=4 model=Permission request_id=65b430d5-e8ec-45dd-90de-4fb4732b132b
-2023-07-20T23:13:17.815491Z [info  ] deleted  [hubuum.signals.object] id=8 model=Host request_id=65b430d5-e8ec-45dd-90de-4fb4732b132b
-2023-07-20T23:13:17.818405Z [info  ] deleted  [hubuum.signals.object] id=7 model=Namespace request_id=65b430d5-e8ec-45dd-90de-4fb4732b132b
-2023-07-20T23:13:17.818837Z [debug ] response [hubuum.response] content=[] method=DELETE path=/api/v1/iam/namespaces/namespace1 request_id=65b430d5-e8ec-45dd-90de-4fb4732b132b run_time_ms=83.53 status_code=204 status_label=No Content user=superuser
+```
+2023-07-23T21:16:30.863144Z [info     ]  • request          [hubuum.http] request_id=a07...2f4 method=PATCH remote_ip=127.0.0.1 proxy_ip= user_agent= path=/api/v1/resources/hosts/yes request_size=12 body={"serial":1}
+2023-07-23T21:16:30.896036Z [info     ]  • updated          [hubuum.object] request_id=a07...2f4 model=Host id=1
+2023-07-23T21:16:30.896433Z [debug    ]  • updated          [hubuum.api] request_id=a07...2f4 model=Host user=tmp instance=1
+2023-07-23T21:16:30.896900Z [info     ]  • response         [hubuum.http] request_id=a07...2f4 user=tmp method=PATCH status_code=200 status_label=OK path=/api/v1/resources/hosts/yes content={"id":1,"created_at":"2023-07-23T21:16:30.725568Z","updated_at":"2023-07-23T21:16:30.892566Z","name":"yes","fqdn":"","serial":"1","registration_date":"2023-07-23T21:16:30.725586Z","namespace":1,"type":null,"room":null,"jack":null,"purchase_order":null,"person":null} run_time_ms=33.75
+2023-07-23T21:16:30.908318Z [info     ]  • updated          [hubuum.object] request_id=98f...8d2 model=User id=1
+2023-07-23T21:16:30.912440Z [info     ]  • created          [hubuum.object] request_id=98f...8d2 model=AuthToken id=2ec...aa0 : superuser
+2023-07-23T21:16:30.913254Z [info     ]  • request          [hubuum.http] request_id=98f...8d2 method=DELETE remote_ip=127.0.0.1 proxy_ip= user_agent= path=/api/v1/iam/namespaces/namespace1 request_size=0 body=
+2023-07-23T21:16:30.928717Z [debug    ]  • deleted          [hubuum.api] request_id=98f...8d2 model=Namespace user=superuser instance=1
+2023-07-23T21:16:30.980427Z [info     ]  • deleted          [hubuum.object] request_id=98f...8d2 model=Permission id=1
+2023-07-23T21:16:30.984305Z [info     ]  • deleted          [hubuum.object] request_id=98f...8d2 model=Host id=1
+2023-07-23T21:16:30.987523Z [info     ]  • deleted          [hubuum.object] request_id=98f...8d2 model=Namespace id=1
+2023-07-23T21:16:30.987982Z [info     ]  • response         [hubuum.http] request_id=98f...8d2 user=superuser method=DELETE status_code=204 status_label=No Content path=/api/v1/iam/namespaces/namespace1 content= run_time_ms=74.71
 ```
 
-Notice how the request_id also applies to the cascading events caught by the signals logger and caused by the deletion of the namespace "namespace1".
+Notice how the request_id also applies to the cascading events caused by the deletion of the namespace "namespace1". Also note that the dots would be colored according to the request_id for the entry.
 
 ## Sentry
 

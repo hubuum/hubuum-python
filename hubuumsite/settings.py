@@ -12,9 +12,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 import structlog
+from structlog.types import Processor
 from structlog_sentry import SentryProcessor
 
 import hubuum.log
@@ -34,6 +35,8 @@ REQUESTS_LOG_LEVEL_SLOW = config.requests.get_log_level("LOG_LEVEL_SLOW")
 REQUESTS_THRESHOLD_VERY_SLOW = config.requests.get("THRESHOLD_VERY_SLOW")
 REQUESTS_LOG_LEVEL_VERY_SLOW = config.requests.get_log_level("LOG_LEVEL_VERY_SLOW")
 
+LOGGING_MAX_BODY_LENGTH = config.logging.get("BODY_LENGTH")
+
 # from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,6 +45,9 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 ALLOWED_HOSTS = []
+
+# Apply a / if needed
+APPEND_SLASH = True
 
 # Application definition
 INSTALLED_APPS = [
@@ -62,8 +68,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "hubuum.User"
 
 MIDDLEWARE = [
-    "django_structlog.middlewares.RequestMiddleware",
-    "hubuum.middleware.logging_http.LogHttpResponseMiddleware",
+    "hubuum.middleware.context.ContextMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -71,7 +76,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "hubuum.middleware.context.ContextMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
+    "hubuum.middleware.logging_http.LogHttpResponseMiddleware",
 ]
 
 ROOT_URLCONF = "hubuumsite.urls"
@@ -171,22 +177,28 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
+
+# Prepare a variable for the common processors
+processors: List[
+    Union[Processor, structlog.dev.ConsoleRenderer, structlog.processors.JSONRenderer]
+] = [
+    hubuum.log.filter_sensitive_data,
+    structlog.stdlib.filter_by_level,
+    structlog.stdlib.add_log_level,
+    structlog.stdlib.add_logger_name,
+    structlog.processors.TimeStamper(fmt="iso"),
+    structlog.processors.StackInfoRenderer(),
+    structlog.processors.format_exc_info,
+    structlog.processors.StackInfoRenderer(),
+    structlog.processors.UnicodeDecoder(),
+    SentryProcessor(event_level=config.sentry.get_log_level("SENTRY_LEVEL")),
+]
+
+# Append the final renderer (either JSON or Console), and any additional processors
+processors.extend(config.logging.get_logging_output())
+
 structlog.configure(
-    processors=[
-        hubuum.log.filter_sensitive_data,
-        structlog.stdlib.filter_by_level,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.add_logger_name,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.UnicodeDecoder(),
-        SentryProcessor(event_level=config.sentry.get_log_level("SENTRY_LEVEL")),
-        # This sets either consolelogger or jsonlogger as the output type,
-        # depending on if we're running in prod or testing production logging.
-        config.logging.get_logging_output_type(),
-    ],
+    processors=processors,
     context_class=dict,
     logger_factory=structlog.stdlib.LoggerFactory(),
     wrapper_class=structlog.stdlib.BoundLogger,
@@ -217,25 +229,26 @@ LOGGING: Dict[str, Any] = {
         "hubuum.internal": {
             "handlers": ["console"],
             "level": config.logging.level_for_source("INTERNAL"),
+            "propagate": False,
         },
-        "hubuum.api.object": {
+        "hubuum.api": {
             "handlers": ["console"],
             "level": config.logging.level_for_source("API"),
             "propagate": False,
         },
-        "hubuum.signals.object": {
+        "hubuum.object": {
             "handlers": ["console"],
-            "level": config.logging.level_for_source("SIGNALS"),
+            "level": config.logging.level_for_source("OBJECT"),
             "propagate": False,
         },
-        "hubuum.request": {
+        "hubuum.signal": {
             "handlers": ["console"],
-            "level": config.logging.level_for_source("REQUEST"),
+            "level": config.logging.level_for_source("SIGNAL"),
             "propagate": False,
         },
-        "hubuum.response": {
+        "hubuum.http": {
             "handlers": ["console"],
-            "level": config.logging.level_for_source("RESPONSE"),
+            "level": config.logging.level_for_source("HTTP"),
             "propagate": False,
         },
         "hubuum.auth": {
