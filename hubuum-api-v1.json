@@ -13030,7 +13030,7 @@
     "/api/auth/login/": {
       "post": {
         "operationId": "createLogin",
-        "description": "Login view that allows basic auth.",
+        "description": "Log the user in.",
         "parameters": [],
         "requestBody": {
           "content": {
