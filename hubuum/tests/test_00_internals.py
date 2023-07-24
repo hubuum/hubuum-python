@@ -5,7 +5,7 @@ import pytest
 from rest_framework.exceptions import NotFound, ValidationError
 
 from hubuum.exceptions import InvalidParam, MissingParam
-from hubuum.log import filter_sensitive_data
+from hubuum.log import RequestColorTracker, filter_sensitive_data
 from hubuum.models.core import model_supports_attachments, model_supports_extensions
 from hubuum.models.iam import (
     Namespace,
@@ -155,3 +155,35 @@ class InternalsTestCase(HubuumModelTestCase):
 
         with pytest.raises(InvalidParam):
             filter_sensitive_data(None, None, Host)
+
+    def test_request_color_generator(self):
+        """Test that the request color generator works."""
+
+    def test_request_color_tracker(self) -> None:
+        """Test that the request color tracker works as expected."""
+
+        color_tracker = RequestColorTracker()
+
+        events = [
+            {"request_id": "abc123", "event": "Event 1"},
+            {"request_id": "def456", "event": "Event 2"},
+            {"request_id": "abc123", "event": "Event 3"},
+            {"request_id": "abc123", "event": "Event 3"},
+            {"request_id": "ghi789", "event": "Event 3"},
+        ]
+
+        expected_colors = [
+            color_tracker.COLORS[0],
+            color_tracker.COLORS[1],
+            color_tracker.COLORS[0],
+            color_tracker.COLORS[0],
+            color_tracker.COLORS[2],
+        ]
+
+        for i, event in enumerate(events):
+            expected_color = expected_colors[i]
+            colored_bubble = color_tracker._colorize(expected_color, " • ")
+            expected_event = colored_bubble + event["event"]
+            colored_event = color_tracker(None, None, event)
+
+            self.assertEqual(colored_event["event"], expected_event)
