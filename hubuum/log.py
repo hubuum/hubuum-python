@@ -10,7 +10,6 @@ from structlog import get_logger
 from structlog.types import EventDict
 
 from hubuum.exceptions import InvalidParam
-from hubuum.middleware.context import get_request_id
 
 logger = get_logger("hubuum.manual")
 
@@ -82,15 +81,10 @@ def filter_sensitive_data(_: Any, __: Any, event_dict: EventDict) -> EventDict:
     return _filter_sensitive_data(event_dict)
 
 
-def add_request_id(_: Any, __: Any, event_dict: EventDict) -> EventDict:
-    """Add the request_id to the event."""
-    event_dict["request_id"] = get_request_id()
-    return event_dict
-
-
 def collapse_request_id(_: Any, __: Any, event_dict: EventDict) -> EventDict:
     """Collapse request_id into the event."""
-    event_dict["request_id"] = _replace_token(event_dict["request_id"])
+    if "request_id" in event_dict:
+        event_dict["request_id"] = _replace_token(event_dict["request_id"])
     return event_dict
 
 
@@ -179,10 +173,13 @@ class RequestColorTracker:
         :param event_dict: The event dictionary of the log entry.
         :return: The modified event dictionary.
         """
-        request_id = event_dict.get("request_id", "None")
-        color = self.request_to_color[request_id]
-        colored_bubble = self._colorize(color, " • ")
+        request_id = event_dict.get("request_id")
 
+        color = "black"
+        if request_id:
+            color = self.request_to_color[request_id]
+
+        colored_bubble = self._colorize(color, " • ")
         event_dict["event"] = colored_bubble + event_dict.get("event", "")
 
         return event_dict

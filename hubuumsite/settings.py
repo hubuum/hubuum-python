@@ -68,7 +68,6 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "hubuum.User"
 
 MIDDLEWARE = [
-    "hubuum.middleware.context.ContextMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -77,7 +76,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
-    "hubuum.middleware.logging_http.LogHttpResponseMiddleware",
+    "hubuum.middleware.logging_http.LogHttpMiddleware",
 ]
 
 ROOT_URLCONF = "hubuumsite.urls"
@@ -182,6 +181,7 @@ STATIC_URL = "/static/"
 processors: List[
     Union[Processor, structlog.dev.ConsoleRenderer, structlog.processors.JSONRenderer]
 ] = [
+    structlog.contextvars.merge_contextvars,
     hubuum.log.filter_sensitive_data,
     structlog.stdlib.filter_by_level,
     structlog.stdlib.add_log_level,
@@ -189,7 +189,6 @@ processors: List[
     structlog.processors.TimeStamper(fmt="iso"),
     structlog.processors.StackInfoRenderer(),
     structlog.processors.format_exc_info,
-    structlog.processors.StackInfoRenderer(),
     structlog.processors.UnicodeDecoder(),
     SentryProcessor(event_level=config.sentry.get_log_level("SENTRY_LEVEL")),
 ]
