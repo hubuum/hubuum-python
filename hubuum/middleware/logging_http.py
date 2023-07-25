@@ -1,7 +1,8 @@
-"""Middleware to handle logging."""
+"""Middleware to handle logging of HTTP requests and responses."""
 import http
 import logging
 import time
+import uuid
 from typing import Callable, cast
 
 import structlog
@@ -11,8 +12,18 @@ from django.http import HttpRequest, HttpResponse
 logger = structlog.getLogger("hubuum.http")
 
 
-class LogHttpResponseMiddleware:
-    """Middleware to log HTTP responses with their status codes, messages, and URLs.
+def _get_header(request: HttpRequest, header: str) -> str:
+    """Get a header from the request."""
+    if hasattr(request, "headers"):
+        val = request.headers.get(header)
+        if val:
+            return val
+
+    return request.META.get(header.upper().replace("-", "_"))
+
+
+class LogHttpMiddleware:
+    """Middleware to log HTTP responses with their status codes, messages, and more.
 
     This middleware checks the status code of the response and logs a message
     based on the response code range (success, redirection, client error, or server error).
@@ -44,6 +55,9 @@ class LogHttpResponseMiddleware:
 
         We currently do not support multipart/form-data requests.
         """
+        if request.POST:
+            return request.POST.dict()
+
         try:
             body = request.body.decode("utf-8")
         except UnicodeDecodeError:
@@ -58,16 +72,23 @@ class LogHttpResponseMiddleware:
 
     def log_request(self, request: HttpRequest) -> None:
         """Log the request."""
-        remote_ip = request.META.get("REMOTE_ADDR")
+        request_id = _get_header(request, "x-request-id") or str(uuid.uuid4())
+        correlation_id = _get_header(request, "x-correlation-id")
+
+        print(correlation_id)
+
+        structlog.contextvars.bind_contextvars(request_id=request_id)
+        if correlation_id:
+            structlog.contextvars.bind_contextvars(correlation_id=correlation_id)
+
+        remote_ip = _get_header(request, "remote-addr")
 
         # Check for a proxy address
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        x_forwarded_for = _get_header(request, "http-x-forwarded-for")
         if x_forwarded_for:
             proxy_ip = x_forwarded_for.split(",")[0]
         else:
             proxy_ip = ""
-
-        user_agent = request.META.get("HTTP_USER_AGENT", "")
 
         # Size of request
         request_size = len(request.body)
@@ -76,10 +97,9 @@ class LogHttpResponseMiddleware:
             method=request.method,
             remote_ip=remote_ip,
             proxy_ip=proxy_ip,
-            user_agent=user_agent,
             path=request.path_info,
             request_size=request_size,
-            body=self._get_body(request),
+            content=self._get_body(request),
         ).info("request")
 
     def log_response(
@@ -94,9 +114,7 @@ class LogHttpResponseMiddleware:
 
         if status_code in range(200, 399):
             log_level = logging.INFO
-        elif status_code == 400:
-            log_level = logging.WARNING
-        elif status_code in range(401, 499):
+        elif status_code in range(400, 499):
             log_level = logging.WARNING
         else:
             log_level = logging.ERROR
@@ -126,5 +144,12 @@ class LogHttpResponseMiddleware:
             **extra_data,
             run_time_ms=round(run_time_ms, 2),
         ).log(log_level, "response")
+
+        contextvars = structlog.contextvars.get_contextvars()
+        response["X-Request-ID"] = contextvars["request_id"]
+        if "correlation_id" in contextvars:
+            response["X-Correlation-ID"] = contextvars["correlation_id"]
+
+        structlog.contextvars.clear_contextvars()
 
         return response

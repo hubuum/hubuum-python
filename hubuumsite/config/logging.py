@@ -118,13 +118,12 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
                     structlog.processors.JSONRenderer,
                 ]
             ] = [
-                hubuum.log.add_request_id,
                 hubuum.log.reorder_keys_processor,
                 hubuum.log.RequestColorTracker(),
                 structlog.dev.ConsoleRenderer(colors=True, sort_keys=False),
             ]
 
             if self.get("COLLAPSE_REQUEST_ID"):
-                processors.insert(2, hubuum.log.collapse_request_id)
+                processors.insert(1, hubuum.log.collapse_request_id)
 
         return processors

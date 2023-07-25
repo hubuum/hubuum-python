@@ -14,7 +14,6 @@ from structlog.types import EventDict
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.log import (
-    add_request_id,
     collapse_request_id,
     critical,
     debug,
@@ -23,32 +22,13 @@ from hubuum.log import (
     reorder_keys_processor,
     warning,
 )
-from hubuum.middleware.logging_http import LogHttpResponseMiddleware
+from hubuum.middleware.logging_http import LogHttpMiddleware
 from hubuum.models.iam import HubuumModel, Namespace, User
 from hubuum.models.resources import Host
 
 
 class HubuumLoggingProcessorTestCase(HubuumAPITestCase):
     """Test that our processors are doing their job."""
-
-    def test_add_request_id_processor(self) -> None:
-        """Test that the request ID is added properly."""
-        # Simulate a series of logging events
-        events = [
-            {"event": "Event 1"},
-            {"event": "Event 2"},
-            {"event": "Event 3"},
-        ]
-        processed_events = []
-
-        # Process each event
-        for event in events:
-            processed_event = add_request_id(None, None, event)
-            processed_events.append(processed_event)
-
-        # Check that the request ID has been added and is the same for all events
-        request_ids: List[str] = [event["request_id"] for event in processed_events]
-        self.assertEqual(len(set(request_ids)), 1)
 
     def test_reorder_keys_processor(self) -> None:
         """Test that the keys are reordered properly."""
@@ -449,7 +429,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
     def test_run_time_ms_escalation(self) -> None:
         """Test run_time_ms escalation for logging levels."""
-        middleware = LogHttpResponseMiddleware(MagicMock())
+        middleware = LogHttpMiddleware(MagicMock())
 
         # mock the get_response method to return a response with a specified status code and delay
         def mock_get_response(_):
@@ -480,7 +460,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
     def test_return_500_error(self) -> None:
         """Test middleware returning 500 error."""
-        middleware = LogHttpResponseMiddleware(MagicMock())
+        middleware = LogHttpMiddleware(MagicMock())
 
         def mock_get_response(_):
             return HttpResponse(status=500)
@@ -498,26 +478,39 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
     def test_proxy_ip_in_logs(self) -> None:
         """Check that a proxy IP is logged."""
-        middleware = LogHttpResponseMiddleware(MagicMock())
 
-        def mock_get_response(_):
-            return HttpResponse(status=500)
+        def common_test(request: HttpRequest):
+            middleware = LogHttpMiddleware(MagicMock())
 
-        middleware.get_response = mock_get_response
+            def mock_get_response(_):
+                return HttpResponse(status=500)
 
-        with capture_logs() as cap_logs:
-            get_logger().bind()
-            request = HttpRequest()
-            request._read_started = False
-            request._stream = io.BytesIO(b"request body")
-            request.user = User.objects.get(username="superuser")
-            request.META["HTTP_X_FORWARDED_FOR"] = "192.0.2.0"  # set a proxy IP
-            middleware(request)
-            self.assertEqual(cap_logs[0]["proxy_ip"], "192.0.2.0")
+            middleware.get_response = mock_get_response
+
+            with capture_logs() as cap_logs:
+                get_logger().bind()
+                request._read_started = False
+                request._stream = io.BytesIO(b"request body")
+                request.user = User.objects.get(username="superuser")
+                middleware(request)
+                self.assertEqual(cap_logs[0]["proxy_ip"], "192.0.2.0")
+
+        # META-based test
+        request = HttpRequest()
+        request.META["HTTP_X_FORWARDED_FOR"] = "192.0.2.0"  # set a proxy IP
+        common_test(request)
+
+        # headers-based test
+        request = HttpRequest()
+        request.headers = {
+            "http-x-forwarded-for": "192.0.2.0",
+            "x-correlation-id": "0123456789",
+        }
+        common_test(request)
 
     def test_binary_request_body(self) -> None:
         """Test logging of a request with a binary body."""
-        middleware = LogHttpResponseMiddleware(MagicMock())
+        middleware = LogHttpMiddleware(MagicMock())
 
         def mock_get_response(_):
             return HttpResponse(status=200)
@@ -537,4 +530,4 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             middleware(request)
 
             # Check that the body was logged as '<Binary Data>'
-            self.assertEqual(cap_logs[0]["body"], "<Binary Data>")
+            self.assertEqual(cap_logs[0]["content"], "<Binary Data>")
