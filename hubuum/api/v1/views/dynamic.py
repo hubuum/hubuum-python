@@ -1,6 +1,6 @@
 """Views for the resources in API v1."""
 
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
@@ -173,6 +173,10 @@ class DynamicObjectDetail(DynamicDetailView):
 class LinkTypeView(RetrieveUpdateDestroyAPIView):  # type: ignore
     """Get, Patch, or Destroy a link type between two classes."""
 
+    schema = DynamicAutoSchema(
+        tags=["Resources"],
+    )
+
     queryset = LinkType.objects.all()
     serializer_class = LinkTypeSerializer
     permission_classes = (NamespacePermission,)
@@ -240,10 +244,16 @@ class DynamicLinkListView(ListCreateAPIView):  # type: ignore
     - get_queryset: retrieves the queryset based on class name and object name/id
     """
 
+    schema = DynamicAutoSchema(
+        tags=["Resources"],
+    )
+
     permission_classes = (NamespacePermission,)
 
     def _query_param_is_true(self, param: str) -> bool:
         """Check if a query parameter is set to true."""
+        if not self.request:  # pragma: no cover
+            return False
         return self.request.query_params.get(param, "").lower() == "true"
 
     def get_serializer_class(self):
@@ -259,6 +269,9 @@ class DynamicLinkListView(ListCreateAPIView):  # type: ignore
 
         Raises NotFound error if the source object does not exist or has no links.
         """
+        if not self.request:  # pragma: no cover
+            return DynamicLink.objects.none()
+
         classname = self.kwargs.get("classname")
         obj = self.kwargs.get("obj")
         targetclass = self.kwargs.get("targetclass")
@@ -319,31 +332,22 @@ class DynamicLinkListView(ListCreateAPIView):  # type: ignore
 
 
 class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
-    """API endpoints for retrieving and deleting a specific dynamic link.
+    """API endpoints for retrieving and deleting a specific dynamic link."""
 
-    Methods
-    -------
-    - get_queryset: retrieves a specific DynamicLink based on source and target
-                    object's class names and their names.
-    """
+    schema = DynamicAutoSchema(
+        tags=["Resources"],
+    )
 
+    queryset = DynamicLink.objects.all()
     serializer_class = DynamicLinkSerializer
     permission_classes = (NamespacePermission,)
 
     def get_object(self):
-        """Get a speific link object between two objects."""
-        # Permissions for links?
-        return self.get_queryset()
-
-    def get_queryset(self):  # type: ignore
-        """Override the get_queryset method to return a specific DynamicLink.
+        """Retrieve a specific DynamicLink.
 
         The source and target objects can be defined by their class names and their names.
-
         Raises NotFound error if the specified link does not exist.
         """
-        print("queryset")
-        print(self.kwargs)
         classname = self.kwargs.get("classname")
         obj = self.kwargs.get("obj")
         targetclass = self.kwargs.get("targetclass")
@@ -364,26 +368,11 @@ class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
     def get(
         self, request: HttpRequest, *args: Dict[str, Any], **kwargs: Dict[str, Any]
     ) -> Response:
-        """Get the path to a specific object."""
-        classname = self.kwargs.get("classname")
-        obj = self.kwargs.get("obj")
-        targetclass = self.kwargs.get("targetclass")
-        print("GET")
-        print(self.kwargs)
-
-        objs = DynamicLink.objects.filter(
-            link_type__source_class__name=classname,
-            link_type__target_class__name=targetclass,
-            source__name=obj,
-        )
-
-        if objs.count() == 0:
-            raise NotFound("The specified link does not exist.")
-
-        return Response(DynamicLinkSerializer(objs, many=True).data)
+        """Get a specific DynamicLink between two objects."""
+        return Response(self.get_serializer(self.get_object()).data)
 
     def delete(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
-        """Delete an existing link between two objects."""
+        """Delete a specific DynamicLink between two objects."""
         obj = self.get_object()
         obj.delete()
         return Response(status=204)
@@ -394,40 +383,11 @@ class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
         obj = self.kwargs.get("obj")
         targetclass = self.kwargs.get("targetclass")
         targetobject = self.kwargs.get("targetobject")
-        namespace_id = request.data.get("namespace")
+        namespace_id = int(request.data.get("namespace"))
 
-        try:
-            source_object = DynamicObject.objects.get(
-                dynamic_class__name=classname,
-                name=obj,
-            )
-        except DynamicObject.DoesNotExist as exc:
-            raise NotFound("The specified source object does not exist.") from exc
-
-        try:
-            target_object = DynamicObject.objects.get(
-                dynamic_class__name=targetclass,
-                name=targetobject,
-            )
-        except DynamicObject.DoesNotExist as exc:
-            raise NotFound("The specified target object does not exist.") from exc
-
-        try:
-            link_type = LinkType.objects.get(
-                source_class__name=classname,
-                target_class__name=targetclass,
-            )
-        except LinkType.DoesNotExist as exc:
-            raise NotFound(
-                f"No link defined between '{classname}' and '{targetclass}'."
-            ) from exc
-
-        try:
-            namespace = Namespace.objects.get(id=namespace_id)
-        except Namespace.DoesNotExist as exc:
-            raise NotFound(
-                f"The namespace with ID '{namespace_id}' does not exist."
-            ) from exc
+        source_object, target_object, link_type, namespace = self.get_link_data(
+            classname, obj, targetclass, targetobject, namespace_id
+        )
 
         # Check how many links the source object already has to the target class
         # and compare it to the max_links allowed by the link type, if it's too high,
@@ -460,3 +420,50 @@ class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
             )
 
         return Response(self.get_serializer(link).data, status=201)
+
+    def get_object_from_model(
+        self, model: str, error_message: str, **filter_args: Any
+    ) -> object:
+        """Retrieve an object from the given model."""
+        try:
+            return model.objects.get(**filter_args)
+        except model.DoesNotExist as exc:
+            raise NotFound(error_message) from exc
+
+    def get_link_data(
+        self,
+        classname: str,
+        obj: str,
+        targetclass: str,
+        targetobject: str,
+        namespace_id: int,
+    ) -> Tuple[DynamicObject, DynamicObject, LinkType, Namespace]:
+        """Retrieve the necessary data for link creation."""
+        source_object = self.get_object_from_model(
+            DynamicObject,
+            "The specified source object does not exist.",
+            dynamic_class__name=classname,
+            name=obj,
+        )
+
+        target_object = self.get_object_from_model(
+            DynamicObject,
+            "The specified target object does not exist.",
+            dynamic_class__name=targetclass,
+            name=targetobject,
+        )
+
+        link_type = self.get_object_from_model(
+            LinkType,
+            f"No link defined between '{classname}' and '{targetclass}'.",
+            source_class__name=classname,
+            target_class__name=targetclass,
+        )
+
+        namespace = self.get_object_from_model(
+            Namespace,
+            f"The namespace with ID '{namespace_id}' does not exist.",
+            id=namespace_id,
+        )
+
+        return source_object, target_object, link_type, namespace

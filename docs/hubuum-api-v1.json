@@ -13482,16 +13482,16 @@
         ]
       }
     },
-    "/api/v1/dynamic/{id}": {
+    "/api/v1/dynamic/{classname}": {
       "get": {
-        "operationId": "dynamic_class_detail_get_api_v1_dynamic_id",
+        "operationId": "dynamic_class_detail_get_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
-            "name": "id",
+            "name": "classname",
             "in": "path",
             "required": true,
-            "description": "A unique integer value identifying this dynamic class.",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -13514,14 +13514,14 @@
         ]
       },
       "put": {
-        "operationId": "dynamic_class_detail_put_api_v1_dynamic_id",
+        "operationId": "dynamic_class_detail_put_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
-            "name": "id",
+            "name": "classname",
             "in": "path",
             "required": true,
-            "description": "A unique integer value identifying this dynamic class.",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -13563,14 +13563,14 @@
         ]
       },
       "patch": {
-        "operationId": "dynamic_class_detail_patch_api_v1_dynamic_id",
+        "operationId": "dynamic_class_detail_patch_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
-            "name": "id",
+            "name": "classname",
             "in": "path",
             "required": true,
-            "description": "A unique integer value identifying this dynamic class.",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -13612,14 +13612,14 @@
         ]
       },
       "delete": {
-        "operationId": "dynamic_class_detail_delete_api_v1_dynamic_id",
+        "operationId": "dynamic_class_detail_delete_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
-            "name": "id",
+            "name": "classname",
             "in": "path",
             "required": true,
-            "description": "A unique integer value identifying this dynamic class.",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -13977,10 +13977,10 @@
         ]
       }
     },
-    "/api/v1/dynamic/{classname}/{id}": {
+    "/api/v1/dynamic/{classname}/{obj}": {
       "get": {
-        "operationId": "dynamic_object_detail_get_api_v1_dynamic_classname_id",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "dynamic_object_detail_get_api_v1_dynamic_classname_obj",
+        "description": "Get the queryset for this view.\n\nThis is overridden to filter by the classname.\nRequires a `classname` in the URL along with the `obj`.",
         "parameters": [
           {
             "name": "classname",
@@ -13992,214 +13992,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "put": {
-        "operationId": "dynamic_object_detail_put_api_v1_dynamic_classname_id",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "patch": {
-        "operationId": "dynamic_object_detail_patch_api_v1_dynamic_classname_id",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "delete": {
-        "operationId": "dynamic_object_detail_delete_api_v1_dynamic_classname_id",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      }
-    },
-    "/api/v1/dynamic/{classname}/{id}/link/{object1}/{object2}": {
-      "get": {
-        "operationId": "dynamic_object_detail_get_api_v1_dynamic_classname_id_link_object1_object2",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object1",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object2",
+            "name": "obj",
             "in": "path",
             "required": true,
             "description": "",
@@ -14225,8 +14018,8 @@
         ]
       },
       "put": {
-        "operationId": "dynamic_object_detail_put_api_v1_dynamic_classname_id_link_object1_object2",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "dynamic_object_detail_put_api_v1_dynamic_classname_obj",
+        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
             "name": "classname",
@@ -14238,25 +14031,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object1",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object2",
+            "name": "obj",
             "in": "path",
             "required": true,
             "description": "",
@@ -14301,8 +14076,8 @@
         ]
       },
       "patch": {
-        "operationId": "dynamic_object_detail_patch_api_v1_dynamic_classname_id_link_object1_object2",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "dynamic_object_detail_patch_api_v1_dynamic_classname_obj",
+        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
             "name": "classname",
@@ -14314,25 +14089,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object1",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object2",
+            "name": "obj",
             "in": "path",
             "required": true,
             "description": "",
@@ -14377,8 +14134,8 @@
         ]
       },
       "delete": {
-        "operationId": "dynamic_object_detail_delete_api_v1_dynamic_classname_id_link_object1_object2",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "dynamic_object_detail_delete_api_v1_dynamic_classname_obj",
+        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
             "name": "classname",
@@ -14390,25 +14147,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object1",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "object2",
+            "name": "obj",
             "in": "path",
             "required": true,
             "description": "",
@@ -14427,13 +14166,13 @@
         ]
       }
     },
-    "/api/v1/dynamic/{classname}/{id}/unlink/{objectid}": {
+    "/api/v1/dynamic/{source_class}/{target_class}/linktype/": {
       "get": {
-        "operationId": "dynamic_object_detail_get_api_v1_dynamic_classname_id_unlink_objectid",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "link_type_get_api_v1_dynamic_source_class_target_class_linktype",
+        "description": "Get, Patch, or Destroy a link type between two classes.",
         "parameters": [
           {
-            "name": "classname",
+            "name": "source_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14442,16 +14181,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "objectid",
+            "name": "target_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14465,7 +14195,65 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/LinkType"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      },
+      "post": {
+        "operationId": "link_type_post_api_v1_dynamic_source_class_target_class_linktype",
+        "description": "Create a new link type between two classes.",
+        "parameters": [
+          {
+            "name": "source_class",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_class",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkType"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkType"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkType"
                 }
               }
             },
@@ -14477,11 +14265,11 @@
         ]
       },
       "put": {
-        "operationId": "dynamic_object_detail_put_api_v1_dynamic_classname_id_unlink_objectid",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "link_type_put_api_v1_dynamic_source_class_target_class_linktype",
+        "description": "Get, Patch, or Destroy a link type between two classes.",
         "parameters": [
           {
-            "name": "classname",
+            "name": "source_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14490,16 +14278,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "objectid",
+            "name": "target_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14512,17 +14291,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/LinkType"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/LinkType"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/LinkType"
               }
             }
           }
@@ -14532,7 +14311,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/LinkType"
                 }
               }
             },
@@ -14544,11 +14323,11 @@
         ]
       },
       "patch": {
-        "operationId": "dynamic_object_detail_patch_api_v1_dynamic_classname_id_unlink_objectid",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "link_type_patch_api_v1_dynamic_source_class_target_class_linktype",
+        "description": "Get, Patch, or Destroy a link type between two classes.",
         "parameters": [
           {
-            "name": "classname",
+            "name": "source_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14557,16 +14336,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "objectid",
+            "name": "target_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14579,17 +14349,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/LinkType"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/LinkType"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/LinkType"
               }
             }
           }
@@ -14599,7 +14369,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/LinkType"
                 }
               }
             },
@@ -14611,11 +14381,11 @@
         ]
       },
       "delete": {
-        "operationId": "dynamic_object_detail_delete_api_v1_dynamic_classname_id_unlink_objectid",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
+        "operationId": "link_type_delete_api_v1_dynamic_source_class_target_class_linktype",
+        "description": "Get, Patch, or Destroy a link type between two classes.",
         "parameters": [
           {
-            "name": "classname",
+            "name": "source_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14624,16 +14394,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "objectid",
+            "name": "target_class",
             "in": "path",
             "required": true,
             "description": "",
@@ -14652,10 +14413,10 @@
         ]
       }
     },
-    "/api/v1/dynamic/{classname}/{id}/links/": {
+    "/api/v1/dynamic/{classname}/{obj}/links/": {
       "get": {
-        "operationId": "dynamic_object_list_get_api_v1_dynamic_classname_id_links",
-        "description": "Get or Post a user defined object.",
+        "operationId": "dynamic_link_list_get_api_v1_dynamic_classname_obj_links",
+        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
             "name": "classname",
@@ -14667,10 +14428,10 @@
             }
           },
           {
-            "name": "id",
+            "name": "obj",
             "in": "path",
             "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -14691,267 +14452,6 @@
             "description": "Number of results to return per page.",
             "schema": {
               "type": "integer"
-            }
-          },
-          {
-            "name": "dynamic_class",
-            "required": false,
-            "in": "query",
-            "description": "dynamic_class",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": false,
-            "in": "query",
-            "description": "id",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__day",
-            "required": false,
-            "in": "query",
-            "description": "created_at__day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__month",
-            "required": false,
-            "in": "query",
-            "description": "created_at__month",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__quarter",
-            "required": false,
-            "in": "query",
-            "description": "created_at__quarter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__year",
-            "required": false,
-            "in": "query",
-            "description": "created_at__year",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at",
-            "required": false,
-            "in": "query",
-            "description": "created_at",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__week_day",
-            "required": false,
-            "in": "query",
-            "description": "created_at__week_day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__iso_week_day",
-            "required": false,
-            "in": "query",
-            "description": "created_at__iso_week_day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__iso_year",
-            "required": false,
-            "in": "query",
-            "description": "created_at__iso_year",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__gt",
-            "required": false,
-            "in": "query",
-            "description": "created_at__gt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__gte",
-            "required": false,
-            "in": "query",
-            "description": "created_at__gte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__lt",
-            "required": false,
-            "in": "query",
-            "description": "created_at__lt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__lte",
-            "required": false,
-            "in": "query",
-            "description": "created_at__lte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__range",
-            "required": false,
-            "in": "query",
-            "description": "created_at__range",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__day",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__month",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__month",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__quarter",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__quarter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__year",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__year",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at",
-            "required": false,
-            "in": "query",
-            "description": "updated_at",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__week_day",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__week_day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__iso_week_day",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__iso_week_day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__iso_year",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__iso_year",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__gt",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__gt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__gte",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__gte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__lt",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__lt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__lte",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__lte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__range",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__range",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "json_data_lookup",
-            "required": false,
-            "in": "query",
-            "description": "json_data_lookup",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -14996,8 +14496,8 @@
         ]
       },
       "post": {
-        "operationId": "dynamic_object_list_post_api_v1_dynamic_classname_id_links",
-        "description": "Get or Post a user defined object.",
+        "operationId": "dynamic_link_list_post_api_v1_dynamic_classname_obj_links",
+        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
             "name": "classname",
@@ -15009,10 +14509,10 @@
             }
           },
           {
-            "name": "id",
+            "name": "obj",
             "in": "path",
             "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -15054,10 +14554,10 @@
         ]
       }
     },
-    "/api/v1/dynamic/{classname}/{id}/links/{class}/": {
+    "/api/v1/dynamic/{classname}/{obj}/link/{targetclass}/{targetobject}": {
       "get": {
-        "operationId": "dynamic_object_list_get_api_v1_dynamic_classname_id_links_class",
-        "description": "Get or Post a user defined object.",
+        "operationId": "dynamic_link_detail_get_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "description": "Get a specific DynamicLink between two objects.",
         "parameters": [
           {
             "name": "classname",
@@ -15069,16 +14569,7 @@
             }
           },
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
+            "name": "obj",
             "in": "path",
             "required": true,
             "description": "",
@@ -15087,262 +14578,195 @@
             }
           },
           {
-            "name": "dynamic_class",
-            "required": false,
-            "in": "query",
-            "description": "dynamic_class",
+            "name": "targetclass",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "id",
-            "required": false,
-            "in": "query",
-            "description": "id",
+            "name": "targetobject",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DynamicLink"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      },
+      "post": {
+        "operationId": "dynamic_link_detail_post_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "description": "Create a new link between two objects.",
+        "parameters": [
+          {
+            "name": "classname",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at__day",
-            "required": false,
-            "in": "query",
-            "description": "created_at__day",
+            "name": "obj",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at__month",
-            "required": false,
-            "in": "query",
-            "description": "created_at__month",
+            "name": "targetclass",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at__quarter",
-            "required": false,
-            "in": "query",
-            "description": "created_at__quarter",
+            "name": "targetobject",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DynamicLink"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DynamicLink"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/DynamicLink"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DynamicLink"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      },
+      "delete": {
+        "operationId": "dynamic_link_detail_delete_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "description": "Delete a specific DynamicLink between two objects.",
+        "parameters": [
+          {
+            "name": "classname",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at__year",
-            "required": false,
-            "in": "query",
-            "description": "created_at__year",
+            "name": "obj",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at",
-            "required": false,
-            "in": "query",
-            "description": "created_at",
+            "name": "targetclass",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at__week_day",
-            "required": false,
-            "in": "query",
-            "description": "created_at__week_day",
+            "name": "targetobject",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/api/v1/dynamic/{classname}/{obj}/links/{targetclass}/": {
+      "get": {
+        "operationId": "dynamic_link_list_get_api_v1_dynamic_classname_obj_links_targetclass",
+        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
+        "parameters": [
+          {
+            "name": "classname",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at__iso_week_day",
-            "required": false,
-            "in": "query",
-            "description": "created_at__iso_week_day",
+            "name": "obj",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "created_at__iso_year",
-            "required": false,
-            "in": "query",
-            "description": "created_at__iso_year",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__gt",
-            "required": false,
-            "in": "query",
-            "description": "created_at__gt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__gte",
-            "required": false,
-            "in": "query",
-            "description": "created_at__gte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__lt",
-            "required": false,
-            "in": "query",
-            "description": "created_at__lt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__lte",
-            "required": false,
-            "in": "query",
-            "description": "created_at__lte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "created_at__range",
-            "required": false,
-            "in": "query",
-            "description": "created_at__range",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__day",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__month",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__month",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__quarter",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__quarter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__year",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__year",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at",
-            "required": false,
-            "in": "query",
-            "description": "updated_at",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__week_day",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__week_day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__iso_week_day",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__iso_week_day",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__iso_year",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__iso_year",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__gt",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__gt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__gte",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__gte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__lt",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__lt",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__lte",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__lte",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "updated_at__range",
-            "required": false,
-            "in": "query",
-            "description": "updated_at__range",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "json_data_lookup",
-            "required": false,
-            "in": "query",
-            "description": "json_data_lookup",
+            "name": "targetclass",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -15365,8 +14789,8 @@
         ]
       },
       "post": {
-        "operationId": "dynamic_object_list_post_api_v1_dynamic_classname_id_links_class",
-        "description": "Get or Post a user defined object.",
+        "operationId": "dynamic_link_list_post_api_v1_dynamic_classname_obj_links_targetclass",
+        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
             "name": "classname",
@@ -15378,16 +14802,16 @@
             }
           },
           {
-            "name": "id",
+            "name": "obj",
             "in": "path",
             "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
+            "description": "",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "class",
+            "name": "targetclass",
             "in": "path",
             "required": true,
             "description": "",
@@ -15424,456 +14848,6 @@
                 }
               }
             },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      }
-    },
-    "/api/v1/dynamic/{classname}/{id}/links/{class}/first": {
-      "get": {
-        "operationId": "dynamic_object_detail_get_api_v1_dynamic_classname_id_links_class_first",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "put": {
-        "operationId": "dynamic_object_detail_put_api_v1_dynamic_classname_id_links_class_first",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "patch": {
-        "operationId": "dynamic_object_detail_patch_api_v1_dynamic_classname_id_links_class_first",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "delete": {
-        "operationId": "dynamic_object_detail_delete_api_v1_dynamic_classname_id_links_class_first",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      }
-    },
-    "/api/v1/dynamic/{classname}/{id}/links/{class}/all": {
-      "get": {
-        "operationId": "dynamic_object_detail_get_api_v1_dynamic_classname_id_links_class_all",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "put": {
-        "operationId": "dynamic_object_detail_put_api_v1_dynamic_classname_id_links_class_all",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "patch": {
-        "operationId": "dynamic_object_detail_patch_api_v1_dynamic_classname_id_links_class_all",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "tags": [
-          "Resources"
-        ]
-      },
-      "delete": {
-        "operationId": "dynamic_object_detail_delete_api_v1_dynamic_classname_id_links_class_all",
-        "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `pk` in the URL.",
-        "parameters": [
-          {
-            "name": "classname",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "A unique integer value identifying this dynamic object.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "class",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
             "description": ""
           }
         },
@@ -15885,7 +14859,7 @@
     "/api/auth/login/": {
       "post": {
         "operationId": "createLogin",
-        "description": "Login view that allows basic auth.",
+        "description": "Log the user in.",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -16807,7 +15781,7 @@
             "type": "string",
             "format": "uri",
             "maxLength": 200,
-            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)(?:\\.(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::[0-9]{1,5})?(?:[/?#][^\\s]*)?\\z"
+            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)(?:\\.(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\z"
           },
           "vendor_credentials": {
             "type": "string",
@@ -16879,23 +15853,19 @@
       "DynamicClass": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "created_at": {
+          "name": {
             "type": "string",
-            "format": "date-time",
-            "readOnly": true
+            "maxLength": 200
           },
           "updated_at": {
             "type": "string",
             "format": "date-time",
             "readOnly": true
           },
-          "name": {
+          "created_at": {
             "type": "string",
-            "maxLength": 200
+            "format": "date-time",
+            "readOnly": true
           },
           "json_schema": {
             "type": "object",
@@ -16916,13 +15886,55 @@
       "DynamicObject": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
             "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "json_data": {
+            "type": "object"
+          },
+          "namespace": {
+            "type": "integer"
           },
           "dynamic_class": {
             "type": "string",
             "readOnly": true
+          }
+        },
+        "required": [
+          "name",
+          "json_data",
+          "namespace"
+        ]
+      },
+      "LinkType": {
+        "type": "object",
+        "properties": {
+          "source_class": {
+            "type": "string",
+            "readOnly": true
+          },
+          "target_class": {
+            "type": "string",
+            "readOnly": true
+          },
+          "max_links": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648
+          },
+          "namespace": {
+            "type": "integer"
           },
           "created_at": {
             "type": "string",
@@ -16933,22 +15945,30 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "json_data": {
-            "type": "object"
-          },
-          "namespace": {
-            "type": "integer"
           }
         },
         "required": [
-          "name",
-          "json_data",
+          "max_links",
           "namespace"
+        ]
+      },
+      "DynamicLink": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "source",
+          "target"
         ]
       }
     }
