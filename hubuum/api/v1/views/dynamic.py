@@ -68,8 +68,6 @@ class DynamicBaseView(LoggingMixin):
 class DynamicListView(DynamicBaseView, ListCreateAPIView):  # type: ignore
     """List view for user defined classes and objects."""
 
-    pass
-
 
 class DynamicDetailView(DynamicBaseView, RetrieveUpdateDestroyAPIView):  # type: ignore
     """Detail view for user defined classes and objects."""
@@ -233,7 +231,7 @@ class LinkTypeView(RetrieveUpdateDestroyAPIView):  # type: ignore
                 max_links=max_links,
             )
 
-        return Response(self.get_serializer(link_type).data, status=201)
+            return Response(self.get_serializer(link_type).data, status=201)
 
 
 class DynamicLinkListView(ListCreateAPIView):  # type: ignore
@@ -419,7 +417,7 @@ class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
                 namespace=namespace,
             )
 
-        return Response(self.get_serializer(link).data, status=201)
+            return Response(self.get_serializer(link).data, status=201)
 
     def get_object_from_model(
         self, model: str, error_message: str, **filter_args: Any
