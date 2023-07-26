@@ -2,7 +2,7 @@
 
 import hashlib
 from typing import Union
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse
@@ -16,21 +16,7 @@ from hubuum.models.core import Attachment, HubuumModel
 from hubuum.models.iam import Namespace
 from hubuum.models.resources import Host, Person
 
-from .base import HubuumAPITestCase
-
-
-def create_mocked_view(action: str, model_name: str) -> Mock:
-    """Create a mocked view for testing the autoschema."""
-    mocked_view = Mock()
-    mocked_view.action = action
-
-    # Mock the model's __name__ attribute
-    mock_model = MagicMock()
-    mock_model.configure_mock(__name__=model_name)
-    mocked_view.queryset = Mock()
-    mocked_view.queryset.model = mock_model
-
-    return mocked_view
+from .base import HubuumAPITestCase, create_mocked_view
 
 
 class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):

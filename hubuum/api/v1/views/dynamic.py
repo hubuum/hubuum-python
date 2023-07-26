@@ -168,7 +168,20 @@ class DynamicObjectDetail(DynamicDetailView):
         return Response(serializer.data)
 
 
-class LinkTypeView(RetrieveUpdateDestroyAPIView):  # type: ignore
+class LinkAbstractView:
+    """Abstract link class with shared utilities."""
+
+    def get_object_from_model(
+        self, model: str, error_message: str, **filter_args: Any
+    ) -> object:
+        """Retrieve an object from the given model."""
+        try:
+            return model.objects.get(**filter_args)
+        except model.DoesNotExist as exc:
+            raise NotFound(error_message) from exc
+
+
+class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ignore
     """Get, Patch, or Destroy a link type between two classes."""
 
     schema = DynamicAutoSchema(
@@ -200,22 +213,23 @@ class LinkTypeView(RetrieveUpdateDestroyAPIView):  # type: ignore
         namespace_id = request.data.get("namespace")
         max_links = request.data.get("max_links")
 
-        try:
-            source_class = DynamicClass.objects.get(name=source_class_name)
-        except DynamicClass.DoesNotExist as exc:
-            raise NotFound("The class '{source_class_name}' does not exist.") from exc
+        source_class = self.get_object_from_model(
+            DynamicClass,
+            f"The class '{source_class_name}' does not exist.",
+            name=source_class_name,
+        )
 
-        try:
-            target_class = DynamicClass.objects.get(name=target_class_name)
-        except DynamicClass.DoesNotExist as exc:
-            raise NotFound(f"The class '{target_class_name}' does not exist.") from exc
+        target_class = self.get_object_from_model(
+            DynamicClass,
+            f"The class '{target_class_name}' does not exist.",
+            name=target_class_name,
+        )
 
-        try:
-            namespace = Namespace.objects.get(id=namespace_id)
-        except Namespace.DoesNotExist as exc:
-            raise NotFound(
-                f"The namespace with ID '{namespace_id}' does not exist."
-            ) from exc
+        namespace = self.get_object_from_model(
+            Namespace,
+            f"The namespace with ID '{namespace_id}' does not exist.",
+            id=namespace_id,
+        )
 
         try:
             LinkType.objects.get(
@@ -234,7 +248,7 @@ class LinkTypeView(RetrieveUpdateDestroyAPIView):  # type: ignore
             return Response(self.get_serializer(link_type).data, status=201)
 
 
-class DynamicLinkListView(ListCreateAPIView):  # type: ignore
+class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
     """DynamicLinkListView handles the API endpoints for listing and creating dynamic links.
 
     Methods
@@ -282,22 +296,18 @@ class DynamicLinkListView(ListCreateAPIView):  # type: ignore
             extra_query = {"target__dynamic_class__name": targetclass}
 
         if transitive:
-            try:
-                source = DynamicObject.objects.get(
-                    dynamic_class__name=classname,
-                    name=obj,
-                )
-            except DynamicObject.DoesNotExist as exc:
-                raise NotFound(
-                    f"Source object '{classname}:{obj}' does not exist."
-                ) from exc
+            source = self.get_object_from_model(
+                DynamicObject,
+                f"Source object '{classname}:{obj}' does not exist.",
+                dynamic_class__name=classname,
+                name=obj,
+            )
 
-            try:
-                target_class = DynamicClass.objects.get(name=targetclass)
-            except DynamicClass.DoesNotExist as exc:
-                raise NotFound(
-                    f"The target class '{targetclass}' does not exist."
-                ) from exc
+            target_class = self.get_object_from_model(
+                DynamicClass,
+                f"The target class '{targetclass}' does not exist.",
+                name=targetclass,
+            )
 
             transitive_objects_and_paths = source.find_transitive_links(
                 target_class, max_depth=max_depth
@@ -329,7 +339,7 @@ class DynamicLinkListView(ListCreateAPIView):  # type: ignore
         return [link.target for link in dynamic_links]
 
 
-class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
+class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: ignore
     """API endpoints for retrieving and deleting a specific dynamic link."""
 
     schema = DynamicAutoSchema(
@@ -351,17 +361,14 @@ class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
         targetclass = self.kwargs.get("targetclass")
         targetobject = self.kwargs.get("targetobject")
 
-        try:
-            dynamic_link = DynamicLink.objects.get(
-                link_type__source_class__name=classname,
-                link_type__target_class__name=targetclass,
-                source__name=obj,
-                target__name=targetobject,
-            )
-        except DynamicLink.DoesNotExist as exc:
-            raise NotFound("The specified link does not exist.") from exc
-
-        return dynamic_link
+        return self.get_object_from_model(
+            DynamicLink,
+            "The specified link does not exist.",
+            link_type__source_class__name=classname,
+            link_type__target_class__name=targetclass,
+            source__name=obj,
+            target__name=targetobject,
+        )
 
     def get(
         self, request: HttpRequest, *args: Dict[str, Any], **kwargs: Dict[str, Any]
@@ -418,15 +425,6 @@ class DynamicLinkDetailView(RetrieveDestroyAPIView):  # type: ignore
             )
 
             return Response(self.get_serializer(link).data, status=201)
-
-    def get_object_from_model(
-        self, model: str, error_message: str, **filter_args: Any
-    ) -> object:
-        """Retrieve an object from the given model."""
-        try:
-            return model.objects.get(**filter_args)
-        except model.DoesNotExist as exc:
-            raise NotFound(error_message) from exc
 
     def get_link_data(
         self,

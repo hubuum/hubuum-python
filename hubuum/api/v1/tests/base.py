@@ -2,6 +2,7 @@
 
 from base64 import b64encode
 from typing import Any, Callable, Dict, List, Union
+from unittest.mock import MagicMock, Mock
 
 # We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
 # because the latter only supportes Z for UTC in python 3.11.
@@ -17,6 +18,23 @@ from rest_framework.test import APIClient, APITestCase
 from hubuum.exceptions import MissingParam
 from hubuum.models.dynamic import DynamicClass, DynamicObject
 from hubuum.models.iam import Namespace
+
+
+def create_mocked_view(action: str, model_name: str) -> Mock:
+    """Create a mocked view for testing the autoschema."""
+    mocked_view = Mock()
+    mocked_view.action = action
+
+    # Mock the model's __name__ attribute
+    mock_model = MagicMock()
+    mock_model.configure_mock(__name__=model_name)
+    mocked_view.queryset = Mock()
+    mocked_view.queryset.model = mock_model
+
+    # Mock the get_view_name method
+    mocked_view.get_view_name = Mock(return_value=model_name)
+
+    return mocked_view
 
 
 # This testsuite design is based on the testsuite for MREG:

@@ -2,9 +2,12 @@
 
 from copy import deepcopy
 from typing import Any, Dict, List, Type
-from unittest.mock import MagicMock, Mock
 
-from hubuum.api.v1.tests.base import HubuumAPITestCase, HubuumDynamicClassesAndObjects
+from hubuum.api.v1.tests.base import (
+    HubuumAPITestCase,
+    HubuumDynamicClassesAndObjects,
+    create_mocked_view,
+)
 from hubuum.api.v1.views.dynamic import (
     DynamicAutoSchema,
     DynamicBaseView,
@@ -12,21 +15,6 @@ from hubuum.api.v1.views.dynamic import (
     DynamicObjectList,
 )
 from hubuum.models.dynamic import DynamicClass, DynamicLink, DynamicObject, LinkType
-
-
-def create_mocked_view(action: str, model_name: str) -> Mock:
-    """Create a mocked view for testing the autoschema."""
-    mocked_view = Mock()
-    mocked_view.action = action
-
-    # Mock the model's __name__ attribute
-    mock_model = MagicMock()
-    mock_model.configure_mock(__name__=model_name)
-    mocked_view.queryset = Mock()
-    mocked_view.queryset.model = mock_model
-    mocked_view.get_view_name = Mock(return_value=model_name)
-
-    return mocked_view
 
 
 class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
