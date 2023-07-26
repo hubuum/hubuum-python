@@ -4,14 +4,14 @@ from copy import deepcopy
 from typing import Any, Dict, List, Type
 from unittest.mock import MagicMock, Mock
 
-from hubuum.api.v1.tests.base import HubuumAPITestCase, HubuumAPITestCaseWithDynamics
+from hubuum.api.v1.tests.base import HubuumAPITestCase, HubuumDynamicClassesAndObjects
 from hubuum.api.v1.views.dynamic import (
     DynamicAutoSchema,
     DynamicBaseView,
     DynamicObjectDetail,
     DynamicObjectList,
 )
-from hubuum.models.dynamic import DynamicClass, DynamicObject
+from hubuum.models.dynamic import DynamicClass, DynamicLink, DynamicObject, LinkType
 
 
 def create_mocked_view(action: str, model_name: str) -> Mock:
@@ -158,14 +158,13 @@ class DynamicClassTestCase(DynamicBaseTestCase):
         """Test creating a dynamic object."""
         cret = self._create_dynamic_class()
         json_data = {"key": "value", "listkey": [1, 2, 3]}
-        for identifier in ("id", "name"):
-            oret = self._create_dynamic_object(
-                dynamic_class=cret.data[identifier],
-                json_data=json_data,
-                name=f"test_{identifier}",
-                namespace=cret.data["namespace"],
-            )
-            self.assertEqual(oret.data["name"], f"test_{identifier}")
+        oret = self._create_dynamic_object(
+            dynamic_class=cret.data["name"],
+            json_data=json_data,
+            name="test",
+            namespace=cret.data["namespace"],
+        )
+        self.assertEqual(oret.data["name"], "test")
 
     def test_creating_dynamic_object_with_schema(self):
         """Test creating a dynamic object with a schema."""
@@ -174,14 +173,13 @@ class DynamicClassTestCase(DynamicBaseTestCase):
             validate_schema=True,
         )
         json_data = {"age": 42}
-        for identifier in ("id", "name"):
-            oret = self._create_dynamic_object(
-                dynamic_class=cret.data[identifier],
-                json_data=json_data,
-                name=f"test_{identifier}",
-                namespace=cret.data["namespace"],
-            )
-            self.assertEqual(oret.data["name"], f"test_{identifier}")
+        oret = self._create_dynamic_object(
+            dynamic_class=cret.data["name"],
+            json_data=json_data,
+            name="test_name",
+            namespace=cret.data["namespace"],
+        )
+        self.assertEqual(oret.data["name"], "test_name")
 
     def test_schema_is_valid(self):
         """Test that an uploaded schema is valid."""
@@ -276,7 +274,7 @@ class DynamicClassTestCase(DynamicBaseTestCase):
 
         # Create an object with valid data
         self.assert_post(
-            f"/dynamic/{cret.data['id']}/",
+            f"/dynamic/{cret.data['name']}/",
             {
                 "name": "test_ok",
                 "namespace": cret.data["namespace"],
@@ -307,7 +305,7 @@ class DynamicClassTestCase(DynamicBaseTestCase):
         # Test failing schemas
         for data in failing_data:
             self.assert_post_and_400(
-                f"/dynamic/{cret.data['id']}/",
+                f"/dynamic/{cret.data['name']}/",
                 {
                     "name": "test_fail",
                     "namespace": cret.data["namespace"],
@@ -316,12 +314,154 @@ class DynamicClassTestCase(DynamicBaseTestCase):
             )
 
 
-class DynamicObjectTestCase(HubuumAPITestCaseWithDynamics):
+class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
     """Test DynamicObject functionality."""
 
     def _get_object(self, dynamic_class: str, name: str) -> DynamicObject:
         """Get a dynamic object."""
         return self.assert_get(f"/dynamic/{dynamic_class}/{name}")
+
+    def test_internals(self):
+        """Test the internals of the class generation."""
+        # Test that the number of objects and classes is correct
+        self.assertEqual(DynamicClass.objects.count(), len(self.all_classes()))
+        self.assertEqual(DynamicObject.objects.count(), len(self.all_objects()))
+
+        # Test creating a link type between Host and Room
+        self.assert_post(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 1, "namespace": self.namespace.id},
+        )
+        self.assert_get("/dynamic/Host/Room/linktype/")
+        self.assert_post_and_409(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 1, "namespace": self.namespace.id},
+        )
+        # Upgrading links:
+        self.assert_patch("/dynamic/Host/Room/linktype/", {"max_links": 2})
+
+        # Test str representation of the link type
+        linktype = LinkType.objects.get(
+            source_class__name="Host", target_class__name="Room"
+        )
+        self.assertEqual(str(linktype), "Host <-> Room (2)")
+
+        # Test creating a link between host1 and room1
+        self.assert_post(
+            "/dynamic/Host/host1/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+
+        self.assert_get("/dynamic/Host/host1/link/Room/room1")
+
+        self.assert_post_and_409(
+            "/dynamic/Host/host1/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+
+        # Test str representation of the link
+        link = DynamicLink.objects.get(source__name="host1", target__name="room1")
+        self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
+
+    def test_failing_specific_link_get(self):
+        """Test that fetching non-existent links fails."""
+        self.assert_get_and_404("/dynamic/Host/Room/linktype/")
+        self.assert_get_and_404(
+            "/dynamic/Host/host1/link/Room/room1",
+        )
+        self.assert_post(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 1, "namespace": self.namespace.id},
+        )
+        self.assert_get_and_404(
+            "/dynamic/nope/host1/link/Room/room1",
+        )
+        self.assert_get_and_404(
+            "/dynamic/Host/nope/link/Room/room1",
+        )
+        self.assert_get_and_404(
+            "/dynamic/Host/host1/link/nope/room1",
+        )
+        self.assert_get_and_404(
+            "/dynamic/Host/host1/link/Room/nope",
+        )
+        self.assert_get_and_404(
+            "/dynamic/Host/nope/links/Room/?transitive=true",
+        )
+        self.assert_get_and_404(
+            "/dynamic/Host/host1/links/Nope/?transitive=true",
+        )
+
+    def test_failing_linktype_creation(self):
+        """Test that creating linktypes between non-existing classes fails."""
+        self.assert_post_and_404(
+            "/dynamic/Host/Nope/linktype/",
+            {"max_links": 1, "namespace": self.namespace.id},
+        )
+        self.assert_post_and_404(
+            "/dynamic/Nope/Room/linktype/",
+            {"max_links": 1, "namespace": self.namespace.id},
+        )
+        # Test that sending a non-existent namespace fails.
+        self.assert_post_and_404(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 1, "namespace": 999999},
+        )
+
+    def test_failing_link_creation(self):
+        """Test that creating a link fails when the link type is not defined."""
+        # Test creating a link between host1 and room1, which should fail as we have not
+        # defined a link type between Host and Room
+        self.assert_post_and_404(
+            "/dynamic/Host/host1/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+        # Source class does not exist
+        self.assert_post_and_404(
+            "/dynamic/Nope/host1/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+        # Target class does not exist
+        self.assert_post_and_404(
+            "/dynamic/Host/host1/link/Nope/room1",
+            {"namespace": self.namespace.id},
+        )
+        # Source object does not exist
+        self.assert_post_and_404(
+            "/dynamic/Host/nope/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+        # Target object does not exist
+        self.assert_post_and_404(
+            "/dynamic/Host/host1/link/Room/nope",
+            {"namespace": self.namespace.id},
+        )
+        self.assert_post(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 1, "namespace": self.namespace.id},
+        )
+        self.assert_post_and_404(
+            "/dynamic/Host/host1/link/Room/room1",
+            {"namespace": 999999},
+        )
+
+    def test_that_link_creation_fails_when_max_links_is_reached(self):
+        """Test that creating a link fails when the max number of links is reached."""
+        self.assert_post(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 1, "namespace": self.namespace.id},
+        )
+        # Test creating a link between host1 and room1
+        self.assert_post(
+            "/dynamic/Host/host1/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+        # Test creating a link between host1 and room2, which should fail as we have
+        # defined a link type between Host and Room with max_links=1
+        self.assert_post_and_409(
+            "/dynamic/Host/host1/link/Room/room2",
+            {"namespace": self.namespace.id},
+        )
 
     def test_creating_object_in_nonexisting_class(self):
         """Test creating an object in a non-existing class."""
@@ -332,6 +472,108 @@ class DynamicObjectTestCase(HubuumAPITestCaseWithDynamics):
                 "namespace": self.namespace.id,
                 "json_data": {},
             },
+        )
+
+    def test_linking_between_objects(self):
+        """Test that manipulating links between objects works."""
+        self.assert_post(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 0, "namespace": self.namespace.id},
+        )
+        self.assert_post(
+            "/dynamic/Host/host1/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+        self.assert_get("/dynamic/Host/host1/link/Room/room1")
+        self.assert_get_elements("/dynamic/Host/host1/links/", 1)
+        self.assert_post(
+            "/dynamic/Host/host1/link/Room/room2",
+            {"namespace": self.namespace.id},
+        )
+        self.assert_get_elements("/dynamic/Host/host1/links/", 2)
+        self.assert_delete("/dynamic/Host/host1/link/Room/room1")
+        self.assert_delete_and_404("/dynamic/Host/host1/link/Room/room1")
+        self.assert_get_elements("/dynamic/Host/host1/links/", 1)
+        self.assert_get_and_404("/dynamic/Host/notfound/links/")
+
+    def test_multiple_links_to_same_class(self):
+        """Test that multiple links to the same class works."""
+        self.assert_post(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 0, "namespace": self.namespace.id},
+        )
+        for room in ["room1", "room2"]:
+            self.assert_post(
+                "/dynamic/Host/host1/link/Room/" + room,
+                {"namespace": self.namespace.id},
+            )
+        self.assert_get_elements("/dynamic/Host/host1/links/Room/", 2)
+        self.assert_get_elements("/dynamic/Host/host1/links/", 2)
+
+    def test_transitive_linking(self):
+        """Test transitive linking."""
+        self.assert_post(
+            "/dynamic/Host/Room/linktype/",
+            {"max_links": 0, "namespace": self.namespace.id},
+        )
+        self.assert_post(
+            "/dynamic/Room/Building/linktype/",
+            {"max_links": 0, "namespace": self.namespace.id},
+        )
+        self.assert_post(
+            "/dynamic/Host/host1/link/Room/room1",
+            {"namespace": self.namespace.id},
+        )
+        self.assert_post(
+            "/dynamic/Room/room1/link/Building/building1",
+            {"namespace": self.namespace.id},
+        )
+        ret = self.assert_get_elements("/dynamic/Host/host1/links/Room/", 1)
+        self.assertEqual(ret.data[0]["name"], "room1")
+        self.assertEqual(ret.data[0]["dynamic_class"], "Room")
+
+        self.assert_get_and_404("/dynamic/Host/host1/links/Building/")
+        ret2 = self.assert_get_elements(
+            "/dynamic/Host/host1/links/Building/?transitive=true", 1
+        )
+        self.assertEqual(ret2.data[0]["object"]["name"], "building1")
+        self.assertEqual(ret2.data[0]["object"]["dynamic_class"], "Building")
+        self.assertEqual(ret2.data[0]["path"], ["Room", "Building"])
+
+        # Create a person class and a person object
+        person_class = DynamicClass.objects.create(
+            name="Person",
+            namespace=self.namespace,
+        )
+        DynamicObject.objects.create(
+            name="person1",
+            dynamic_class=person_class,
+            namespace=self.namespace,
+            json_data={"name": "Noone"},
+        )
+        # First verify that there is no path between Host:host1 and Person
+        self.assert_get_and_404("/dynamic/Host/host1/links/Person/?transitive=true")
+
+        # Link person1 to building1, but first link Building to Person
+        # This should create a transitive link between Host and Person
+        # via Room and Building
+        self.assert_post(
+            "/dynamic/Building/Person/linktype/",
+            {"max_links": 0, "namespace": self.namespace.id},
+        )
+        self.assert_post(
+            "/dynamic/Building/building1/link/Person/person1",
+            {"namespace": self.namespace.id},
+        )
+        ret3 = self.assert_get_elements(
+            "/dynamic/Host/host1/links/Person/?transitive=true", 1
+        )
+        self.assertEqual(ret3.data[0]["object"]["name"], "person1")
+        self.assertEqual(ret3.data[0]["object"]["dynamic_class"], "Person")
+        self.assertEqual(ret3.data[0]["path"], ["Room", "Building", "Person"])
+
+        self.assert_get_and_404(
+            "/dynamic/Host/host1/links/Person/?transitive=true&max-depth=1"
         )
 
     def test_fetching_classes_and_objects(self):
@@ -347,8 +589,6 @@ class DynamicObjectTestCase(HubuumAPITestCaseWithDynamics):
             "Room": ["room1", "room2"],
             "Building": ["building1"],
         }
-
-        namemap: Dict[str, int] = {}
 
         # Fetch all classes
         self.assert_get_elements(
@@ -367,14 +607,6 @@ class DynamicObjectTestCase(HubuumAPITestCaseWithDynamics):
         for dynamic_class, objects in objectmap.items():
             for obj in objects:
                 ret = self._get_object(dynamic_class, obj)
-                self.assertEqual(ret.data["name"], obj)
-                # Save the ID for later
-                namemap[obj] = ret.data["id"]
-
-        # Fetch every object created in every class by id, and test that the name is correct
-        for dynamic_class, objects in objectmap.items():
-            for obj in objects:
-                ret = self._get_object(dynamic_class, namemap[obj])
                 self.assertEqual(ret.data["name"], obj)
 
     def test_404(self):

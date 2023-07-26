@@ -5,23 +5,37 @@ from django.urls import path
 from hubuum.api.v1.views.dynamic import (
     DynamicClassDetail,
     DynamicClassList,
+    DynamicLinkDetailView,
+    DynamicLinkListView,
     DynamicObjectDetail,
     DynamicObjectList,
+    LinkTypeView,
 )
 
 urlpatterns = [
     # Classes
     path("", DynamicClassList.as_view()),
-    path("<pk>", DynamicClassDetail.as_view()),
+    path("<classname>", DynamicClassDetail.as_view()),
     # Objects
     path("<classname>/", DynamicObjectList.as_view()),
-    path("<classname>/<pk>", DynamicObjectDetail.as_view()),
+    path("<classname>/<obj>", DynamicObjectDetail.as_view()),
     # Links
-    path("<classname>/<pk>/link/<object1>/<object2>", DynamicObjectDetail.as_view()),
-    path("<classname>/<pk>/unlink/<objectid>", DynamicObjectDetail.as_view()),
-    path("<classname>/<pk>/links/", DynamicObjectList.as_view()),
-    # List first link to a specific class, may be transitive
-    path("<classname>/<pk>/links/<class>/", DynamicObjectList.as_view()),
-    path("<classname>/<pk>/links/<class>/first", DynamicObjectDetail.as_view()),
-    path("<classname>/<pk>/links/<class>/all", DynamicObjectDetail.as_view()),
+    # This endpoint supports POST, GET, and DELETE.
+    path("<source_class>/<target_class>/linktype/", LinkTypeView.as_view()),
+    # Lists all direct links for an object
+    # Post to create a direct link
+    path("<classname>/<obj>/links/", DynamicLinkListView.as_view()),
+    # Get the link object of a spesific (direct) link.
+    # Returns 404 if no such path exists.
+    # Delete removes a specific link, may NOT be transitive.
+    # Does not support patch.
+    path(
+        "<classname>/<obj>/link/<targetclass>/<targetobject>",
+        DynamicLinkDetailView.as_view(),
+    ),
+    # Check if an object can reach a class via links (possibly transitive)
+    # Optionally takes query parameters:
+    # transitive: boolean, default False
+    # max_depth: integer, default 0 (no limit) - only valid if transitive is True
+    path("<classname>/<obj>/links/<targetclass>/", DynamicLinkListView.as_view()),
 ]

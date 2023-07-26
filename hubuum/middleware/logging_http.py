@@ -75,8 +75,6 @@ class LogHttpMiddleware:
         request_id = _get_header(request, "x-request-id") or str(uuid.uuid4())
         correlation_id = _get_header(request, "x-correlation-id")
 
-        print(correlation_id)
-
         structlog.contextvars.bind_contextvars(request_id=request_id)
         if correlation_id:
             structlog.contextvars.bind_contextvars(correlation_id=correlation_id)

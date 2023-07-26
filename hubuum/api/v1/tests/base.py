@@ -431,10 +431,10 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
 # TODO: For every endpoint we should have and check input validation.
 
 
-class HubuumAPITestCaseWithDynamics(HubuumAPITestCase):
-    """A base class for Hubuum API test cases with dynamic classes already active.
+class HubuumDynamicBase(HubuumAPITestCase):
+    """A base class for Hubuum API test cases with functionality to create dynamic structures.
 
-    The following classes are created:
+    The following classes can be created via
     - Host
     - Room
     - Building
@@ -473,25 +473,45 @@ class HubuumAPITestCaseWithDynamics(HubuumAPITestCase):
         return DynamicObject.objects.create(dynamic_class=dynamic_class, **attributes)
 
     def setUp(self):
-        """Set up a few dynamic classes for testing.
+        """Set up a default namespace."""
+        super().setUp()
+
+        self.namespaces = []
+        for i in range(1, 4):
+            self.namespaces.append(
+                self._create_namespace(namespacename=f"namespace{i}")
+            )
+
+        self.namespace = self.namespaces[0]
+
+        self.host_class = None
+        self.room_class = None
+        self.building_class = None
+
+        self.hosts = []
+        self.rooms = []
+        self.buildings = []
+
+    def create_classes(self) -> None:
+        """Create the dynamic classes.
 
         The following classes are created:
         - Host
         - Room
         - Building
+        """
+        self.host_class = self._create_dynamic_class(name="Host")
+        self.room_class = self._create_dynamic_class(name="Room")
+        self.building_class = self._create_dynamic_class(name="Building")
+
+    def create_objects(self) -> None:
+        """Populate the classes with objects.
 
         The following objects are created:
         - Hosts (3, named host1, host2, host3)
         - Rooms (2, named room1, room2, room3)
         - Buildings (1, named building1)
         """
-        super().setUp()
-
-        self.namespace = self._create_namespace()
-        self.host_class = self._create_dynamic_class(name="Host")
-        self.room_class = self._create_dynamic_class(name="Room")
-        self.building_class = self._create_dynamic_class(name="Building")
-
         # Create an array of hosts with names host1, host2, host3
         self.hosts = [
             self._create_dynamic_object(
@@ -509,13 +529,52 @@ class HubuumAPITestCaseWithDynamics(HubuumAPITestCase):
         ]
 
         # Create a building with name building1
-        self.building = self._create_dynamic_object(
-            dynamic_class=self.building_class,
-            namespace=self.namespace,
-            name="building1",
-        )
+        self.buildings = [
+            self._create_dynamic_object(
+                dynamic_class=self.building_class,
+                namespace=self.namespace,
+                name="building1",
+            )
+        ]
+
+    def all_classes(self) -> List[DynamicClass]:
+        """Return all classes."""
+        return [self.host_class, self.room_class, self.building_class]
+
+    def all_objects(self) -> List[DynamicObject]:
+        """Return all objects."""
+        return self.hosts + self.rooms + self.buildings
 
     def tearDown(self) -> None:
         """Delete the namespace after the test."""
-        self.namespace.delete()
+        for namespace in self.namespaces:
+            namespace.delete()
         return super().tearDown()
+
+
+class HubuumDynamicClasses(HubuumDynamicBase):
+    """A base class with dynamic classes already created.
+
+    Utilizes the HubuumDynamicBase.create_classes method.
+    """
+
+    def setUp(self):
+        """Set up a default namespace and creates the classes."""
+        super().setUp()
+        self.create_classes()
+
+
+class HubuumDynamicClassesAndObjects(HubuumDynamicClasses):
+    """A base class with dynamic classes and objects already created.
+
+    Utilizes the following methods:
+     - HubuumDynamicBase.create_classes
+     - HubuumDynamicBase.create_objects
+
+
+    """
+
+    def setUp(self):
+        """Set up a default namespace and creates the classes."""
+        super().setUp()
+        self.create_objects()

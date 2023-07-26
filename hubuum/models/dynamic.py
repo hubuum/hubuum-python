@@ -4,7 +4,8 @@
 # pyright: reportIncompatibleVariableOverride=false
 
 
-from typing import Any, Dict
+from collections import deque
+from typing import Any, Dict, List, Union
 
 from django.db import models
 from django.db.models import JSONField
@@ -81,11 +82,16 @@ class DynamicClass(NamespacedHubuumModel):
 class DynamicObject(NamespacedHubuumModel):
     """A user-created object."""
 
-    name = models.CharField(max_length=200, null=False, unique=True)
+    name = models.CharField(max_length=200, null=False)
     dynamic_class = models.ForeignKey(
         DynamicClass, null=False, on_delete=models.CASCADE
     )
     json_data = JSONField()
+
+    class Meta:
+        """Define the DynamicObjects model's meta data."""
+
+        unique_together = ["name", "dynamic_class"]
 
     def __str__(self) -> str:
         """Return a string representation of the DynamicObject instance.
@@ -128,6 +134,31 @@ class DynamicObject(NamespacedHubuumModel):
             # If validation is not required, we consider the instance valid by default.
             return True
 
+    def find_transitive_links(
+        self,
+        target_class: DynamicClass,
+        max_depth: int = 0,
+    ) -> List[Dict[str, Union["DynamicObject", List["DynamicLink"]]]]:
+        """BFS function to find all paths from self to any object of target_class."""
+        queue = deque([(self, [], 0)])  # queue elements are: (node, path, depth)
+        visited = set([self])
+        paths = []
+
+        while queue:
+            node, path, depth = queue.popleft()
+
+            if max_depth and depth > max_depth:
+                continue
+
+            if node.dynamic_class == target_class:
+                paths.append({"object": node, "path": path})
+            for link in node.outbound_links.all():
+                if link.target not in visited:
+                    visited.add(link.target)
+                    queue.append((link.target, path + [link], depth + 1))
+
+        return paths
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Save the DynamicObject instance.
 
@@ -135,3 +166,66 @@ class DynamicObject(NamespacedHubuumModel):
         """
         self.validate_json()
         super().save(*args, **kwargs)
+
+
+class LinkType(NamespacedHubuumModel):
+    """A user-created link type between two classes."""
+
+    source_class = models.ForeignKey(
+        DynamicClass, related_name="source_links", on_delete=models.CASCADE
+    )
+    target_class = models.ForeignKey(
+        DynamicClass, related_name="target_links", on_delete=models.CASCADE
+    )
+    max_links = models.IntegerField()
+
+    class Meta:
+        """Define the LinkType model's meta data."""
+
+        unique_together = ["source_class", "target_class"]
+
+    def __str__(self):
+        """Return a string representation of the LinkType instance."""
+        return (
+            f"{self.source_class.name} <-> {self.target_class.name} ({self.max_links})"
+        )
+
+
+class DynamicLink(NamespacedHubuumModel):
+    """DynamicLink model represents a user-defined link between two objects.
+
+    The model inherits from NamespacedHubuumModel, which includes fields:
+        namespace: The namespace the object belongs to.
+        created_at: The date and time the object was created.
+        updated_at: The date and time the object was last updated.
+
+    Fields:
+    - source: The source object of the link.
+    - target: The target object of the link.
+    - link_type: A ForeignKey to the LinkType model which defines the type of the link.
+    """
+
+    source = models.ForeignKey(
+        "DynamicObject",
+        on_delete=models.CASCADE,
+        related_name="outbound_links",
+    )
+    target = models.ForeignKey(
+        "DynamicObject",
+        on_delete=models.CASCADE,
+        related_name="inbound_links",
+    )
+    link_type = models.ForeignKey(
+        "LinkType",
+        on_delete=models.CASCADE,
+        related_name="links",
+    )
+
+    class Meta:
+        """Define the DynamicLink model's meta data."""
+
+        unique_together = ["source", "target"]
+
+    def __str__(self):
+        """Return a string representation of the DynamicLink instance."""
+        return f"{self.source} <-> {self.target}"
