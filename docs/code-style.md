@@ -23,3 +23,4 @@ Coveralls and Codiga are used to check code coverage and code quality respective
 
 * [Coveralls.io](https://coveralls.io/github/hubuum/hubuum?branch=main)
 * [Codiga.io](https://app.codiga.io/hub/project/35582/hubuum)
+  

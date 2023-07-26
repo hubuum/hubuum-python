@@ -2,7 +2,7 @@
 
 ## Overview
 
-Hubuum supports permissions based on `namespaces`. A namespace is a collection of objects, and each object belongs to one and only one namespace. A namespace can be thought of as a project, or a tenant. 
+Hubuum supports permissions based on `namespaces`. A namespace is a collection of objects, and each object belongs to one and only one namespace. A namespace can be thought of as a project, or a tenant.
 
 Groups are given access to namespaces based on one of five boolean permissions: `read`, `create`, `update`, `delete` and `namespace`. These permissions are described in detail below.
 
