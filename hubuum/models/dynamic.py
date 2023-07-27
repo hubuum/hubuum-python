@@ -78,6 +78,39 @@ class DynamicClass(NamespacedHubuumModel):
         else:
             raise DRFValidationError("Schema changes must be additive.")
 
+    def get_transitive_paths(
+        self, target_class: str, max_depth: int = 0
+    ) -> List[List["LinkType"]]:
+        """
+        Returns all possible paths that can lead from self to target_class.
+        Each path is represented as a list of LinkTypes.
+        """
+        queue = deque(
+            [([], self, set([self]))]
+        )  # queue elements are: (path, class, visited classes)
+        paths = []
+
+        # Get the DynamicClass object for the target class.
+        target_class = DynamicClass.objects.get(name=target_class)
+
+        while queue:
+            path, node, visited = queue.popleft()
+            if max_depth and len(path) >= max_depth:
+                break
+            link_types = LinkType.objects.filter(source_class=node)
+            for link_type in link_types:
+                if link_type.target_class in visited:
+                    continue  # Avoid cycles.
+                new_visited = visited.copy()
+                new_visited.add(link_type.target_class)
+                new_path = path + [link_type]
+                if link_type.target_class == target_class:
+                    paths.append(new_path)
+                else:
+                    queue.append((new_path, link_type.target_class, new_visited))
+
+        return paths
+
 
 class DynamicObject(NamespacedHubuumModel):
     """A user-created object."""
@@ -135,27 +168,47 @@ class DynamicObject(NamespacedHubuumModel):
             return True
 
     def find_transitive_links(
-        self,
-        target_class: DynamicClass,
-        max_depth: int = 0,
+        self, target_class: DynamicClass, max_depth: int = 0
     ) -> List[Dict[str, Union["DynamicObject", List["DynamicLink"]]]]:
-        """BFS function to find all paths from self to any object of target_class."""
-        queue = deque([(self, [], 0)])  # queue elements are: (node, path, depth)
-        visited = set([self])
+        """Find all paths from self to any object of target_class."""
+
+        # Get the possible paths and early exit if there's no possible link to the target_class.
+        possible_paths = self.dynamic_class.get_transitive_paths(
+            target_class, max_depth=max_depth
+        )
+        if not possible_paths:
+            return []
+
+        def traverse(
+            possible_path: List[LinkType], current_path: List[DynamicObject]
+        ) -> List[List[DynamicObject]]:
+            """Traverse the possible paths and collect the links that meet the path requirements."""
+            # First, we check the possible LinkTypes for the current node.
+            # These are the class-based links.
+            traversed_path = []
+            if not possible_path:
+                return [current_path]
+
+            for link_type in possible_path:
+                object_links = current_path[-1].outbound_links.filter(
+                    link_type=link_type
+                )
+                for link in object_links:
+                    traversed_path.extend(
+                        traverse(possible_path[1:], current_path + [link.target])
+                    )
+
+            return traversed_path
+
+        # Traverse the possible paths and collect the links that meet the path requirements.
         paths = []
+        for possible_path in possible_paths:
+            object_paths = traverse(possible_path, [self])
 
-        while queue:
-            node, path, depth = queue.popleft()
-
-            if max_depth and depth > max_depth:
-                continue
-
-            if node.dynamic_class == target_class:
-                paths.append({"object": node, "path": path})
-            for link in node.outbound_links.all():
-                if link.target not in visited:
-                    visited.add(link.target)
-                    queue.append((link.target, path + [link], depth + 1))
+            # If we reached the end of the path and the last node's class is the target class,
+            # then we successfully found a path.
+            for objects in object_paths:
+                paths.append({"object": objects[-1], "path": objects})
 
         return paths
 

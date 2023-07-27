@@ -2,6 +2,7 @@
 
 from typing import Any, Dict, Tuple
 
+from django.db import IntegrityError, transaction
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import NotFound
@@ -206,6 +207,7 @@ class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ign
             raise NotFound("No link type exists between these classes")
         return obj
 
+    @transaction.atomic
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
         """Create a new link type between two classes."""
         source_class_name = self.kwargs.get("source_class")
@@ -231,21 +233,111 @@ class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ign
             id=namespace_id,
         )
 
+        # Try to create both link types in the same transaction
+        link_type1: LinkType = None
         try:
-            LinkType.objects.get(
-                source_class=source_class,
-                target_class=target_class,
-            )
-            raise Conflict("A link type already exists between these classes.")
-        except LinkType.DoesNotExist:
-            link_type = LinkType.objects.create(
+            link_type1 = LinkType.objects.create(
                 source_class=source_class,
                 target_class=target_class,
                 namespace=namespace,
                 max_links=max_links,
             )
 
-            return Response(self.get_serializer(link_type).data, status=201)
+            # Try creating the reverse LinkType
+            LinkType.objects.create(
+                source_class=target_class,
+                target_class=source_class,
+                namespace=namespace,
+                max_links=max_links,
+            )
+        except IntegrityError as exc:
+            raise Conflict("A link type already exists between these classes.") from exc
+
+        return Response(self.get_serializer(link_type1).data, status=201)
+
+    @transaction.atomic
+    def patch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
+        """Update a link type between two classes."""
+        source_class_name = self.kwargs.get("source_class")
+        target_class_name = self.kwargs.get("target_class")
+        namespace_id = request.data.get("namespace", None)
+        max_links = request.data.get("max_links", None)
+
+        source_class = self.get_object_from_model(
+            DynamicClass,
+            f"The class '{source_class_name}' does not exist.",
+            name=source_class_name,
+        )
+
+        target_class = self.get_object_from_model(
+            DynamicClass,
+            f"The class '{target_class_name}' does not exist.",
+            name=target_class_name,
+        )
+
+        try:
+            link_type1 = LinkType.objects.get(
+                source_class=source_class,
+                target_class=target_class,
+            )
+            link_type2 = LinkType.objects.get(
+                source_class=target_class,
+                target_class=source_class,
+            )
+
+            if namespace_id:  # TODO: Test patching namespaces
+                namespace = self.get_object_from_model(
+                    Namespace,
+                    f"The namespace with ID '{namespace_id}' does not exist.",
+                    id=namespace_id,
+                )
+                link_type1.namespace = namespace
+                link_type2.namespace = namespace
+
+            if max_links is not None:
+                link_type1.max_links = max_links
+                link_type2.max_links = max_links
+
+            link_type1.save()
+            link_type2.save()
+        except LinkType.DoesNotExist as exc:  # TODO: Test patching missing linktype
+            raise NotFound("The link type does not exist.") from exc
+
+        return Response(self.get_serializer(link_type1).data)
+
+    @transaction.atomic  # TODO: Test deleting linktypes
+    def delete(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
+        """Delete a link type between two classes."""
+        source_class_name = self.kwargs.get("source_class")
+        target_class_name = self.kwargs.get("target_class")
+
+        source_class = self.get_object_from_model(
+            DynamicClass,
+            f"The class '{source_class_name}' does not exist.",
+            name=source_class_name,
+        )
+
+        target_class = self.get_object_from_model(
+            DynamicClass,
+            f"The class '{target_class_name}' does not exist.",
+            name=target_class_name,
+        )
+
+        try:
+            link_type1 = LinkType.objects.get(
+                source_class=source_class,
+                target_class=target_class,
+            )
+            link_type2 = LinkType.objects.get(
+                source_class=target_class,
+                target_class=source_class,
+            )
+            link_type1.delete()
+            link_type2.delete()
+        except LinkType.DoesNotExist as exc:
+            raise NotFound("The link type does not exist.") from exc
+
+        return Response(status=204)
 
 
 class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
@@ -376,12 +468,25 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
         """Get a specific DynamicLink between two objects."""
         return Response(self.get_serializer(self.get_object()).data)
 
+    @transaction.atomic
     def delete(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
         """Delete a specific DynamicLink between two objects."""
-        obj = self.get_object()
-        obj.delete()
+        obj1 = self.get_object()
+        obj2 = self.get_object_from_model(
+            DynamicLink,
+            "The corresponding link in the reverse direction does not exist.",
+            link_type__source_class=obj1.link_type.target_class.id,
+            link_type__target_class=obj1.link_type.source_class.id,
+            source__name=obj1.target.name,
+            target__name=obj1.source.name,
+        )
+
+        obj2.delete()
+        obj1.delete()
+
         return Response(status=204)
 
+    @transaction.atomic
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
         """Create a new link between two objects."""
         classname = self.kwargs.get("classname")
@@ -410,21 +515,32 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
                 )
             )
 
+        # Try to create both dynamic links in the same transaction
+        link1 = None
         try:
-            DynamicLink.objects.get(
-                source=source_object,
-                target=target_object,
-            )
-            raise Conflict("A link already exists between these objects.")
-        except DynamicLink.DoesNotExist:
-            link = DynamicLink.objects.create(
+            link1 = DynamicLink.objects.create(
                 source=source_object,
                 target=target_object,
                 link_type=link_type,
                 namespace=namespace,
             )
 
-            return Response(self.get_serializer(link).data, status=201)
+            # Reverse link type for the reverse direction
+            reverse_link_type = LinkType.objects.get(
+                source_class=link_type.target_class,
+                target_class=link_type.source_class,
+            )
+
+            DynamicLink.objects.create(
+                source=target_object,
+                target=source_object,
+                link_type=reverse_link_type,
+                namespace=namespace,
+            )
+        except IntegrityError as exc:
+            raise Conflict("A link already exists between these objects.") from exc
+
+        return Response(self.get_serializer(link1).data, status=201)
 
     def get_link_data(
         self,

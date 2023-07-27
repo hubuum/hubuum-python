@@ -539,6 +539,6 @@ class PathSerializer(serializers.Serializer):  # type: ignore
     object = DynamicObjectSerializer(read_only=True)  # noqa: A003 (redefine object)
     path = serializers.SerializerMethodField()
 
-    def get_path(self, obj: LinkType):
+    def get_path(self, objects: Dict[str, Any]):
         """Display the path to the object as a name of classes we pass through."""
-        return [link.link_type.target_class.name for link in obj["path"]]
+        return DynamicObjectSerializer(objects["path"], many=True).data
