@@ -81,8 +81,8 @@ class DynamicClass(NamespacedHubuumModel):
     def get_transitive_paths(
         self, target_class: str, max_depth: int = 0
     ) -> List[List["LinkType"]]:
-        """
-        Returns all possible paths that can lead from self to target_class.
+        """Produce all possible paths that can lead from self to target_class.
+
         Each path is represented as a list of LinkTypes.
         """
         queue = deque(
@@ -171,7 +171,6 @@ class DynamicObject(NamespacedHubuumModel):
         self, target_class: DynamicClass, max_depth: int = 0
     ) -> List[Dict[str, Union["DynamicObject", List["DynamicLink"]]]]:
         """Find all paths from self to any object of target_class."""
-
         # Get the possible paths and early exit if there's no possible link to the target_class.
         possible_paths = self.dynamic_class.get_transitive_paths(
             target_class, max_depth=max_depth
@@ -182,7 +181,7 @@ class DynamicObject(NamespacedHubuumModel):
         def traverse(
             possible_path: List[LinkType], current_path: List[DynamicObject]
         ) -> List[List[DynamicObject]]:
-            """Traverse the possible paths and collect the links that meet the path requirements."""
+            """Traverse the possible paths and collect links that meet the path requirements."""
             # First, we check the possible LinkTypes for the current node.
             # These are the class-based links.
             traversed_path = []

@@ -334,6 +334,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
     def check_link_exists(
         self, class1_obj1: str, class2: str, expected_data_list: List[Dict[str, Any]]
     ) -> HttpResponse:
+        """Check that a link exists between two objects."""
         class1, obj1 = self.split_class_object(class1_obj1)
         ret = self.assert_get_elements(
             f"/dynamic/{class1}/{obj1}/links/{class2}/?transitive=true",
@@ -343,7 +344,9 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             self.assertEqual(returned_obj["object"]["dynamic_class"], class2)
 
         # Check each returned object against expected data
-        for expected_data, actual_data in zip(expected_data_list, ret.data):
+        for expected_data, actual_data in zip(
+            expected_data_list, ret.data, strict=True
+        ):
             self.assertEqual(len(actual_data["path"]), len(expected_data["path"]))
 
             self.assertEqual(actual_data["object"]["name"], expected_data["name"])
