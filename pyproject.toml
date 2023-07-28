@@ -36,7 +36,7 @@ django_filter = "23.2"
 django-structlog = "5.3.0"
 django-rest-knox = "4.2.0"
 gunicorn = "21.2.0"
-rich = "13.4.2" # Used for console logging.
+rich = "13.4.2"                # Used for console logging.
 typing_extensions = "4.7.1"
 validators = "0.20.0"
 jsonschema = "4.17.3"
@@ -46,7 +46,7 @@ structlog_sentry = "2.0.3"
 psycopg2-binary = "2.9.6"
 pyyaml = "6.0.1"
 uritemplate = "4.1.1"
-sentry-sdk = {version = "1.28.1", extras = ["django"]}
+sentry-sdk = { version = "1.28.1", extras = ["django"] }
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
@@ -62,7 +62,7 @@ mkdocs = "1.4.3"
 mkdocs-material = "9.1.19"
 mkdocs-swagger-ui-tag = "0.6.3"
 mkdocs-git-revision-date-localized-plugin = "1.2.0"
-mkdocstrings = {version = "0.22.0", extras = ["python"]}
+mkdocstrings = { version = "0.22.0", extras = ["python"] }
 
 [build-system]
 requires = ["poetry-core"]
@@ -73,16 +73,10 @@ max-line-length = 99
 exclude = "hubuum/migrations"
 
 [tool.coverage.run]
-source = [
-    "hubuum",
-    "hubuumsite",
-]
+source = ["hubuum", "hubuumsite"]
 # concurrency = multiprocessing
 # parallel = True
-omit = [ 
-  "hubuumsite/asgi.py",
-  "hubuumsite/wsgi.py"
-]
+omit = ["hubuumsite/asgi.py", "hubuumsite/wsgi.py"]
 
 [tool.coverage.report]
 fail_under = 100
@@ -91,41 +85,90 @@ show_missing = true
 [tool.isort]
 profile = "black"
 line_length = 99
-skip="hubuum/migrations"
+skip = "hubuum/migrations"
 
 [tool.ruff]
 select = [
     "A", # flake8-builtins
-#    "ANN", # annotations
-#    "ARG", # flake8-unused-arguments
-    "B", # flake8-bugbear
-    "D", # pydocstyle
-    "DJ", # flake8-django
-    "E", # error
-    "F", # Pyflakes
-    "I", # isort
+    #    "ANN", # annotations
+    #    "ARG", # flake8-unused-arguments
+    "B",   # flake8-bugbear
+    "D",   # pydocstyle
+    "DJ",  # flake8-django
+    "E",   # error
+    "F",   # Pyflakes
+    "I",   # isort
     "ISC", # flake8-implicit-str-concat
     "INP", # flake8-no-pep420 (implicit namespace packages, you need __init__.py)
-#    "PL", # pylint (all of the below)
+    #    "PL", # pylint (all of the below)
     "PLC", # pylint-convention
     "PLE", # pylint-error
-#    "PLR", # pylint-refactor
-#    "PLW", # pylint-warning
+    #    "PLR", # pylint-refactor
+    #    "PLW", # pylint-warning
     "W", # warnings        
 ]
 ignore = [
     # D203 (1 blank line required before class docstring) is incompatible with
     # D211 (No blank lines allowed before class docstring). We ignore D203.
-    "D203", 
+    "D203",
     # D213 (Multi-line docstring summary should start at the second line) is incompatible with
     # D212 (Multi-line docstring summary should start at the first line). We ignore D213.
     "D213",
     # ANN101 (Missing type annotation for `self` in method) is infered.
     "ANN101",
+    # B905 zip() without an explicit strict= parameter set. strict=True causes the resulting iterator
+    # to raise a ValueError if the arguments are exhausted at differing lengths. Added in python 3.10
+    # and we support 3.7+.
+    "B905",
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+fixable = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "I",
+    "N",
+    "Q",
+    "S",
+    "T",
+    "W",
+    "ANN",
+    "ARG",
+    "BLE",
+    "COM",
+    "DJ",
+    "DTZ",
+    "EM",
+    "ERA",
+    "EXE",
+    "FBT",
+    "ICN",
+    "INP",
+    "ISC",
+    "NPY",
+    "PD",
+    "PGH",
+    "PIE",
+    "PL",
+    "PT",
+    "PTH",
+    "PYI",
+    "RET",
+    "RSE",
+    "RUF",
+    "SIM",
+    "SLF",
+    "TCH",
+    "TID",
+    "TRY",
+    "UP",
+    "YTT",
+]
 unfixable = []
 
 # Exclude a variety of commonly ignored directories.

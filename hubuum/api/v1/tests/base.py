@@ -600,9 +600,7 @@ class HubuumDynamicBase(HubuumAPITestCase):
             self.assertEqual(returned_obj["object"]["dynamic_class"], class2)
 
         # Check each returned object against expected data
-        for expected_data, actual_data in zip(
-            expected_data_list, ret.data, strict=True
-        ):
+        for expected_data, actual_data in zip(expected_data_list, ret.data):
             self.assertEqual(len(actual_data["path"]), len(expected_data["path"]))
 
             self.assertEqual(actual_data["object"]["name"], expected_data["name"])
