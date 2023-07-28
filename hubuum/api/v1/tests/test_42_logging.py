@@ -25,6 +25,7 @@ from hubuum.log import (
 )
 from hubuum.middleware.logging_http import LogHttpMiddleware
 from hubuum.models.iam import Namespace, User
+from hubuum.tests.abstract.logging import LogAnalyzer
 
 
 class HubuumLoggingProcessorTestCase(HubuumAPITestCase):
@@ -118,6 +119,24 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         )
         log.check_levels_are(["info", "info", "debug", "debug", "info", "info"])
         log.check_events()
+        log = LogAnalyzer(
+            cap_logs, "GET", "/api/v1/iam/namespaces/", 200, expected_status_label="OK"
+        )
+        log.set_response_content(
+            [{"id": self.namespace.id, "name": self.namespace.name}], model="Namespace"
+        )
+        log.check_events_are(
+            [
+                "request_started",
+                "request",
+                "has_perm_n",
+                "has_perm",
+                "response",
+                "request_finished",
+            ]
+        )
+        log.check_levels_are(["info", "info", "debug", "debug", "info", "info"])
+        log.check_events()
 
     def test_logging_of_failed_namespace_get(self) -> None:
         """Test logging of a failed namespace retrieval."""
@@ -130,35 +149,12 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         log = LogAnalyzer(cap_logs, "GET", "/api/v1/iam/namespaces/nope", 404)
         log.check_events_are(
             ["request_started", "request", "response", "request_finished"]
+
+        log = LogAnalyzer(cap_logs, "GET", "/api/v1/iam/namespaces/nope", 404)
+        log.check_events_are(
+            ["request_started", "request", "response", "request_finished"]
         )
         log.check_levels_are(["info", "info", "warning", "info"])
-        log.check_events()
-
-    def test_logging_dynamic_object_creation(self) -> None:
-        """Test logging of a dynamic object being created."""
-        self.assert_post(
-            "/dynamic/", {"name": "Testclass", "namespace": self.namespace.id}
-        )
-        with capture_logs() as cap_logs:
-            get_logger().bind()
-            self.assert_post(
-                "/dynamic/Testclass/",
-                {"name": "testobject", "namespace": self.namespace.id, "json_data": {}},
-            )
-
-        log = LogAnalyzer(cap_logs, "POST", "/api/v1/dynamic/Testclass/", 201)
-        log.check_events_are(
-            [
-                "request_started",
-                "request",
-                "has_perm_n",
-                "has_perm",
-                "created",
-                "response",
-                "request_finished",
-            ]
-        )
-        log.check_levels_are(["info", "info", "debug", "debug", "info", "info", "info"])
         log.check_events()
 
     def test_logging_object_creation(self) -> None:
@@ -169,6 +165,22 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             host_id = host_blob.data["id"]
 
         cap_logs = self._prune_permissions(cap_logs)
+
+        log = LogAnalyzer(cap_logs, "POST", "/api/v1/resources/hosts/", 201)
+        log.set_user("superuser")
+        log.set_instance_id(host_id)
+        log.set_response_content(
+            [
+                {
+                    "id": host_id,
+                    "name": "test",
+                    "fqdn": "test.domain.tld",
+                    "namespace": self.namespace.id,
+                }
+            ],
+            model="Host",
+        )
+        log.check_events_are(
 
         log = LogAnalyzer(cap_logs, "POST", "/api/v1/resources/hosts/", 201)
         log.set_user("superuser")
@@ -216,7 +228,17 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "criticaltest",
                 "errortest",
             ]
+        log = LogAnalyzer(cap_logs, None, None, None)
+        log.check_events_are(
+            [
+                "debugtest",
+                "infotest",
+                "warningtest",
+                "criticaltest",
+                "errortest",
+            ]
         )
+        log.check_levels_are(["debug", "info", "warning", "critical", "error"])
         log.check_levels_are(["debug", "info", "warning", "critical", "error"])
 
     def test_successful_auth_logging(self) -> None:
@@ -250,6 +272,15 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         for index in [11, 12]:
             log.override_status_code(index, 204)
         log.check_events_are(
+        # Since we do both a login and a logout, we get two different
+        # POST events, so we need to override the path and status code
+        # for the logout events.
+        log = LogAnalyzer(cap_logs, "POST", "/api/auth/login/", 200)
+        for index in [7, 8, 11, 12]:
+            log.override_path(index, "/api/auth/logout/")
+        for index in [11, 12]:
+            log.override_status_code(index, 204)
+        log.check_events_are(
             [
                 "request_started",
                 "request",
@@ -267,6 +298,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             ],
         )
         log.check_levels_are(
+        log.check_levels_are(
             [
                 "info",
                 "info",
@@ -282,6 +314,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "info",
                 "info",
             ]
+            ]
         )
         log.check_events()
 
@@ -289,6 +322,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         self.assertTrue(cap_logs[2]["id"] == cap_logs[9]["id"])
         # Check that we have the right users.
         self.assertTrue(cap_logs[4]["id"] == user.id == cap_logs[10]["id"])
+        # Check that we have a token in the response.
         # Check that we have a token in the response.
         json_data = json.loads(cap_logs[5]["content"])
         self.assertIn("token", json_data)
@@ -316,6 +350,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         log = LogAnalyzer(cap_logs, "POST", "/api/auth/login/", 401)
         log.check_events_are(
+        log = LogAnalyzer(cap_logs, "POST", "/api/auth/login/", 401)
+        log.check_events_are(
             [
                 "request_started",
                 "request",
@@ -324,6 +360,16 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_finished",
             ],
         )
+        log.check_levels_are(
+            [
+                "info",
+                "info",
+                "error",
+                ["warning", "critical", "error"],
+                "info",
+            ]
+        )
+        log.check_events()
         log.check_levels_are(
             [
                 "info",
