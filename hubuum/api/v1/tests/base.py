@@ -1,7 +1,7 @@
 """Provide a base class for testing api/v1."""
 
 from base64 import b64encode
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 from unittest.mock import MagicMock, Mock
 
 # We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
@@ -562,6 +562,79 @@ class HubuumDynamicBase(HubuumAPITestCase):
     def all_objects(self) -> List[DynamicObject]:
         """Return all objects."""
         return self.hosts + self.rooms + self.buildings
+
+    def get_object_via_api(self, dynamic_class: str, name: str) -> DynamicObject:
+        """Get a dynamic object."""
+        return self.assert_get(f"/dynamic/{dynamic_class}/{name}")
+
+    def split_class_object(self, class_object: str) -> Tuple[str, str]:
+        """Split a class.object string into class and object."""
+        return class_object.split(".")
+
+    def create_link_type_via_api(self, class1: str, class2: str) -> HttpResponse:
+        """Create a link type between two classes."""
+        return self.assert_post(
+            f"/dynamic/{class1}/{class2}/linktype/",
+            {"max_links": 0, "namespace": self.namespace.id},
+        )
+
+    def create_link_via_api(self, class1_obj1: str, class2_obj2: str) -> HttpResponse:
+        """Create a link between two objects."""
+        class1, obj1 = self.split_class_object(class1_obj1)
+        class2, obj2 = self.split_class_object(class2_obj2)
+        return self.assert_post(
+            f"/dynamic/{class1}/{obj1}/link/{class2}/{obj2}",
+            {"namespace": self.namespace.id},
+        )
+
+    def check_link_exists_via_api(
+        self, class1_obj1: str, class2: str, expected_data_list: List[Dict[str, Any]]
+    ) -> HttpResponse:
+        """Check that a link exists between two objects."""
+        class1, obj1 = self.split_class_object(class1_obj1)
+        ret = self.assert_get_elements(
+            f"/dynamic/{class1}/{obj1}/links/{class2}/?transitive=true",
+            len(expected_data_list),
+        )
+        for returned_obj in ret.data:
+            self.assertEqual(returned_obj["object"]["dynamic_class"], class2)
+
+        # Check each returned object against expected data
+        for expected_data, actual_data in zip(
+            expected_data_list, ret.data, strict=True
+        ):
+            self.assertEqual(len(actual_data["path"]), len(expected_data["path"]))
+
+            self.assertEqual(actual_data["object"]["name"], expected_data["name"])
+            self.assertEqual(
+                actual_data["object"]["dynamic_class"], expected_data["class"]
+            )
+
+            # Check each path item against expected values
+
+            for i, class_obj_pair in enumerate(expected_data["path"]):
+                expected_class, expected_obj = self.split_class_object(class_obj_pair)
+                path_item = actual_data["path"][i]
+                self.assertEqual(path_item["name"], expected_obj)
+                self.assertEqual(path_item["dynamic_class"], expected_class)
+
+        return ret
+
+    def create_class_and_object(
+        self, class_name: str, obj_name: str, json_data: Dict[str, Any] = None
+    ) -> Tuple[DynamicClass, DynamicObject]:
+        """Create a class and an object."""
+        dynamic_class = DynamicClass.objects.create(
+            name=class_name,
+            namespace=self.namespace,
+        )
+        dynamic_object = DynamicObject.objects.create(
+            name=obj_name,
+            dynamic_class=dynamic_class,
+            namespace=self.namespace,
+            json_data=json_data or {"name": "Noone"},
+        )
+        return dynamic_class, dynamic_object
 
     def tearDown(self) -> None:
         """Delete the namespace after the test."""
