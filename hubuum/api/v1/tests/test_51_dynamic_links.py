@@ -9,13 +9,13 @@ from hubuum.models.dynamic import DynamicClass, DynamicLink, DynamicObject, Link
 class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
     """Test DynamicObject functionality."""
 
-    def test_internal_class_and_object_count(self):
+    def test_internal_class_and_object_count(self) -> None:
         """Test the internals of the class generation."""
         # Test that the number of objects and classes is correct
         self.assertEqual(DynamicClass.objects.count(), len(self.all_classes()))
         self.assertEqual(DynamicObject.objects.count(), len(self.all_objects()))
 
-    def test_str_of_linktype_and_dynamiclink(self):
+    def test_str_of_linktype_and_dynamiclink(self) -> None:
         """Test the str representation of link types and dynamic links."""
         # Test creating a link type between Host and Room
         self.assert_post(
@@ -37,7 +37,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         link = DynamicLink.objects.get(source__name="host1", target__name="room1")
         self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
 
-    def test_basic_operations(self):
+    def test_basic_operations(self) -> None:
         """Test basic operations of classes, objects, and links."""
         # Try patching a non-existing linktype
         self.assert_patch_and_404(
@@ -106,16 +106,13 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         link = DynamicLink.objects.get(source__name="host1", target__name="room1")
         self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
 
-    def test_failing_specific_link_get(self):
+    def test_failing_specific_link_get(self) -> None:
         """Test that fetching non-existent links fails."""
         self.assert_get_and_404("/dynamic/Host/Room/linktype/")
         self.assert_get_and_404(
             "/dynamic/Host/host1/link/Room/room1",
         )
-        self.assert_post(
-            "/dynamic/Host/Room/linktype/",
-            {"max_links": 1, "namespace": self.namespace.id},
-        )
+        self.create_link_type_via_api("Host", "Room", max_links=1)
         self.assert_get_and_404(
             "/dynamic/nope/host1/link/Room/room1",
         )
@@ -135,7 +132,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             "/dynamic/Host/host1/links/Nope/?transitive=true",
         )
 
-    def test_failing_linktype_creation(self):
+    def test_failing_linktype_creation(self) -> None:
         """Test that creating linktypes between non-existing classes fails."""
         self.assert_post_and_404(
             "/dynamic/Host/Nope/linktype/",
@@ -151,7 +148,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             {"max_links": 1, "namespace": 999999},
         )
 
-    def test_failing_link_creation(self):
+    def test_failing_link_creation(self) -> None:
         """Test that creating a link fails when the link type is not defined."""
         # Test creating a link between host1 and room1, which should fail as we have not
         # defined a link type between Host and Room
@@ -188,7 +185,54 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             {"namespace": 999999},
         )
 
-    def test_that_link_creation_fails_when_max_links_is_reached(self):
+    def test_loops_during_transitive_links(self) -> None:
+        """Test that loops during transitive links don't break anything."""
+        self.create_class_and_object("Person", "person1")
+        self.create_link_type_via_api("Host", "Room")
+        self.create_link_type_via_api("Room", "Building")
+        self.create_link_type_via_api("Building", "Person")
+        self.create_link_type_via_api("Building", "Host")
+
+        # host1 -> room1 -> building1 -> person1
+        self.create_link_via_api("Host.host1", "Room.room1")
+        self.create_link_via_api("Room.room1", "Building.building1")
+        self.create_link_via_api("Building.building1", "Person.person1")
+
+        # This creates the loop back to host1
+        # host1 -> room1 -> building1 -> host1
+        # Note that due to bidirectionality, this is the same as saying
+        # host1 -> building1
+        # Which again leads to the following secondary path to person1
+        # host1 -> building1 -> person1
+        self.create_link_via_api("Building.building1", "Host.host1")
+
+        self.check_link_exists_via_api(
+            "Host.host1",
+            "Person",
+            [
+                {
+                    "name": "person1",
+                    "class": "Person",
+                    "path": [
+                        "Host.host1",
+                        "Building.building1",
+                        "Person.person1",
+                    ],
+                },
+                {
+                    "name": "person1",
+                    "class": "Person",
+                    "path": [
+                        "Host.host1",
+                        "Room.room1",
+                        "Building.building1",
+                        "Person.person1",
+                    ],
+                },
+            ],
+        )
+
+    def test_that_link_creation_fails_when_max_links_is_reached(self) -> None:
         """Test that creating a link fails when the max number of links is reached."""
         self.assert_post(
             "/dynamic/Host/Room/linktype/",
@@ -206,7 +250,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             {"namespace": self.namespace.id},
         )
 
-    def test_deleting_linktype(self):
+    def test_deleting_linktype(self) -> None:
         """Test that deleting a link type works."""
         self.assert_delete_and_404("/dynamic/Nope/Room/linktype/")
         self.assert_delete_and_404("/dynamic/Host/Nope/linktype/")
@@ -223,7 +267,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         self.assert_delete("/dynamic/Host/Room/linktype/")
         self.assert_get_and_404("/dynamic/Host/host1/link/Room/room1")
 
-    def test_creating_object_in_nonexisting_class(self):
+    def test_creating_object_in_nonexisting_class(self) -> None:
         """Test creating an object in a non-existing class."""
         self.assert_post_and_404(
             "/dynamic/NonExistingClass/",
@@ -234,7 +278,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             },
         )
 
-    def test_linking_between_objects(self):
+    def test_linking_between_objects(self) -> None:
         """Test that manipulating links between objects works."""
         self.assert_post(
             "/dynamic/Host/Room/linktype/",
@@ -265,7 +309,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
 
         self.assert_get_and_404("/dynamic/Host/notfound/links/")
 
-    def test_multiple_links_to_same_class(self):
+    def test_multiple_links_to_same_class(self) -> None:
         """Test that multiple links to the same class works."""
         self.assert_post(
             "/dynamic/Host/Room/linktype/",
@@ -279,7 +323,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         self.assert_get_elements("/dynamic/Host/host1/links/Room/", 2)
         self.assert_get_elements("/dynamic/Host/host1/links/", 2)
 
-    def test_transitive_linking(self):
+    def test_transitive_linking(self) -> None:
         """Test transitive linking."""
         self.create_link_type_via_api("Host", "Room")
         self.create_link_type_via_api("Room", "Building")
@@ -386,7 +430,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             "/dynamic/Host/host1/links/Person/?transitive=true&max-depth=1"
         )
 
-    def test_fetching_classes_and_objects(self):
+    def test_fetching_classes_and_objects(self) -> None:
         """Test fetching objects.
 
         We have the following classes and objects created behind the scenes:
@@ -419,7 +463,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
                 ret = self.get_object_via_api(dynamic_class, obj)
                 self.assertEqual(ret.data["name"], obj)
 
-    def test_404(self):
+    def test_404(self) -> None:
         """Test that 404 is returned when fetching a non-existing classes or objects."""
         self.assert_get_and_404("/dynamic/classdoesnotexist")
         self.assert_get_and_404("/dynamic/Host/doesnotexist")

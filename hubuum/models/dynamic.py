@@ -236,7 +236,7 @@ class LinkType(NamespacedHubuumModel):
 
         unique_together = ["source_class", "target_class"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of the LinkType instance."""
         return (
             f"{self.source_class.name} <-> {self.target_class.name} ({self.max_links})"
@@ -278,6 +278,6 @@ class DynamicLink(NamespacedHubuumModel):
 
         unique_together = ["source", "target"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of the DynamicLink instance."""
         return f"{self.source} <-> {self.target}"

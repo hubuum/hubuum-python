@@ -1,6 +1,7 @@
 """Provide a base class for testing api/v1."""
 
 from base64 import b64encode
+from itertools import zip_longest
 from typing import Any, Callable, Dict, List, Tuple, Union
 from unittest.mock import MagicMock, Mock
 
@@ -571,15 +572,27 @@ class HubuumDynamicBase(HubuumAPITestCase):
         """Split a class.object string into class and object."""
         return class_object.split(".")
 
-    def create_link_type_via_api(self, class1: str, class2: str) -> HttpResponse:
-        """Create a link type between two classes."""
+    def create_link_type_via_api(
+        self, class1: str, class2: str, max_links: int = 0, namespace: Namespace = None
+    ) -> HttpResponse:
+        """Create a link type between two classes.
+
+        param class1: The source class name (string)
+        param class2: The target class name (string)
+        """
+        namespace = namespace or self.namespace
+
         return self.assert_post(
             f"/dynamic/{class1}/{class2}/linktype/",
-            {"max_links": 0, "namespace": self.namespace.id},
+            {"max_links": max_links, "namespace": self.namespace.id},
         )
 
     def create_link_via_api(self, class1_obj1: str, class2_obj2: str) -> HttpResponse:
-        """Create a link between two objects."""
+        """Create a link between two objects.
+
+        param class1_obj1: The class and object (class.object) of the source object
+        param class2_obj2: The class and object (class.object) of the target object
+        """
         class1, obj1 = self.split_class_object(class1_obj1)
         class2, obj2 = self.split_class_object(class2_obj2)
         return self.assert_post(
@@ -588,14 +601,50 @@ class HubuumDynamicBase(HubuumAPITestCase):
         )
 
     def check_link_exists_via_api(
-        self, class1_obj1: str, class2: str, expected_data_list: List[Dict[str, Any]]
+        self,
+        class1_obj1: str,
+        class2: str,
+        expected_data_list: List[Dict[str, Any]],
+        transitive: bool = True,
     ) -> HttpResponse:
-        """Check that a link exists between two objects."""
+        """Check that a link exists between two objects.
+
+        param class1_obj1: The class and object (class.object) of the first object
+        param class2: The class of the second object
+        param expected_data_list: A list of dictionaries containing the expected data
+        param transitive: Whether the link should be transitive (default: True)
+        """
         class1, obj1 = self.split_class_object(class1_obj1)
-        ret = self.assert_get_elements(
-            f"/dynamic/{class1}/{obj1}/links/{class2}/?transitive=true",
-            len(expected_data_list),
+        transitive = "true" if transitive else "false"
+
+        # Check that the correct number of links are returned
+
+        ret = self.assert_get(
+            f"/dynamic/{class1}/{obj1}/links/{class2}/?transitive={transitive}",
         )
+
+        ret_length = len(ret.data)
+        expected_length = len(expected_data_list)
+        if ret_length != expected_length:  # pragma: no cover, debug when test fails
+            for returned, expected in zip_longest(ret.data, expected_data_list):
+                print("Expected:")
+                print(expected)
+                print("Returned:")
+                if returned:
+                    pret: Dict[str, Any] = {
+                        "name": returned["object"]["name"],
+                        "class": returned["object"]["dynamic_class"],
+                        "path": [
+                            f"{d['dynamic_class']}.{d['name']}"
+                            for d in returned["path"]
+                        ],
+                    }
+                    print(pret)
+                else:
+                    print(returned)
+
+        self.assertEqual(len(ret.data), len(expected_data_list))
+
         for returned_obj in ret.data:
             self.assertEqual(returned_obj["object"]["dynamic_class"], class2)
 

@@ -424,7 +424,7 @@ class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
 
         if dynamic_links.count() == 0:
             raise NotFound(
-                "The specified source object does not exist or has no links."
+                f"The specified source object {str(obj)} does not exist or has no links."
             )
 
         # Return the target objects (not the links)
