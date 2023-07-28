@@ -77,7 +77,7 @@ class LogAnalyzer:
         }
 
     def dummy(self, index: int) -> None:
-        """Dummy tester."""
+        """Perform a no-operation test."""
 
     updated = dummy
     deleted = dummy
@@ -404,7 +404,7 @@ class LogAnalyzer:
         :type expected_values: Dict[str, Any]
         """
         for key, expected in expected_values.items():
-            if key in self.ALLOWED_MISSING_FROM_LOG and not key in log:
+            if key in self.ALLOWED_MISSING_FROM_LOG and key not in log:
                 continue
             if key in self.ALLOWED_MISSING_FROM_EXPECTED and key in log:
                 continue
