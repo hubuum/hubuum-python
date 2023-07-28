@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from rest_framework.test import APIClient
 
 from hubuum.exceptions import MissingParam
+from hubuum.tools import is_iso_date
 
 from ..serializers import GroupSerializer
 from .base import HubuumAPITestCase
@@ -43,8 +44,8 @@ class InternalTestAPITestCase(HubuumAPITestCase):
 
     def test_is_iso_date(self):
         """Test that _is_iso_date correctly identifies ISO dates."""
-        self.assertTrue(self._is_iso_date("2020-01-01T00:00:00Z"))
-        self.assertFalse(self._is_iso_date("Not a date"))
+        self.assertTrue(is_iso_date("2020-01-01T00:00:00Z"))
+        self.assertFalse(is_iso_date("Not a date"))
         self.assert_is_iso_date("2020-01-01T00:00:00Z")
         self.assert_is_iso_date("2023-04-14T07:11:54.866956Z")
 

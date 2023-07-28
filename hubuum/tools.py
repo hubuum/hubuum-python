@@ -4,9 +4,19 @@ This package is NOT allowed to import anything from internally in hubuum.
 """
 from typing import List, Union, cast
 
+from dateutil.parser import isoparse
 from django.apps import apps
 from django.db.models import Model
 from rest_framework.exceptions import NotFound
+
+
+def is_iso_date(value: str) -> bool:
+    """Assert that a value is a valid date."""
+    try:
+        isoparse(value)
+        return True
+    except ValueError:
+        return False
 
 
 def get_model(model: Union[str, Model]) -> Union[Model, None]:

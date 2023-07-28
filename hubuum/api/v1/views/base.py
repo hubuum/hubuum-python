@@ -31,7 +31,7 @@ class LoggingMixin:
             operation,
             model=model,
             user=str(user),
-            instance=instance.id,
+            id=instance.id,
         )
 
     def perform_create(self, serializer: serializers.ModelSerializer) -> None:

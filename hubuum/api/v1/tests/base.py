@@ -5,10 +5,6 @@ from itertools import zip_longest
 from typing import Any, Callable, Dict, List, Tuple, Union
 from unittest.mock import MagicMock, Mock
 
-# We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
-# because the latter only supportes Z for UTC in python 3.11.
-# https://github.com/python/cpython/issues/80010
-from dateutil.parser import isoparse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -19,6 +15,11 @@ from rest_framework.test import APIClient, APITestCase
 from hubuum.exceptions import MissingParam
 from hubuum.models.dynamic import DynamicClass, DynamicObject
 from hubuum.models.iam import Namespace
+
+# We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
+# because the latter only supportes Z for UTC in python 3.11.
+# https://github.com/python/cpython/issues/80010
+from hubuum.tools import is_iso_date
 
 
 def create_mocked_view(action: str, model_name: str) -> Mock:
@@ -247,14 +248,6 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self._assert_status_and_debug(response, status_code)
         return response
 
-    def _is_iso_date(self, value: str) -> bool:
-        """Assert that a value is a valid date."""
-        try:
-            isoparse(value)
-            return True
-        except ValueError:
-            return False
-
     def assert_list_contains(
         self, lst: List[Any], predicate: Callable[[Any], bool]
     ) -> None:
@@ -266,7 +259,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
 
     def assert_is_iso_date(self, value: str) -> None:
         """Assert that a value is a valid date."""
-        self.assertTrue(self._is_iso_date(value))
+        self.assertTrue(is_iso_date(value))
 
     def assert_delete(self, path: str, **kwargs: Any) -> HttpResponse:
         """Delete and assert status as 204."""

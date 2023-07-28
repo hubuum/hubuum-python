@@ -2,7 +2,7 @@
 
 import io
 import json
-from typing import Any, Dict, List, Tuple, Type
+from typing import List, Tuple
 from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.hashers import make_password
@@ -23,8 +23,8 @@ from hubuum.log import (
     warning,
 )
 from hubuum.middleware.logging_http import LogHttpMiddleware
-from hubuum.models.iam import HubuumModel, Namespace, User
-from hubuum.models.resources import Host
+from hubuum.models.iam import Namespace, User
+from hubuum.tests.abstract.logging import LogAnalyzer
 
 
 class HubuumLoggingProcessorTestCase(HubuumAPITestCase):
@@ -94,133 +94,30 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             not in {"has_perm_n", "has_perm", "m:get_object", "login_data"}
         ]
 
-    def _check_levels(self, cap_logs: EventDict, expected_levels: List[str]) -> None:
-        """Check the log levels in the log."""
-        for i, level in enumerate(expected_levels):
-            if not isinstance(level, list):
-                level = [level]
-
-            self.assertIn(cap_logs[i]["log_level"], level)
-
-    def _check_events(self, cap_logs: EventDict, expected_events: List[str]) -> None:
-        """Check the events in the log."""
-        for i, event in enumerate(expected_events):
-            self.assertEqual(cap_logs[i]["event"], event)
-
-    def _check_request_started(
-        self, log: Dict[str, Any], method_and_expected_path: str
-    ) -> None:
-        """Check the request_started log entry."""
-        self.assertEqual(log["event"], "request_started")
-        self.assertEqual(log["request"], method_and_expected_path)
-
-    def _check_request_finished(
-        self, log: Dict[str, Any], method_and_expected_path: str, code: int
-    ) -> None:
-        """Check the request_finished log entry."""
-        self.assertEqual(log["event"], "request_finished")
-        self.assertEqual(log["request"], method_and_expected_path)
-        self.assertEqual(log["code"], code)
-
-    def _check_request(
-        self,
-        log: Dict[str, Any],
-        method: str,
-        path: str,
-    ) -> None:
-        """Check the HTTP response log entry."""
-        self.assertEqual(log["event"], "request")
-        self.assertEqual(log["method"], method)
-        self.assertEqual(log["path"], path)
-
-    def _check_response(  # pylint: disable=too-many-arguments
-        self,
-        log: Dict[str, Any],
-        method: str,
-        path: str,
-        status_code: int,
-        status_label: str,
-    ) -> None:
-        """Check the HTTP response log entry."""
-        self.assertEqual(log["event"], "response")
-        self.assertEqual(log["method"], method)
-        self.assertEqual(log["path"], path)
-        self.assertEqual(log["status_label"], status_label)
-        self.assertEqual(log["status_code"], status_code)
-        self.assertTrue(float(log["run_time_ms"]) > 0)
-
-    def _check_json(  # pylint: disable=too-many-arguments
-        self,
-        cls: Type[HubuumModel],
-        content: str,
-        expected_content: Dict[str, Any],
-        element: int = 0,
-        count: int = 0,
-    ) -> None:
-        """Check the JSON against expected_content.
-
-        :param cls: The class of the model to check against.
-        :param content: The JSON content to check.
-        :param expected_content: The expected content.
-        :param element: The element to check in the list.
-        :param count: Expect a list of this many elements.
-        """
-        json_data = json.loads(content)
-        if count:
-            self.assertEqual(len(json_data), count)
-            json_data = json_data[element]
-
-        self._check_structure(cls, json_data, expected_content)
-
-    def _check_structure(
-        self,
-        cls: Type[HubuumModel],
-        content: Dict[str, Any],
-        expected_content: Dict[str, Any],
-    ) -> None:
-        """Check the structure of a response."""
-        self.assert_is_iso_date(content["created_at"])
-        self.assert_is_iso_date(content["updated_at"])
-
-        if cls == Host:
-            self.assert_is_iso_date(content["registration_date"])
-
-        for key, value in expected_content.items():
-            self.assertEqual(content[key], value)
-
-    def _check_object_change(  # pylint: disable=too-many-arguments
-        self, log: Dict[str, Any], operation: str, model: str, instance: str, user: str
-    ) -> None:
-        """Check the object change log entry."""
-        self.assertEqual(log["event"], operation)
-        self.assertEqual(log["model"], model)
-        self.assertEqual(log["instance"], instance)
-        self.assertEqual(log["user"], user)
-
     def test_logging_of_namespace_get(self) -> None:
         """Test logging of a namespace being retrieved."""
         with capture_logs() as cap_logs:
             get_logger().bind()
             self.assert_get("/iam/namespaces/")
 
-        cap_logs = self._prune_permissions(cap_logs)
-        self.assertEqual(len(cap_logs), 4)
-
-        self._check_events(
-            cap_logs, ["request_started", "request", "response", "request_finished"]
+        log = LogAnalyzer(
+            cap_logs, "GET", "/api/v1/iam/namespaces/", 200, expected_status_label="OK"
         )
-        self._check_levels(cap_logs, ["info", "info", "info", "info"])
-        self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/")
-        self._check_request(cap_logs[1], "GET", "/api/v1/iam/namespaces/")
-        self._check_response(cap_logs[2], "GET", "/api/v1/iam/namespaces/", 200, "OK")
-        self._check_json(
-            Namespace,
-            cap_logs[2]["content"],
-            {"id": self.namespace.id, "name": self.namespace.name},
-            element=0,
-            count=1,
+        log.set_response_content(
+            [{"id": self.namespace.id, "name": self.namespace.name}], model="Namespace"
         )
-        self._check_request_finished(cap_logs[3], "GET /api/v1/iam/namespaces/", 200)
+        log.check_events_are(
+            [
+                "request_started",
+                "request",
+                "has_perm_n",
+                "has_perm",
+                "response",
+                "request_finished",
+            ]
+        )
+        log.check_levels_are(["info", "info", "debug", "debug", "info", "info"])
+        log.check_events()
 
     def test_logging_of_failed_namespace_get(self) -> None:
         """Test logging of a failed namespace retrieval."""
@@ -229,19 +126,13 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             self.assert_get_and_404("/iam/namespaces/nope")
 
         cap_logs = self._prune_permissions(cap_logs)
-        self.assertEqual(len(cap_logs), 4)
-        self._check_events(
-            cap_logs, ["request_started", "request", "response", "request_finished"]
+
+        log = LogAnalyzer(cap_logs, "GET", "/api/v1/iam/namespaces/nope", 404)
+        log.check_events_are(
+            ["request_started", "request", "response", "request_finished"]
         )
-        self._check_levels(cap_logs, ["info", "info", "warning", "info"])
-        self._check_request_started(cap_logs[0], "GET /api/v1/iam/namespaces/nope")
-        self._check_request(cap_logs[1], "GET", "/api/v1/iam/namespaces/nope")
-        self._check_response(
-            cap_logs[2], "GET", "/api/v1/iam/namespaces/nope", 404, "Not Found"
-        )
-        self._check_request_finished(
-            cap_logs[3], "GET /api/v1/iam/namespaces/nope", 404
-        )
+        log.check_levels_are(["info", "info", "warning", "info"])
+        log.check_events()
 
     def test_logging_object_creation(self) -> None:
         """Test logging of a host being created."""
@@ -251,10 +142,22 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             host_id = host_blob.data["id"]
 
         cap_logs = self._prune_permissions(cap_logs)
-        self.assertEqual(len(cap_logs), 6)
 
-        self._check_events(
-            cap_logs,
+        log = LogAnalyzer(cap_logs, "POST", "/api/v1/resources/hosts/", 201)
+        log.set_user("superuser")
+        log.set_instance_id(host_id)
+        log.set_response_content(
+            [
+                {
+                    "id": host_id,
+                    "name": "test",
+                    "fqdn": "test.domain.tld",
+                    "namespace": self.namespace.id,
+                }
+            ],
+            model="Host",
+        )
+        log.check_events_are(
             [
                 "request_started",
                 "request",
@@ -262,29 +165,10 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "created",
                 "response",
                 "request_finished",
-            ],
+            ]
         )
-
-        self._check_levels(cap_logs, ["info", "info", "info", "debug", "info", "info"])
-
-        self._check_request_started(cap_logs[0], "POST /api/v1/resources/hosts/")
-        self._check_request(cap_logs[1], "POST", "/api/v1/resources/hosts/")
-        self.assertTrue(cap_logs[2]["id"] == host_id)
-        self._check_object_change(cap_logs[3], "created", "Host", host_id, "superuser")
-        self._check_response(
-            cap_logs[4], "POST", "/api/v1/resources/hosts/", 201, "Created"
-        )
-        self._check_json(
-            Host,
-            cap_logs[4]["content"],
-            {
-                "id": host_id,
-                "name": "test",
-                "fqdn": "test.domain.tld",
-                "namespace": self.namespace.id,
-            },
-        )
-        self._check_request_finished(cap_logs[5], "POST /api/v1/resources/hosts/", 201)
+        log.check_levels_are(["info", "info", "info", "debug", "info", "info"])
+        log.check_events()
 
     def test_manual_logging(self) -> None:
         """Test manual logging."""
@@ -296,13 +180,17 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
             critical("criticaltest")
             error("errortest")
 
-        self.assertTrue(len(cap_logs) == 5)
-
-        self._check_events(
-            cap_logs,
-            ["debugtest", "infotest", "warningtest", "criticaltest", "errortest"],
+        log = LogAnalyzer(cap_logs, None, None, None)
+        log.check_events_are(
+            [
+                "debugtest",
+                "infotest",
+                "warningtest",
+                "criticaltest",
+                "errortest",
+            ]
         )
-        self._check_levels(cap_logs, ["debug", "info", "warning", "critical", "error"])
+        log.check_levels_are(["debug", "info", "warning", "critical", "error"])
 
     def test_successful_auth_logging(self) -> None:
         """Test logging of successful authentication."""
@@ -326,10 +214,15 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         cap_logs = self._prune_permissions(cap_logs)
 
-        self.assertTrue(len(cap_logs) == 13)
-
-        self._check_events(
-            cap_logs,
+        # Since we do both a login and a logout, we get two different
+        # POST events, so we need to override the path and status code
+        # for the logout events.
+        log = LogAnalyzer(cap_logs, "POST", "/api/auth/login/", 200)
+        for index in [7, 8, 11, 12]:
+            log.override_path(index, "/api/auth/logout/")
+        for index in [11, 12]:
+            log.override_status_code(index, 204)
+        log.check_events_are(
             [
                 "request_started",
                 "request",
@@ -346,13 +239,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_finished",
             ],
         )
-
-        # During a github action run, under QEMU, generating the knox
-        # token takes a long time -- log enough for the http_logging requests
-        # to raise the level of the response. So we will accept a few more values
-        # for the log level for the fifth log entry.
-        self._check_levels(
-            cap_logs,
+        log.check_levels_are(
             [
                 "info",
                 "info",
@@ -367,20 +254,18 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "info",
                 "info",
                 "info",
-            ],
+            ]
         )
+        log.check_events()
 
         # Check that we're deleting the right token
         self.assertTrue(cap_logs[2]["id"] == cap_logs[9]["id"])
-
         # Check that we have the right users.
         self.assertTrue(cap_logs[4]["id"] == user.id == cap_logs[10]["id"])
-
+        # Check that we have a token in the response.
         json_data = json.loads(cap_logs[5]["content"])
         self.assertIn("token", json_data)
         self.assert_is_iso_date(json_data["expiry"])
-
-        self.assertEqual(cap_logs[5]["status_code"], 200)
 
         user.delete()
 
@@ -402,9 +287,8 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         cap_logs = self._prune_permissions(cap_logs)
 
-        self.assertTrue(len(cap_logs) == 5)
-        self._check_events(
-            cap_logs,
+        log = LogAnalyzer(cap_logs, "POST", "/api/auth/login/", 401)
+        log.check_events_are(
             [
                 "request_started",
                 "request",
@@ -413,17 +297,20 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_finished",
             ],
         )
-        self._check_levels(
-            cap_logs,
-            ["info", "info", "error", ["warning", "critical", "error"], "info"],
+        log.check_levels_are(
+            [
+                "info",
+                "info",
+                "error",
+                ["warning", "critical", "error"],
+                "info",
+            ]
         )
+        log.check_events()
 
         self.assertIsNone(cap_logs[2]["id"])
-
         json_data = json.loads(cap_logs[3]["content"])
         self.assertIn(json_data["detail"], "Invalid username/password.")
-
-        self.assertEqual(cap_logs[3]["status_code"], 401)
 
         user.delete()
 
