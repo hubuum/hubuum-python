@@ -357,11 +357,11 @@
 <li><code>HUBUUM_DATABASE_PORT</code>: Sets the port for the database. Defaults to 5432.</li>
 </ul>
 <h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">¶</a></h2>
-<p>For detailed information on logging, see the <a href="../logging/">logging documentation</a>. Loggers that take log values as input accept the following values: DEBUG, INFO, WARNING, ERROR, CRITICAL. </p>
+<p>For detailed information on logging, see the <a href="../logging/">logging documentation</a>. Loggers that take log values as input accept the following values: DEBUG, INFO, WARNING, ERROR, CRITICAL.</p>
 <h3 id="core-logging-options">Core logging options<a class="headerlink" href="#core-logging-options" title="Permanent link">¶</a></h3>
 <ul>
 <li><code>HUBUUM_LOGGING_LEVEL</code>: Sets the default logging level for all sources. Defaults to "CRITICAL".</li>
-<li><code>HUBUUM_LOGGING_PRODUCTION</code>: Determines if logging is in production mode or not. In production we get no colored output and the JSON layout is compact. Defaults to <code>False</code>. Note that if <code>HUBUUM_SECRET_KEY</code> was set above, this defaults to <code>True</code>, but may be overridden explicitly. </li>
+<li><code>HUBUUM_LOGGING_PRODUCTION</code>: Determines if logging is in production mode or not. In production we get no colored output and the JSON layout is compact. Defaults to <code>False</code>. Note that if <code>HUBUUM_SECRET_KEY</code> was set above, this defaults to <code>True</code>, but may be overridden explicitly.</li>
 <li><code>HUBUUM_LOGGING_MAX_BODY_SIZE</code>: Sets the maximum size for the logging of the request.body. Defaults to 3k.</li>
 <li><code>HUBUUM_LOGGING_COLLAPSE_REQUEST_ID</code>: <em>Only applies to rich console output, never applies for production logging</em>. If set to True, collapse request_ids to <code>xxx...xxx</code> to save some screen real estate. Defaults to True.</li>
 </ul>
@@ -457,9 +457,11 @@
 <li><code>HUBUUM_REQUEST_LOG_LEVEL_SLOW</code>: The log level a slow request gets escalated to, defaults to <code>WARNING</code>.</li>
 <li><code>HUBUUM_REQUEST_LOG_LEVEL_VERY_SLOW</code>: The log level a very slow request gets escalated to, defaults to <code>ERROR</code>.</li>
 </ul>
-<p>In addition to escalating the <code>log_level</code>, the following fields are added to the event: 
- - <code>original_log_level</code>: This is the original log level of the event.
- - One of <code>slow_response</code> or <code>very_slow_response</code> is set to <code>True</code>.</p>
+<p>In addition to escalating the <code>log_level</code>, the following fields are added to the event:</p>
+<ul>
+<li><code>original_log_level</code>: This is the original log level of the event.</li>
+<li>One of <code>slow_response</code> or <code>very_slow_response</code> is set to <code>True</code>.</li>
+</ul>
 <p>With the default setup, this can look something like this:</p>
 <div class="highlight"><pre><span></span><code><span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">11</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mf">27.353445</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">war</span><span class="kc">n</span><span class="err">i</span><span class="kc">n</span><span class="err">g</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="err">respo</span><span class="kc">nse</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.reques</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">co</span><span class="kc">ntent</span><span class="err">=...</span><span class="w"> </span><span class="err">me</span><span class="kc">t</span><span class="err">hod=GET</span><span class="w"> </span><span class="err">origi</span><span class="kc">nal</span><span class="err">_log_level=</span><span class="mi">10</span><span class="w"> </span><span class="err">pa</span><span class="kc">t</span><span class="err">h=/api/v</span><span class="mi">1</span><span class="err">/resources/hos</span><span class="kc">ts</span><span class="err">/</span><span class="w"> </span><span class="err">ru</span><span class="kc">n</span><span class="err">_</span><span class="kc">t</span><span class="err">ime_ms=</span><span class="mf">1438.51</span><span class="w"> </span><span class="err">slow_respo</span><span class="kc">nse</span><span class="err">=True</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_code=</span><span class="mi">200</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_label=OK</span>
 <span class="mi">2023-05-23</span><span class="err">T</span><span class="mi">11</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mf">33.020905</span><span class="err">Z</span><span class="w"> </span><span class="p">[</span><span class="err">error</span><span class="w">   </span><span class="p">]</span><span class="w"> </span><span class="err">respo</span><span class="kc">nse</span><span class="w"> </span><span class="p">[</span><span class="err">hubuum.reques</span><span class="kc">t</span><span class="p">]</span><span class="w"> </span><span class="err">co</span><span class="kc">ntent</span><span class="err">=...</span><span class="w"> </span><span class="err">me</span><span class="kc">t</span><span class="err">hod=GET</span><span class="w"> </span><span class="err">origi</span><span class="kc">nal</span><span class="err">_log_level=</span><span class="mi">10</span><span class="w"> </span><span class="err">pa</span><span class="kc">t</span><span class="err">h=/api/v</span><span class="mi">1</span><span class="err">/resources/hos</span><span class="kc">ts</span><span class="err">/</span><span class="w"> </span><span class="err">ru</span><span class="kc">n</span><span class="err">_</span><span class="kc">t</span><span class="err">ime_ms=</span><span class="mf">5664.79</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_code=</span><span class="mi">200</span><span class="w"> </span><span class="err">s</span><span class="kc">tatus</span><span class="err">_label=OK</span><span class="w"> </span><span class="err">very_slow_respo</span><span class="kc">nse</span><span class="err">=True</span>
@@ -469,7 +471,7 @@
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 24, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 28, 2023</span>
 </small>
 </div>
 </article>

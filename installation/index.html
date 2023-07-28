@@ -291,22 +291,26 @@
 <p>Hubuum is a work in progress and is not ready for production use.</p>
 </div>
 <p>Currently there are no releases, so...</p>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:terjekv/hubuum.git
-$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>hubuum
-$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
-$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
-$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
-$<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>runserver
+<div class="highlight"><pre><span></span><code>```bash
+git clone git@github.com:terjekv/hubuum.git
+cd hubuum
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py runserver
+```
 </code></pre></div>
 <p>If you want to work on development for Hubuum, you can install the additional development requirements:</p>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements-dev.txt
+<div class="highlight"><pre><span></span><code>```bash
+pip install -r requirements-dev.txt
+```
 </code></pre></div>
 <hr/>
 <div class="md-source-file">
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 16, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 28, 2023</span>
 </small>
 </div>
 </article>
