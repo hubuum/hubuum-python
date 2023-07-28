@@ -51,7 +51,7 @@ class AttachmentAutoSchema(AutoSchema):
 
         :return: The unique operation ID for the route.
         """
-        operation_id_base = cast(str, super().get_operation_id(path, method))
+        operation_id_base = super().get_operation_id(path, method)
 
         # Order is relevant, so use a list of tuples and not a dict.
         path_mapping: Dict[str, str] = [

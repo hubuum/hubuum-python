@@ -7,13 +7,6 @@ from .base import HubuumAPITestCase
 class APIHost(HubuumAPITestCase):
     """Test hosts."""
 
-    def _create_namespace(self, namespacename: str = "namespace1") -> None:
-        """Create the default namespace (namespace1) [as superuser]."""
-        oldclient = self.client
-        self.client = self.get_superuser_client()
-        self.assert_post("/iam/namespaces/", {"name": namespacename})
-        self.client = oldclient
-
     def _create_host(
         self, hostname: str = "yes", namespace: str = "namespace1"
     ) -> None:

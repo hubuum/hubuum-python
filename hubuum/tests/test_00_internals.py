@@ -156,9 +156,6 @@ class InternalsTestCase(HubuumModelTestCase):
         with pytest.raises(InvalidParam):
             filter_sensitive_data(None, None, Host)
 
-    def test_request_color_generator(self):
-        """Test that the request color generator works."""
-
     def test_request_color_tracker(self) -> None:
         """Test that the request color tracker works as expected."""
         color_tracker = RequestColorTracker()

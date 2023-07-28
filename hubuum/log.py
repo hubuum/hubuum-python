@@ -131,7 +131,7 @@ class RequestColorTracker:
 
     COLORS = ["red", "white", "green", "yellow", "blue", "magenta", "cyan"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new RequestColorizer.
 
         Sets the initial mapping of request_ids to colors to be an empty defaultdict.

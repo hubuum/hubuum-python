@@ -15,6 +15,5 @@ GET /api/v1/extensions/?json_data_lookup__foo=bar
 GET /api/v1/extensions/?content_type=host&json_data_lookup__foo__bar__icontains=baz
 ```
 
-
 !!! warning
     You always want to use case-insensitive operators for JSON fields. Otherwise, you will get unexpected (ie, no) results.

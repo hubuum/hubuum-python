@@ -20,6 +20,7 @@ from hubuum.models.core import (
     ExtensionData,
     ExtensionsModel,
 )
+from hubuum.models.dynamic import DynamicClass, DynamicLink, DynamicObject, LinkType
 from hubuum.models.iam import (
     Namespace,
     NamespacedHubuumModelWithExtensions,
@@ -323,6 +324,70 @@ class AttachmentSerializer(HubuumMetaSerializer):
         return file
 
 
+class DynamicClassSerializer(HubuumMetaSerializer):
+    """Serialize a DynamicClass object."""
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = DynamicClass
+        fields = [
+            "name",
+            "updated_at",
+            "created_at",
+            "json_schema",
+            "validate_schema",
+            "namespace",
+        ]
+
+    def update(self, instance: DynamicClass, validated_data: Dict[str, Any]):
+        """Update the DynamicClass instance with the proposed schema if validation succeeds."""
+        # Validating the schema to be additive implies validating
+        # that the schema in itself is valid
+        if "json_schema" in validated_data:
+            instance.validate_additive_schema_change(validated_data["json_schema"])
+
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+
+        instance.save()
+        return instance
+
+    def create(self, validated_data: Dict[str, Any]):
+        """Create a new DynamicClass instance with the proposed schema if validation succeeds."""
+        instance = DynamicClass(**validated_data)
+        proposed_schema = validated_data.get("json_schema", None)
+
+        # Proposed_schema may be false or empty, so we need to check for None
+        if proposed_schema is not None:
+            instance.validate_schema_correctness(proposed_schema)
+
+        instance.save()
+        return instance
+
+
+class DynamicObjectSerializer(HubuumMetaSerializer):
+    """Serialize a DynamicObject object."""
+
+    # Make the dynamic_class field read-only so that it's not required during initial validation
+    # dynamic_class = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    dynamic_class = serializers.SlugRelatedField(slug_field="name", read_only=True)
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = DynamicObject
+        fields = [
+            "name",
+            "updated_at",
+            "created_at",
+            "json_data",
+            "namespace",
+            "dynamic_class",
+        ]
+
+
 class HostSerializer(HubuumMetaSerializer):
     """Serialize a Host object."""
 
@@ -417,3 +482,63 @@ class VendorSerializer(HubuumMetaSerializer):
 
         model = Vendor
         fields = "__all__"
+
+
+class LinkTypeSerializer(HubuumMetaSerializer):
+    """Serialize a LinkType object."""
+
+    source_class = serializers.SlugRelatedField(
+        slug_field="name",
+        read_only=True,
+    )
+    target_class = serializers.SlugRelatedField(
+        slug_field="name",
+        read_only=True,
+    )
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = LinkType
+        fields = [
+            "source_class",
+            "target_class",
+            "max_links",
+            "namespace",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class DynamicLinkSerializer(serializers.ModelSerializer):  # type: ignore
+    """Serializer for the DynamicLink model."""
+
+    source = serializers.SlugRelatedField(
+        slug_field="name", queryset=DynamicObject.objects.all()
+    )
+    target = serializers.SlugRelatedField(
+        slug_field="name", queryset=DynamicObject.objects.all()
+    )
+
+    path = serializers.SerializerMethodField(required=False)
+
+    class Meta:
+        """How to serialize the object."""
+
+        model = DynamicLink
+        fields = ["source", "target", "path"]
+
+    def get_path(self, obj: DynamicLink):
+        """Get the path to the object."""
+        return getattr(obj, "path", None)
+
+
+class PathSerializer(serializers.Serializer):  # type: ignore
+    """Serialize a path to an object."""
+
+    object = DynamicObjectSerializer(read_only=True)  # noqa: A003 (redefine object)
+    path = serializers.SerializerMethodField()
+
+    def get_path(self, objects: Dict[str, Any]):
+        """Display the path to the object as a name of classes we pass through."""
+        return DynamicObjectSerializer(objects["path"], many=True).data

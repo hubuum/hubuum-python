@@ -1,3 +1,6 @@
+# Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
+# pyright: reportIncompatibleVariableOverride=false
+
 """Filters for hubuum permissions."""
 from typing import List, Tuple
 
@@ -20,6 +23,7 @@ from hubuum.models.core import (
     ExtensionData,
     model_is_open,
 )
+from hubuum.models.dynamic import DynamicClass, DynamicObject
 from hubuum.models.iam import Namespace, Permission, User
 from hubuum.models.resources import (
     Host,
@@ -102,7 +106,7 @@ class RaiseBadRequestOnBadFilter(filters.FilterSet):
 
     def _validate_fields_and_lookups(self) -> None:
         """Validate that fields and lookups in the request are valid for filtering."""
-        for field in self.request.GET:
+        for field in self.request.GET:  # type: ignore
             field_name, lookup = self._get_field_and_lookup(field)
             self._validate_field(field_name)
             self._validate_lookup(field_name, lookup)
@@ -240,6 +244,37 @@ class NamespacePermissionFilter(RaiseBadRequestOnBadFilter):
         else:
             filtered = queryset.filter(namespace__in=res)
         return filtered
+
+
+class DynamicClassFilterSet(NamespacePermissionFilter):
+    """Filterset class for DynamicClass."""
+
+    json_schema_lookup = JSONFieldLookupFilter(field_name="json_schema")
+
+    class Meta:
+        """Metadata for the class."""
+
+        model = DynamicClass
+        fields = {
+            "name": _textual_lookups,
+            "validate_schema": _boolean_lookups,
+        }
+        fields.update(_hubuum_fields)
+
+
+class DynamicObjectFilterSet(NamespacePermissionFilter):
+    """Filterset class for DynamicClass."""
+
+    json_data_lookup = JSONFieldLookupFilter(field_name="json_data")
+
+    class Meta:
+        """Metadata for the class."""
+
+        model = DynamicObject
+        fields = {
+            "dynamic_class": _key_lookups,
+        }
+        fields.update(_hubuum_fields)
 
 
 class NamespaceFilterSet(NamespacePermissionFilter):

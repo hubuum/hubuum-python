@@ -188,7 +188,7 @@ processors: List[
     structlog.stdlib.add_logger_name,
     structlog.processors.TimeStamper(fmt="iso"),
     structlog.processors.StackInfoRenderer(),
-    structlog.processors.format_exc_info,
+    #    structlog.processors.format_exc_info,
     structlog.processors.UnicodeDecoder(),
     SentryProcessor(event_level=config.sentry.get_log_level("SENTRY_LEVEL")),
 ]

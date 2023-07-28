@@ -12,9 +12,9 @@ Pull Requests are very welcome. For faster turnaround, please see the [Pull Requ
 
 Before you submit a pull request, please make sure the following is done:
 
-1. Fork the repository and create your branch from `main`.
-2. Check that the tests pass and code style is valid by running `tox -e format` and `tox -e flake8`.
-3. Check that coverage is 100% by running `tox -e coverage` and then `coverage report -m`.
+  1. Fork the repository and create your branch from `main`.
+  2. Check that the tests pass and code style is valid by running `tox -e format` and `tox -e flake8`.
+  3. Check that coverage is 100% by running `tox -e coverage` and then `coverage report -m`.
 
 ### Local testing
 
@@ -31,18 +31,18 @@ If you have both postgresql and sqlite available locally, you can run the comple
 
 You MUST specify the following variables for postgresql, even when using tox to ask for a postgresql enviroment (ie, `python310-django41-postgres`). The database name and engine will however be automatically set.
 
-- `HUBUUM_DATABASE_USER` 
-- `HUBUUM_DATABASE_PASSWORD` 
-- `HUBUUM_DATABASE_HOST` 
-- `HUBUUM_DATABASE_PORT` 
+- `HUBUUM_DATABASE_USER`
+- `HUBUUM_DATABASE_PASSWORD`
+- `HUBUUM_DATABASE_HOST`
+- `HUBUUM_DATABASE_PORT`
 
 You can see the available sqlite environments by doing `tox -l | grep postgres`.
 
 You can run the postgresql suite by itself by doing `tox -e $( tox -l | grep postgres | tr '\n' ',' )`.
 
-#### SQLite 
+#### SQLite
 
-No configuration is required when using Tox and asking for an sqlite environment. The database will be created in `{envtmpdir}/hubuum.db`, typically something like ` .tox/python310-django41-sqlite/tmp`, and it will be deleted after use. The engine will be automaticall set.
+No configuration is required when using Tox and asking for an sqlite environment. The database will be created in `{envtmpdir}/hubuum.db`, typically something like `.tox/python310-django41-sqlite/tmp`, and it will be deleted after use. The engine will be automaticall set.
 
 You can see the available sqlite environments by doing `tox -l | grep sqlite`.
 

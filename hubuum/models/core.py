@@ -77,7 +77,15 @@ class HubuumModel(models.Model):
 
 
 class NamespacedHubuumModel(HubuumModel):
-    """Base model for a namespaced Hubuum Objects."""
+    """Base model for a namespaced Hubuum Objects.
+
+    Adds the following fields:
+        namespace: The namespace the object belongs to.
+
+    Inherits from HubuumModel, which and adds the following fields:
+        created_at: The date and time the object was created.
+        updated_at: The date and time the object was last updated.
+    """
 
     # When we delete a namespace, do we want *all* the objects to disappear?
     # That'd be harsh. But, well... What is the realistic option?
