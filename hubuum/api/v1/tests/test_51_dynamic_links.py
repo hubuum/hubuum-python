@@ -2,34 +2,11 @@
 
 from typing import Any, Dict
 
-from hubuum.api.v1.tests.base import HubuumHubuumClassesAndObjects
-from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
+from hubuum.api.v1.tests.helpers.populators import APIv1Objects
 
 
-class HubuumObjectTestCase(HubuumHubuumClassesAndObjects):
+class HubuumObjectTestCase(APIv1Objects):
     """Test HubuumObject functionality."""
-
-    def test_internal_class_and_object_count(self) -> None:
-        """Test the internals of the class generation."""
-        # Test that the number of objects and classes is correct
-        self.assertEqual(HubuumClass.objects.count(), len(self.all_classes()))
-        self.assertEqual(HubuumObject.objects.count(), len(self.all_objects()))
-
-    def test_str_of_ClassLink_and_ObjectLink(self) -> None:
-        """Test the str representation of link types and dynamic links."""
-        # Test creating a link type between Host and Room
-        self.create_class_link_via_api("Host", "Room", max_links=3)
-        class_link = ClassLink.objects.get(
-            source_class__name="Host", target_class__name="Room"
-        )
-        self.assertEqual(str(class_link), "Host <-> Room (3)")
-
-        # Test creating a link between host1 and room1
-        self.create_object_link_via_api("Host.host1", "Room.room1")
-
-        # Test str representation of the link
-        link = ObjectLink.objects.get(source__name="host1", target__name="room1")
-        self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
 
     def test_basic_operations(self) -> None:
         """Test basic operations of classes, objects, and links."""
@@ -67,12 +44,6 @@ class HubuumObjectTestCase(HubuumHubuumClassesAndObjects):
         # Try patching a non-existing namespace
         self.assert_patch_and_404("/dynamic/Room/link/Host/", {"namespace": 999999999})
 
-        # Test str representation of the link type
-        class_link = ClassLink.objects.get(
-            source_class__name="Host", target_class__name="Room"
-        )
-        self.assertEqual(str(class_link), "Host <-> Room (3)")
-
         # Test creating a link between host1 and room1
         self.create_object_link_via_api("Host.host1", "Room.room1")
         self.assert_get("/dynamic/Host/host1/link/Room/room1")
@@ -84,10 +55,6 @@ class HubuumObjectTestCase(HubuumHubuumClassesAndObjects):
             "/dynamic/Room/room1/link/Host/host1",
             {"namespace": self.namespace.id},
         )
-
-        # Test str representation of the link
-        link = ObjectLink.objects.get(source__name="host1", target__name="room1")
-        self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
 
     def test_failing_specific_link_get(self) -> None:
         """Test that fetching non-existent links fails."""

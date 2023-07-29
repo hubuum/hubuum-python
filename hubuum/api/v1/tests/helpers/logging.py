@@ -260,7 +260,10 @@ class LogAnalyzer:
         if self.expected_status_label:
             expected_values["status_label"] = self.expected_status_label
 
-        self._check_log_entry_count(log, 9)
+        ignored_keys = ["slow_response", "very_slow_response"]
+        expected_count = 11 if any(key in log for key in ignored_keys) else 9
+
+        self._check_log_entry_count(log, expected_count)
         self._check_log_values(log, expected_values)
 
         self._check_response_content(log["content"])
