@@ -8,9 +8,10 @@ from django.http import HttpResponse
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
+from hubuum.tests.helpers.populators import BasePopulator
 
 
-class APIv1Empty(HubuumAPITestCase):
+class APIv1Empty(HubuumAPITestCase, BasePopulator):
     """A base class for Hubuum API test cases with functionality to create dynamic structures.
 
     The following classes can be created via
@@ -23,33 +24,6 @@ class APIv1Empty(HubuumAPITestCase):
     - Rooms (2, named room1, room2, room3)
     - Buildings (1, named building1)
     """
-
-    def _create_dynamic_class(
-        self, name: str = "Test", namespace: Namespace = None
-    ) -> HubuumClass:
-        """Create a dynamic class."""
-        if not namespace:
-            namespace = self.namespace
-
-        attributes = {"name": name, "namespace": namespace}
-        return HubuumClass.objects.create(**attributes)
-
-    def _create_dynamic_object(
-        self,
-        dynamic_class: HubuumClass = None,
-        namespace: Namespace = None,
-        **kwargs: Any,
-    ) -> HubuumObject:
-        """Create a dynamic object."""
-        attributes = {
-            "json_data": {"key": "value", "listkey": [1, 2, 3]},
-            "namespace": namespace,
-        }
-
-        for key, value in kwargs.items():
-            attributes[key] = value
-
-        return HubuumObject.objects.create(dynamic_class=dynamic_class, **attributes)
 
     def setUp(self):
         """Set up a default namespace."""
@@ -79,9 +53,9 @@ class APIv1Empty(HubuumAPITestCase):
         - Room
         - Building
         """
-        self.host_class = self._create_dynamic_class(name="Host")
-        self.room_class = self._create_dynamic_class(name="Room")
-        self.building_class = self._create_dynamic_class(name="Building")
+        self.host_class = self.create_class_direct(name="Host")
+        self.room_class = self.create_class_direct(name="Room")
+        self.building_class = self.create_class_direct(name="Building")
 
     def create_objects(self) -> None:
         """Populate the classes with objects.
@@ -93,7 +67,7 @@ class APIv1Empty(HubuumAPITestCase):
         """
         # Create an array of hosts with names host1, host2, host3
         self.hosts = [
-            self._create_dynamic_object(
+            self.create_object_direct(
                 dynamic_class=self.host_class, namespace=self.namespace, name=f"host{i}"
             )
             for i in range(1, 4)
@@ -101,7 +75,7 @@ class APIv1Empty(HubuumAPITestCase):
 
         # Create an array of rooms with names room1, room2, room3
         self.rooms = [
-            self._create_dynamic_object(
+            self.create_object_direct(
                 dynamic_class=self.room_class, namespace=self.namespace, name=f"room{i}"
             )
             for i in range(1, 3)
@@ -109,7 +83,7 @@ class APIv1Empty(HubuumAPITestCase):
 
         # Create a building with name building1
         self.buildings = [
-            self._create_dynamic_object(
+            self.create_object_direct(
                 dynamic_class=self.building_class,
                 namespace=self.namespace,
                 name="building1",

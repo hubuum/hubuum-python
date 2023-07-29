@@ -1,7 +1,5 @@
 """Test the internals of the Populator class."""
 
-import pytest
-
 from hubuum.api.v1.tests.helpers.populators import APIv1Objects
 from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
 
@@ -28,27 +26,3 @@ class TestPopulators(APIv1Objects):
         self.create_object_link_via_api("Host.host1", "Room.room1")
         link = ObjectLink.objects.get(source__name="host1", target__name="room1")
         self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
-
-    def test_get_class_from_cache(self) -> None:
-        """Test the get_class_from_cache method."""
-        self.assertEqual(self.get_class_from_cache("Host").name, "Host")
-        self.assertEqual(self.get_class_from_cache("Room").name, "Room")
-        self.assertEqual(self.get_class_from_cache("Building").name, "Building")
-
-        with pytest.raises(ValueError):
-            self.get_class_from_cache("NonExistentClass")
-
-    def test_get_object_from_cache(self) -> None:
-        """Test the get_object_from_cache method."""
-        self.assertEqual(self.get_objects_from_cache("Host.host1").name, "host1")
-        self.assertEqual(self.get_objects_from_cache("Room.room1").name, "room1")
-        self.assertEqual(
-            self.get_objects_from_cache("Building.building1").name, "building1"
-        )
-
-        self.assertEqual(len(self.get_objects_from_cache("Host")), 3)
-        self.assertEqual(len(self.get_objects_from_cache("Room")), 2)
-        self.assertEqual(len(self.get_objects_from_cache("Building")), 1)
-
-        self.assertEqual(self.get_objects_from_cache("NonExistentClass"), [])
-        self.assertIsNone(self.get_objects_from_cache("Host.nosuchhost"))

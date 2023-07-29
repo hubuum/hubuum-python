@@ -23,7 +23,7 @@ class DynamicBaseTestCase(HubuumModelTestCase):
         return cast(HubuumClass, self._create_object(model=HubuumClass, **attributes))
         return cast(HubuumClass, self._create_object(model=HubuumClass, **attributes))
 
-    def _create_dynamic_object(
+    def create_object_direct(
         self, dynamic_class: HubuumClass = None, namespace: Namespace = None
     ) -> HubuumObject:
         """Create a dynamic object."""
