@@ -208,6 +208,7 @@ class LogAnalyzer:
             "request": f"{self.expected_method} {self.get_path(index)}",
         }
 
+        self._check_log_entry_count(log, 4)
         self._check_log_values(log, expected_values)
 
     def request_finished(self, index: int) -> None:
@@ -223,6 +224,7 @@ class LogAnalyzer:
             "code": self.get_status_code(index),
         }
 
+        self._check_log_entry_count(log, 4)
         self._check_log_values(log, expected_values)
 
     def request(self, index: int) -> None:
@@ -238,6 +240,7 @@ class LogAnalyzer:
             "path": self.get_path(index),
         }
 
+        self._check_log_entry_count(log, 8)
         self._check_log_values(log, expected_values)
 
     def response(self, index: int) -> None:
@@ -257,6 +260,7 @@ class LogAnalyzer:
         if self.expected_status_label:
             expected_values["status_label"] = self.expected_status_label
 
+        self._check_log_entry_count(log, 9)
         self._check_log_values(log, expected_values)
 
         self._check_response_content(log["content"])
@@ -306,6 +310,15 @@ class LogAnalyzer:
         if self.expected_user:
             expected_values["user"] = self.expected_user
 
+        log_count = 5
+        # AuthToken removes _str from the logs, to avoid leaking the token
+        if log["model"] == "AuthToken":
+            log_count = 4
+        # DynamicObject logs has two extra fields (_class_id and _class_name)
+        elif log["model"] == "DynamicObject":
+            log_count = 7
+
+        self._check_log_entry_count(log, log_count)
         self._check_log_values(log, expected_values)
 
     def check_events(self) -> None:
@@ -410,3 +423,13 @@ class LogAnalyzer:
                 continue
 
             assert log[key] == expected, f"{key}: expected {expected}, got {log[key]}"
+
+    def _check_log_entry_count(self, log: EventDict, count: int) -> None:
+        """Check if the log entry count matches the expected count.
+
+        :param log: The log entry to check.
+        :type log: EventDict
+        :param count: The expected count.
+        :type count: int
+        """
+        assert len(log) == count, f"Expected {count} log entries, got {len(log)}"
