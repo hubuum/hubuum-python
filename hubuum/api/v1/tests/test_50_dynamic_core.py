@@ -71,7 +71,7 @@ class DynamicBaseTestCase(HubuumAPITestCase):
         super().tearDown()
         self.namespace.delete()
 
-    def _create_dynamic_class(
+    def create_class_direct(
         self,
         name: str = "Test",
         namespace_id: int = None,
@@ -94,7 +94,7 @@ class DynamicBaseTestCase(HubuumAPITestCase):
 
         return ret
 
-    def _create_dynamic_object(
+    def create_object_direct(
         self,
         dynamic_class: str = None,
         namespace: int = None,
@@ -135,14 +135,14 @@ class HubuumClassTestCase(DynamicBaseTestCase):
 
     def test_creating_dynamic_class(self):
         """Test creating a dynamic class."""
-        ret = self._create_dynamic_class(name="Test")
+        ret = self.create_class_direct(name="Test")
         self.assertEqual(ret.data["name"], "Test")
 
     def test_creating_dynamic_object(self):
         """Test creating a dynamic object."""
-        cret = self._create_dynamic_class()
+        cret = self.create_class_direct()
         json_data = {"key": "value", "listkey": [1, 2, 3]}
-        oret = self._create_dynamic_object(
+        oret = self.create_object_direct(
             dynamic_class=cret.data["name"],
             json_data=json_data,
             name="test",
@@ -152,12 +152,12 @@ class HubuumClassTestCase(DynamicBaseTestCase):
 
     def test_creating_dynamic_object_with_schema(self):
         """Test creating a dynamic object with a schema."""
-        cret = self._create_dynamic_class(
+        cret = self.create_class_direct(
             json_schema=self.valid_schema,
             validate_schema=True,
         )
         json_data = {"age": 42}
-        oret = self._create_dynamic_object(
+        oret = self.create_object_direct(
             dynamic_class=cret.data["name"],
             json_data=json_data,
             name="test_name",
@@ -167,7 +167,7 @@ class HubuumClassTestCase(DynamicBaseTestCase):
 
     def test_schema_is_valid(self):
         """Test that an uploaded schema is valid."""
-        cret = self._create_dynamic_class(
+        cret = self.create_class_direct(
             name="SchemaOK",
             json_schema=self.valid_schema,
             validate_schema=True,
@@ -192,7 +192,7 @@ class HubuumClassTestCase(DynamicBaseTestCase):
 
     def test_schema_patching(self):
         """Test that schemas can be patched in an additive way only."""
-        cret = self._create_dynamic_class(
+        cret = self.create_class_direct(
             name="SchemaOK",
             json_schema=self.valid_schema,
             validate_schema=True,
@@ -250,7 +250,7 @@ class HubuumClassTestCase(DynamicBaseTestCase):
         }
 
         # Create a class with a schema
-        cret = self._create_dynamic_class(
+        cret = self.create_class_direct(
             name="SchemaPerson",
             json_schema=schema,
             validate_schema=True,
