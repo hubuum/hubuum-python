@@ -25,7 +25,6 @@ from hubuum.log import (
 )
 from hubuum.middleware.logging_http import LogHttpMiddleware
 from hubuum.models.iam import Namespace, User
-from hubuum.tests.abstract.logging import LogAnalyzer
 
 
 class HubuumLoggingProcessorTestCase(HubuumAPITestCase):

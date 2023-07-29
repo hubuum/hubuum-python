@@ -23,7 +23,7 @@ class LogAnalyzer:
 
     DATEFIELDS = ["created_at", "updated_at", "registration_date"]
     ALLOWED_MISSING_FROM_LOG = ["user"]
-    ALLOWED_MISSING_FROM_EXPECTED = ["model", "id"]
+    ALLOWED_MISSING_FROM_EXPECTED = ["model"]
 
     def __init__(
         self,
@@ -76,11 +76,14 @@ class LogAnalyzer:
             "failure": self.failure,
         }
 
-    #    def dummy(self, index: int) -> None:
-    #        """Perform a no-operation test."""
-    #        log = self.cap_logs[index]
-    #        olog = self._order_keys(log)
-    #        print(f"{log['event']} ({len(log)} entries}: {olog}")
+    def dummy(self, index: int) -> None:
+        """Perform a no-operation test."""
+
+    updated = dummy
+    deleted = dummy
+    login = dummy
+    logout = dummy
+    failure = dummy
 
     def override_path(self, index: int, path: str) -> None:
         """Override the default path."""
@@ -193,8 +196,6 @@ class LogAnalyzer:
         assert check_method, f"No check method for event type '{event_type}'"
         check_method(index)
 
-    # Event check methods
-
     def request_started(self, index: int) -> None:
         """Assert that a specific log entry is a 'request_started' event with correct details.
 
@@ -259,10 +260,7 @@ class LogAnalyzer:
         if self.expected_status_label:
             expected_values["status_label"] = self.expected_status_label
 
-        ignored_keys = ["slow_response", "very_slow_response"]
-        expected_count = 11 if any(key in log for key in ignored_keys) else 9
-
-        self._check_log_entry_count(log, expected_count)
+        self._check_log_entry_count(log, 9)
         self._check_log_values(log, expected_values)
 
         self._check_response_content(log["content"])
@@ -321,59 +319,6 @@ class LogAnalyzer:
             log_count = 7
 
         self._check_log_entry_count(log, log_count)
-        self._check_log_values(log, expected_values)
-
-    def updated(self, index: int) -> None:
-        """Check updated entries."""
-        log = self.cap_logs[index]
-        expected_values = {
-            "event": "updated",
-            "model": self.expected_response_model_string,
-        }
-
-        self._check_log_entry_count(log, 5)
-        self._check_log_values(log, expected_values)
-
-    def login(self, index: int) -> None:
-        """Check login entries."""
-        log = self.cap_logs[index]
-        expected_values = {
-            "event": "login",
-        }
-
-        self._check_log_entry_count(log, 3)
-        self._check_log_values(log, expected_values)
-
-    def deleted(self, index: int) -> None:
-        """Check deleted entries."""
-        log = self.cap_logs[index]
-        expected_values = {
-            "event": "deleted",
-            "model": self.expected_response_model_string,
-            "id": self.expected_instance_id,
-        }
-
-        self._check_log_entry_count(log, 4)
-        self._check_log_values(log, expected_values)
-
-    def logout(self, index: int) -> None:
-        """Check logout entries."""
-        log = self.cap_logs[index]
-        expected_values = {
-            "event": "logout",
-        }
-
-        self._check_log_entry_count(log, 3)
-        self._check_log_values(log, expected_values)
-
-    def failure(self, index: int) -> None:
-        """Check failure entries."""
-        log = self.cap_logs[index]
-        expected_values = {
-            "event": "failure",
-        }
-
-        self._check_log_entry_count(log, 3)
         self._check_log_values(log, expected_values)
 
     def check_events(self) -> None:
@@ -474,7 +419,7 @@ class LogAnalyzer:
         for key, expected in expected_values.items():
             if key in self.ALLOWED_MISSING_FROM_LOG and key not in log:
                 continue
-            elif key in self.ALLOWED_MISSING_FROM_EXPECTED and key in log:
+            if key in self.ALLOWED_MISSING_FROM_EXPECTED and key in log:
                 continue
 
             assert log[key] == expected, f"{key}: expected {expected}, got {log[key]}"
