@@ -157,6 +157,33 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         log.check_levels_are(["info", "info", "warning", "info"])
         log.check_events()
 
+    def test_logging_dynamic_object_creation(self) -> None:
+        """Test logging of a dynamic object being created."""
+        self.assert_post(
+            "/dynamic/", {"name": "Testclass", "namespace": self.namespace.id}
+        )
+        with capture_logs() as cap_logs:
+            get_logger().bind()
+            self.assert_post(
+                "/dynamic/Testclass/",
+                {"name": "testobject", "namespace": self.namespace.id, "json_data": {}},
+            )
+
+        log = LogAnalyzer(cap_logs, "POST", "/api/v1/dynamic/Testclass/", 201)
+        log.check_events_are(
+            [
+                "request_started",
+                "request",
+                "has_perm_n",
+                "has_perm",
+                "created",
+                "response",
+                "request_finished",
+            ]
+        )
+        log.check_levels_are(["info", "info", "debug", "debug", "info", "info", "info"])
+        log.check_events()
+
     def test_logging_object_creation(self) -> None:
         """Test logging of a host being created."""
         with capture_logs() as cap_logs:
