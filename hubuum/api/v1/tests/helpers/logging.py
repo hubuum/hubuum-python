@@ -314,8 +314,8 @@ class LogAnalyzer:
         # AuthToken removes _str from the logs, to avoid leaking the token
         if log["model"] == "AuthToken":
             log_count = 4
-        # DynamicObject logs has two extra fields (_class_id and _class_name)
-        elif log["model"] == "DynamicObject":
+        # HubuumObject logs has two extra fields (_class_id and _class_name)
+        elif log["model"] == "HubuumObject":
             log_count = 7
 
         self._check_log_entry_count(log, log_count)

@@ -13029,7 +13029,7 @@
     },
     "/api/v1/dynamic/": {
       "get": {
-        "operationId": "dynamic_class_list_get_api_v1_dynamic",
+        "operationId": "hubuum_class_list_get_api_v1_dynamic",
         "description": "",
         "parameters": [
           {
@@ -13428,7 +13428,7 @@
                     "results": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/DynamicClass"
+                        "$ref": "#/components/schemas/HubuumClass"
                       }
                     }
                   }
@@ -13443,24 +13443,24 @@
         ]
       },
       "post": {
-        "operationId": "dynamic_class_list_post_api_v1_dynamic",
+        "operationId": "hubuum_class_list_post_api_v1_dynamic",
         "description": "",
         "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             }
           }
@@ -13470,7 +13470,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicClass"
+                  "$ref": "#/components/schemas/HubuumClass"
                 }
               }
             },
@@ -13484,7 +13484,7 @@
     },
     "/api/v1/dynamic/{classname}": {
       "get": {
-        "operationId": "dynamic_class_detail_get_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_get_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13502,7 +13502,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicClass"
+                  "$ref": "#/components/schemas/HubuumClass"
                 }
               }
             },
@@ -13514,7 +13514,7 @@
         ]
       },
       "put": {
-        "operationId": "dynamic_class_detail_put_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_put_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13531,17 +13531,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             }
           }
@@ -13551,7 +13551,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicClass"
+                  "$ref": "#/components/schemas/HubuumClass"
                 }
               }
             },
@@ -13563,7 +13563,7 @@
         ]
       },
       "patch": {
-        "operationId": "dynamic_class_detail_patch_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_patch_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13580,17 +13580,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicClass"
+                "$ref": "#/components/schemas/HubuumClass"
               }
             }
           }
@@ -13600,7 +13600,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicClass"
+                  "$ref": "#/components/schemas/HubuumClass"
                 }
               }
             },
@@ -13612,7 +13612,7 @@
         ]
       },
       "delete": {
-        "operationId": "dynamic_class_detail_delete_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_delete_api_v1_dynamic_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13637,7 +13637,7 @@
     },
     "/api/v1/dynamic/{classname}/": {
       "get": {
-        "operationId": "dynamic_object_list_get_api_v1_dynamic_classname",
+        "operationId": "hubuum_object_list_get_api_v1_dynamic_classname",
         "description": "Get or Post a user defined object.",
         "parameters": [
           {
@@ -13916,7 +13916,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -13928,7 +13928,7 @@
         ]
       },
       "post": {
-        "operationId": "dynamic_object_list_post_api_v1_dynamic_classname",
+        "operationId": "hubuum_object_list_post_api_v1_dynamic_classname",
         "description": "Get or Post a user defined object.",
         "parameters": [
           {
@@ -13945,17 +13945,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             }
           }
@@ -13965,7 +13965,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -13979,7 +13979,7 @@
     },
     "/api/v1/dynamic/{classname}/{obj}": {
       "get": {
-        "operationId": "dynamic_object_detail_get_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_get_api_v1_dynamic_classname_obj",
         "description": "Get the queryset for this view.\n\nThis is overridden to filter by the classname.\nRequires a `classname` in the URL along with the `obj`.",
         "parameters": [
           {
@@ -14006,7 +14006,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -14018,7 +14018,7 @@
         ]
       },
       "put": {
-        "operationId": "dynamic_object_detail_put_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_put_api_v1_dynamic_classname_obj",
         "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
@@ -14044,17 +14044,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             }
           }
@@ -14064,7 +14064,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -14076,7 +14076,7 @@
         ]
       },
       "patch": {
-        "operationId": "dynamic_object_detail_patch_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_patch_api_v1_dynamic_classname_obj",
         "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
@@ -14102,17 +14102,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             }
           }
@@ -14122,7 +14122,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -14134,7 +14134,7 @@
         ]
       },
       "delete": {
-        "operationId": "dynamic_object_detail_delete_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_delete_api_v1_dynamic_classname_obj",
         "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
@@ -14166,9 +14166,9 @@
         ]
       }
     },
-    "/api/v1/dynamic/{source_class}/{target_class}/linktype/": {
+    "/api/v1/dynamic/{source_class}/link/{target_class}/": {
       "get": {
-        "operationId": "link_type_get_api_v1_dynamic_source_class_target_class_linktype",
+        "operationId": "class_link_get_api_v1_dynamic_source_class_link_target_class",
         "description": "Get, Patch, or Destroy a link type between two classes.",
         "parameters": [
           {
@@ -14195,7 +14195,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkType"
+                  "$ref": "#/components/schemas/ClassLink"
                 }
               }
             },
@@ -14207,7 +14207,7 @@
         ]
       },
       "post": {
-        "operationId": "link_type_post_api_v1_dynamic_source_class_target_class_linktype",
+        "operationId": "class_link_post_api_v1_dynamic_source_class_link_target_class",
         "description": "Create a new link type between two classes.",
         "parameters": [
           {
@@ -14233,17 +14233,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             }
           }
@@ -14253,7 +14253,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkType"
+                  "$ref": "#/components/schemas/ClassLink"
                 }
               }
             },
@@ -14265,7 +14265,7 @@
         ]
       },
       "put": {
-        "operationId": "link_type_put_api_v1_dynamic_source_class_target_class_linktype",
+        "operationId": "class_link_put_api_v1_dynamic_source_class_link_target_class",
         "description": "Get, Patch, or Destroy a link type between two classes.",
         "parameters": [
           {
@@ -14291,17 +14291,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             }
           }
@@ -14311,7 +14311,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkType"
+                  "$ref": "#/components/schemas/ClassLink"
                 }
               }
             },
@@ -14323,8 +14323,8 @@
         ]
       },
       "patch": {
-        "operationId": "link_type_patch_api_v1_dynamic_source_class_target_class_linktype",
-        "description": "Get, Patch, or Destroy a link type between two classes.",
+        "operationId": "class_link_patch_api_v1_dynamic_source_class_link_target_class",
+        "description": "Update a link type between two classes.",
         "parameters": [
           {
             "name": "source_class",
@@ -14349,17 +14349,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/LinkType"
+                "$ref": "#/components/schemas/ClassLink"
               }
             }
           }
@@ -14369,7 +14369,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkType"
+                  "$ref": "#/components/schemas/ClassLink"
                 }
               }
             },
@@ -14381,8 +14381,8 @@
         ]
       },
       "delete": {
-        "operationId": "link_type_delete_api_v1_dynamic_source_class_target_class_linktype",
-        "description": "Get, Patch, or Destroy a link type between two classes.",
+        "operationId": "class_link_delete_api_v1_dynamic_source_class_link_target_class",
+        "description": "Delete a link type between two classes.",
         "parameters": [
           {
             "name": "source_class",
@@ -14415,8 +14415,8 @@
     },
     "/api/v1/dynamic/{classname}/{obj}/links/": {
       "get": {
-        "operationId": "dynamic_link_list_get_api_v1_dynamic_classname_obj_links",
-        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
+        "operationId": "object_link_list_get_api_v1_dynamic_classname_obj_links",
+        "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
             "name": "classname",
@@ -14481,7 +14481,7 @@
                     "results": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/DynamicObject"
+                        "$ref": "#/components/schemas/HubuumObject"
                       }
                     }
                   }
@@ -14496,8 +14496,8 @@
         ]
       },
       "post": {
-        "operationId": "dynamic_link_list_post_api_v1_dynamic_classname_obj_links",
-        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
+        "operationId": "object_link_list_post_api_v1_dynamic_classname_obj_links",
+        "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
             "name": "classname",
@@ -14522,17 +14522,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             }
           }
@@ -14542,7 +14542,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -14556,8 +14556,8 @@
     },
     "/api/v1/dynamic/{classname}/{obj}/link/{targetclass}/{targetobject}": {
       "get": {
-        "operationId": "dynamic_link_detail_get_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
-        "description": "Get a specific DynamicLink between two objects.",
+        "operationId": "object_link_detail_get_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "description": "Get a specific ObjectLink between two objects.",
         "parameters": [
           {
             "name": "classname",
@@ -14601,7 +14601,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicLink"
+                  "$ref": "#/components/schemas/ObjectLink"
                 }
               }
             },
@@ -14613,7 +14613,7 @@
         ]
       },
       "post": {
-        "operationId": "dynamic_link_detail_post_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "operationId": "object_link_detail_post_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
         "description": "Create a new link between two objects.",
         "parameters": [
           {
@@ -14657,17 +14657,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicLink"
+                "$ref": "#/components/schemas/ObjectLink"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicLink"
+                "$ref": "#/components/schemas/ObjectLink"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicLink"
+                "$ref": "#/components/schemas/ObjectLink"
               }
             }
           }
@@ -14677,7 +14677,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicLink"
+                  "$ref": "#/components/schemas/ObjectLink"
                 }
               }
             },
@@ -14689,8 +14689,8 @@
         ]
       },
       "delete": {
-        "operationId": "dynamic_link_detail_delete_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
-        "description": "Delete a specific DynamicLink between two objects.",
+        "operationId": "object_link_detail_delete_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "description": "Delete a specific ObjectLink between two objects.",
         "parameters": [
           {
             "name": "classname",
@@ -14741,8 +14741,8 @@
     },
     "/api/v1/dynamic/{classname}/{obj}/links/{targetclass}/": {
       "get": {
-        "operationId": "dynamic_link_list_get_api_v1_dynamic_classname_obj_links_targetclass",
-        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
+        "operationId": "object_link_list_get_api_v1_dynamic_classname_obj_links_targetclass",
+        "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
             "name": "classname",
@@ -14777,7 +14777,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -14789,8 +14789,8 @@
         ]
       },
       "post": {
-        "operationId": "dynamic_link_list_post_api_v1_dynamic_classname_obj_links_targetclass",
-        "description": "DynamicLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
+        "operationId": "object_link_list_post_api_v1_dynamic_classname_obj_links_targetclass",
+        "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
             "name": "classname",
@@ -14824,17 +14824,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/DynamicObject"
+                "$ref": "#/components/schemas/HubuumObject"
               }
             }
           }
@@ -14844,7 +14844,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DynamicObject"
+                  "$ref": "#/components/schemas/HubuumObject"
                 }
               }
             },
@@ -15781,7 +15781,7 @@
             "type": "string",
             "format": "uri",
             "maxLength": 200,
-            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)(?:\\.(?:0|25[0-5]|2[0-4]\\d|1\\d?\\d?|[1-9]\\d?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\z"
+            "pattern": "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)(?:\\.(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)){3}|\\[[0-9a-f:.]+\\]|([a-z¡-￿0-9](?:[a-z¡-￿0-9-]{0,61}[a-z¡-￿0-9])?(?:\\.(?!-)[a-z¡-￿0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z¡-￿-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::[0-9]{1,5})?(?:[/?#][^\\s]*)?\\z"
           },
           "vendor_credentials": {
             "type": "string",
@@ -15850,7 +15850,7 @@
           "namespace"
         ]
       },
-      "DynamicClass": {
+      "HubuumClass": {
         "type": "object",
         "properties": {
           "name": {
@@ -15883,7 +15883,7 @@
           "namespace"
         ]
       },
-      "DynamicObject": {
+      "HubuumObject": {
         "type": "object",
         "properties": {
           "name": {
@@ -15917,7 +15917,7 @@
           "namespace"
         ]
       },
-      "LinkType": {
+      "ClassLink": {
         "type": "object",
         "properties": {
           "source_class": {
@@ -15952,7 +15952,7 @@
           "namespace"
         ]
       },
-      "DynamicLink": {
+      "ObjectLink": {
         "type": "object",
         "properties": {
           "source": {

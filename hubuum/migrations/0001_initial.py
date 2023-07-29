@@ -2,9 +2,10 @@
 
 import django.contrib.auth.models
 import django.contrib.auth.validators
-from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
+from django.db import migrations, models
+
 import hubuum.validators
 
 
@@ -54,7 +55,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="DynamicClass",
+            name="HubuumClass",
             fields=[
                 (
                     "id",
@@ -238,7 +239,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="LinkType",
+            name="ClassLink",
             fields=[
                 (
                     "id",
@@ -264,7 +265,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="source_links",
-                        to="hubuum.dynamicclass",
+                        to="hubuum.HubuumClass",
                     ),
                 ),
                 (
@@ -272,7 +273,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="target_links",
-                        to="hubuum.dynamicclass",
+                        to="hubuum.HubuumClass",
                     ),
                 ),
             ],
@@ -472,7 +473,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="DynamicObject",
+            name="HubuumObject",
             fields=[
                 (
                     "id",
@@ -491,7 +492,7 @@ class Migration(migrations.Migration):
                     "dynamic_class",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="hubuum.dynamicclass",
+                        to="hubuum.HubuumClass",
                     ),
                 ),
                 (
@@ -507,7 +508,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddField(
-            model_name="dynamicclass",
+            model_name="HubuumClass",
             name="namespace",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE, to="hubuum.namespace"
@@ -751,7 +752,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="DynamicLink",
+            name="ObjectLink",
             fields=[
                 (
                     "id",
@@ -769,7 +770,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="links",
-                        to="hubuum.linktype",
+                        to="hubuum.ClassLink",
                     ),
                 ),
                 (
@@ -784,7 +785,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="outbound_links",
-                        to="hubuum.dynamicobject",
+                        to="hubuum.HubuumObject",
                     ),
                 ),
                 (
@@ -792,7 +793,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="inbound_links",
-                        to="hubuum.dynamicobject",
+                        to="hubuum.HubuumObject",
                     ),
                 ),
             ],

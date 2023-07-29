@@ -7,10 +7,10 @@ from hubuum.api.v1.tests.base import HubuumAPITestCase, create_mocked_view
 from hubuum.api.v1.views.dynamic import (
     DynamicAutoSchema,
     DynamicBaseView,
-    DynamicObjectDetail,
-    DynamicObjectList,
+    HubuumObjectDetail,
+    HubuumObjectList,
 )
-from hubuum.models.dynamic import DynamicClass, DynamicObject
+from hubuum.models.dynamic import HubuumClass, HubuumObject
 
 
 class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
@@ -49,8 +49,8 @@ class DynamicGenerateSchemaTestCase(HubuumAPITestCase):
     def test_get_queryset_for_generateschema(self):
         """Test that get_queryset returns nothing when called from generateschema."""
         class_list: List[Type[DynamicBaseView]] = [
-            DynamicObjectDetail,
-            DynamicObjectList,
+            HubuumObjectDetail,
+            HubuumObjectList,
         ]
         for cls in class_list:
             view = cls()
@@ -77,7 +77,7 @@ class DynamicBaseTestCase(HubuumAPITestCase):
         namespace_id: int = None,
         json_schema: str = None,
         validate_schema: bool = False,
-    ) -> DynamicClass:
+    ) -> HubuumClass:
         """Create a dynamic class."""
         if not namespace_id:
             namespace_id = self.namespace.id
@@ -100,7 +100,7 @@ class DynamicBaseTestCase(HubuumAPITestCase):
         namespace: int = None,
         name: str = None,
         json_data: Dict[str, Any] = None,
-    ) -> DynamicObject:
+    ) -> HubuumObject:
         """Create a dynamic object."""
         ret = self.assert_post(
             f"/dynamic/{dynamic_class}/",
@@ -114,8 +114,8 @@ class DynamicBaseTestCase(HubuumAPITestCase):
         return ret
 
 
-class DynamicClassTestCase(DynamicBaseTestCase):
-    """Test DynamicClass functionality."""
+class HubuumClassTestCase(DynamicBaseTestCase):
+    """Test HubuumClass functionality."""
 
     valid_schema = {
         "$id": "https://example.com/person.schema.json",

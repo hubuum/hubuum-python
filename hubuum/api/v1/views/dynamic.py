@@ -15,16 +15,16 @@ from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 
 from hubuum.api.v1.serializers import (
-    DynamicClassSerializer,
-    DynamicLinkSerializer,
-    DynamicObjectSerializer,
-    LinkTypeSerializer,
+    ClassLinkSerializer,
+    HubuumClassSerializer,
+    HubuumObjectSerializer,
+    ObjectLinkSerializer,
     PathSerializer,
 )
 from hubuum.api.v1.views.base import LoggingMixin
 from hubuum.exceptions import Conflict
-from hubuum.filters import DynamicClassFilterSet, DynamicObjectFilterSet
-from hubuum.models.dynamic import DynamicClass, DynamicLink, DynamicObject, LinkType
+from hubuum.filters import HubuumClassFilterSet, HubuumObjectFilterSet
+from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
 from hubuum.models.iam import Namespace
 from hubuum.permissions import NameSpace as NamespacePermission
 
@@ -74,19 +74,19 @@ class DynamicDetailView(DynamicBaseView, RetrieveUpdateDestroyAPIView):  # type:
     """Detail view for user defined classes and objects."""
 
 
-class DynamicClassList(DynamicListView):
+class HubuumClassList(DynamicListView):
     """Get: List user defined classes. Post: Add a new user defined class."""
 
-    queryset = DynamicClass.objects.all().order_by("name")
-    serializer_class = DynamicClassSerializer
-    filterset_class = DynamicClassFilterSet
+    queryset = HubuumClass.objects.all().order_by("name")
+    serializer_class = HubuumClassSerializer
+    filterset_class = HubuumClassFilterSet
 
 
-class DynamicClassDetail(DynamicDetailView):
+class HubuumClassDetail(DynamicDetailView):
     """Get, Patch, or Destroy a user defined class."""
 
-    queryset = DynamicClass.objects.all()
-    serializer_class = DynamicClassSerializer
+    queryset = HubuumClass.objects.all()
+    serializer_class = HubuumClassSerializer
     lookup_field = "name"
 
     def get_object(self):
@@ -97,7 +97,7 @@ class DynamicClassDetail(DynamicDetailView):
         return obj
 
 
-class DynamicObjectList(DynamicListView):
+class HubuumObjectList(DynamicListView):
     """Get or Post a user defined object.
 
     Get: List all objects of a specific user defined class.
@@ -106,8 +106,8 @@ class DynamicObjectList(DynamicListView):
     Requires a `classname` in the URL.
     """
 
-    serializer_class = DynamicObjectSerializer
-    filterset_class = DynamicObjectFilterSet
+    serializer_class = HubuumObjectSerializer
+    filterset_class = HubuumObjectFilterSet
 
     def get_queryset(self):
         """Get the queryset for this view.
@@ -117,37 +117,37 @@ class DynamicObjectList(DynamicListView):
         """
         # This is an issue with generateschema, so we need to check if the request exists
         if not self.request:
-            return DynamicObject.objects.none()
+            return HubuumObject.objects.none()
 
         classname = self.kwargs["classname"]
-        return DynamicObject.objects.filter(dynamic_class__name=classname).order_by(
+        return HubuumObject.objects.filter(dynamic_class__name=classname).order_by(
             "name"
         )
 
     def perform_create(self, serializer) -> None:  # type: ignore
         """Perform the create operation.
 
-        Overridden to get the `DynamicClass` instance from the `classname` in the URL
+        Overridden to get the `HubuumClass` instance from the `classname` in the URL
         and add it to the validated data.
         """
         classname = self.kwargs["classname"]
 
         try:
-            dynamic_class = DynamicClass.objects.get(name=classname)
-        except DynamicClass.DoesNotExist as exc:
-            raise NotFound(f"No DynamicClass found with name '{classname}'") from exc
+            dynamic_class = HubuumClass.objects.get(name=classname)
+        except HubuumClass.DoesNotExist as exc:
+            raise NotFound(f"No HubuumClass found with name '{classname}'") from exc
 
         serializer.save(dynamic_class=dynamic_class)
 
 
-class DynamicObjectDetail(DynamicDetailView):
+class HubuumObjectDetail(DynamicDetailView):
     """Get, Patch, or Destroy an object from a user defined class.
 
     Requires a `classname` and `obj` in the URL.
     """
 
-    queryset = DynamicObject.objects.all()
-    serializer_class = DynamicObjectSerializer
+    queryset = HubuumObject.objects.all()
+    serializer_class = HubuumObjectSerializer
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
         """Get the queryset for this view.
@@ -157,7 +157,7 @@ class DynamicObjectDetail(DynamicDetailView):
         """
         # This is an issue with generateschema, so we need to check if the request exists
         if not self.request:  # pragma: no cover
-            return DynamicObject.objects.none()
+            return HubuumObject.objects.none()
 
         obj = get_object_or_404(
             self.queryset,
@@ -182,15 +182,15 @@ class LinkAbstractView:
             raise NotFound(error_message) from exc
 
 
-class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ignore
+class ClassLinkView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ignore
     """Get, Patch, or Destroy a link type between two classes."""
 
     schema = DynamicAutoSchema(
         tags=["Resources"],
     )
 
-    queryset = LinkType.objects.all()
-    serializer_class = LinkTypeSerializer
+    queryset = ClassLink.objects.all()
+    serializer_class = ClassLinkSerializer
     permission_classes = (NamespacePermission,)
 
     def get_object(self):
@@ -216,13 +216,13 @@ class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ign
         max_links = request.data.get("max_links")
 
         source_class = self.get_object_from_model(
-            DynamicClass,
+            HubuumClass,
             f"The class '{source_class_name}' does not exist.",
             name=source_class_name,
         )
 
         target_class = self.get_object_from_model(
-            DynamicClass,
+            HubuumClass,
             f"The class '{target_class_name}' does not exist.",
             name=target_class_name,
         )
@@ -234,17 +234,17 @@ class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ign
         )
 
         # Try to create both link types in the same transaction
-        link_type1: LinkType = None
+        link_type1: ClassLink = None
         try:
-            link_type1 = LinkType.objects.create(
+            link_type1 = ClassLink.objects.create(
                 source_class=source_class,
                 target_class=target_class,
                 namespace=namespace,
                 max_links=max_links,
             )
 
-            # Try creating the reverse LinkType
-            LinkType.objects.create(
+            # Try creating the reverse ClassLink
+            ClassLink.objects.create(
                 source_class=target_class,
                 target_class=source_class,
                 namespace=namespace,
@@ -264,23 +264,23 @@ class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ign
         max_links = request.data.get("max_links", None)
 
         source_class = self.get_object_from_model(
-            DynamicClass,
+            HubuumClass,
             f"The class '{source_class_name}' does not exist.",
             name=source_class_name,
         )
 
         target_class = self.get_object_from_model(
-            DynamicClass,
+            HubuumClass,
             f"The class '{target_class_name}' does not exist.",
             name=target_class_name,
         )
 
         try:
-            link_type1 = LinkType.objects.get(
+            link_type1 = ClassLink.objects.get(
                 source_class=source_class,
                 target_class=target_class,
             )
-            link_type2 = LinkType.objects.get(
+            link_type2 = ClassLink.objects.get(
                 source_class=target_class,
                 target_class=source_class,
             )
@@ -300,48 +300,48 @@ class LinkTypeView(LinkAbstractView, RetrieveUpdateDestroyAPIView):  # type: ign
 
             link_type1.save()
             link_type2.save()
-        except LinkType.DoesNotExist as exc:  # TODO: Test patching missing linktype
+        except ClassLink.DoesNotExist as exc:  # TODO: Test patching missing ClassLink
             raise NotFound("The link type does not exist.") from exc
 
         return Response(self.get_serializer(link_type1).data)
 
-    @transaction.atomic  # TODO: Test deleting linktypes
+    @transaction.atomic  # TODO: Test deleting ClassLinks
     def delete(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
         """Delete a link type between two classes."""
         source_class_name = self.kwargs.get("source_class")
         target_class_name = self.kwargs.get("target_class")
 
         source_class = self.get_object_from_model(
-            DynamicClass,
+            HubuumClass,
             f"The class '{source_class_name}' does not exist.",
             name=source_class_name,
         )
 
         target_class = self.get_object_from_model(
-            DynamicClass,
+            HubuumClass,
             f"The class '{target_class_name}' does not exist.",
             name=target_class_name,
         )
 
         try:
-            link_type1 = LinkType.objects.get(
+            link_type1 = ClassLink.objects.get(
                 source_class=source_class,
                 target_class=target_class,
             )
-            link_type2 = LinkType.objects.get(
+            link_type2 = ClassLink.objects.get(
                 source_class=target_class,
                 target_class=source_class,
             )
             link_type1.delete()
             link_type2.delete()
-        except LinkType.DoesNotExist as exc:
+        except ClassLink.DoesNotExist as exc:
             raise NotFound("The link type does not exist.") from exc
 
         return Response(status=204)
 
 
-class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
-    """DynamicLinkListView handles the API endpoints for listing and creating dynamic links.
+class ObjectLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
+    """ObjectLinkListView handles the API endpoints for listing and creating dynamic links.
 
     Methods
     -------
@@ -364,17 +364,17 @@ class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
         """Return the serializer class based on the query parameters."""
         if self._query_param_is_true("transitive"):
             return PathSerializer
-        return DynamicObjectSerializer
+        return HubuumObjectSerializer
 
     def get_queryset(self):  # type: ignore
-        """Override the get_queryset method to return DynamicLinks for a given source object.
+        """Override the get_queryset method to return ObjectLinks for a given source object.
 
         The source object can be defined by its class name and its name.
 
         Raises NotFound error if the source object does not exist or has no links.
         """
         if not self.request:  # pragma: no cover
-            return DynamicLink.objects.none()
+            return ObjectLink.objects.none()
 
         classname = self.kwargs.get("classname")
         obj = self.kwargs.get("obj")
@@ -389,14 +389,14 @@ class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
 
         if transitive:
             source = self.get_object_from_model(
-                DynamicObject,
+                HubuumObject,
                 f"Source object '{classname}:{obj}' does not exist.",
                 dynamic_class__name=classname,
                 name=obj,
             )
 
             target_class = self.get_object_from_model(
-                DynamicClass,
+                HubuumClass,
                 f"The target class '{targetclass}' does not exist.",
                 name=targetclass,
             )
@@ -416,7 +416,7 @@ class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
 
             return transitive_objects_and_paths
 
-        dynamic_links = DynamicLink.objects.filter(
+        dynamic_links = ObjectLink.objects.filter(
             link_type__source_class__name=classname,
             source__name=obj,
             **extra_query,
@@ -431,19 +431,19 @@ class DynamicLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
         return [link.target for link in dynamic_links]
 
 
-class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: ignore
+class ObjectLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: ignore
     """API endpoints for retrieving and deleting a specific dynamic link."""
 
     schema = DynamicAutoSchema(
         tags=["Resources"],
     )
 
-    queryset = DynamicLink.objects.all()
-    serializer_class = DynamicLinkSerializer
+    queryset = ObjectLink.objects.all()
+    serializer_class = ObjectLinkSerializer
     permission_classes = (NamespacePermission,)
 
     def get_object(self):
-        """Retrieve a specific DynamicLink.
+        """Retrieve a specific ObjectLink.
 
         The source and target objects can be defined by their class names and their names.
         Raises NotFound error if the specified link does not exist.
@@ -454,7 +454,7 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
         targetobject = self.kwargs.get("targetobject")
 
         return self.get_object_from_model(
-            DynamicLink,
+            ObjectLink,
             "The specified link does not exist.",
             link_type__source_class__name=classname,
             link_type__target_class__name=targetclass,
@@ -465,15 +465,15 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
     def get(
         self, request: HttpRequest, *args: Dict[str, Any], **kwargs: Dict[str, Any]
     ) -> Response:
-        """Get a specific DynamicLink between two objects."""
+        """Get a specific ObjectLink between two objects."""
         return Response(self.get_serializer(self.get_object()).data)
 
     @transaction.atomic
     def delete(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
-        """Delete a specific DynamicLink between two objects."""
+        """Delete a specific ObjectLink between two objects."""
         obj1 = self.get_object()
         obj2 = self.get_object_from_model(
-            DynamicLink,
+            ObjectLink,
             "The corresponding link in the reverse direction does not exist.",
             link_type__source_class=obj1.link_type.target_class.id,
             link_type__target_class=obj1.link_type.source_class.id,
@@ -502,7 +502,7 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
         # Check how many links the source object already has to the target class
         # and compare it to the max_links allowed by the link type, if it's too high,
         # raise a 409 Conflict error
-        source_links = DynamicLink.objects.filter(
+        source_links = ObjectLink.objects.filter(
             source=source_object,
             target__dynamic_class__name=targetclass,
         ).count()
@@ -518,7 +518,7 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
         # Try to create both dynamic links in the same transaction
         link1 = None
         try:
-            link1 = DynamicLink.objects.create(
+            link1 = ObjectLink.objects.create(
                 source=source_object,
                 target=target_object,
                 link_type=link_type,
@@ -526,12 +526,12 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
             )
 
             # Reverse link type for the reverse direction
-            reverse_link_type = LinkType.objects.get(
+            reverse_link_type = ClassLink.objects.get(
                 source_class=link_type.target_class,
                 target_class=link_type.source_class,
             )
 
-            DynamicLink.objects.create(
+            ObjectLink.objects.create(
                 source=target_object,
                 target=source_object,
                 link_type=reverse_link_type,
@@ -549,24 +549,24 @@ class DynamicLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: 
         targetclass: str,
         targetobject: str,
         namespace_id: int,
-    ) -> Tuple[DynamicObject, DynamicObject, LinkType, Namespace]:
+    ) -> Tuple[HubuumObject, HubuumObject, ClassLink, Namespace]:
         """Retrieve the necessary data for link creation."""
         source_object = self.get_object_from_model(
-            DynamicObject,
+            HubuumObject,
             "The specified source object does not exist.",
             dynamic_class__name=classname,
             name=obj,
         )
 
         target_object = self.get_object_from_model(
-            DynamicObject,
+            HubuumObject,
             "The specified target object does not exist.",
             dynamic_class__name=targetclass,
             name=targetobject,
         )
 
         link_type = self.get_object_from_model(
-            LinkType,
+            ClassLink,
             f"No link defined between '{classname}' and '{targetclass}'.",
             source_class__name=classname,
             target_class__name=targetclass,

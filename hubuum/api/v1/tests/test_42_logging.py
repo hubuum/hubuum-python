@@ -13,6 +13,7 @@ from structlog.testing import capture_logs
 from structlog.types import EventDict
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
+from hubuum.api.v1.tests.helpers.logging import LogAnalyzer
 from hubuum.log import (
     collapse_request_id,
     critical,
@@ -24,7 +25,6 @@ from hubuum.log import (
 )
 from hubuum.middleware.logging_http import LogHttpMiddleware
 from hubuum.models.iam import Namespace, User
-from hubuum.tests.abstract.logging import LogAnalyzer
 
 
 class HubuumLoggingProcessorTestCase(HubuumAPITestCase):

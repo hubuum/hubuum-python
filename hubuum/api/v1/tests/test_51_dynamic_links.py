@@ -2,56 +2,56 @@
 
 from typing import Any, Dict
 
-from hubuum.api.v1.tests.base import HubuumDynamicClassesAndObjects
-from hubuum.models.dynamic import DynamicClass, DynamicLink, DynamicObject, LinkType
+from hubuum.api.v1.tests.base import HubuumHubuumClassesAndObjects
+from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
 
 
-class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
-    """Test DynamicObject functionality."""
+class HubuumObjectTestCase(HubuumHubuumClassesAndObjects):
+    """Test HubuumObject functionality."""
 
     def test_internal_class_and_object_count(self) -> None:
         """Test the internals of the class generation."""
         # Test that the number of objects and classes is correct
-        self.assertEqual(DynamicClass.objects.count(), len(self.all_classes()))
-        self.assertEqual(DynamicObject.objects.count(), len(self.all_objects()))
+        self.assertEqual(HubuumClass.objects.count(), len(self.all_classes()))
+        self.assertEqual(HubuumObject.objects.count(), len(self.all_objects()))
 
-    def test_str_of_linktype_and_dynamiclink(self) -> None:
+    def test_str_of_ClassLink_and_ObjectLink(self) -> None:
         """Test the str representation of link types and dynamic links."""
         # Test creating a link type between Host and Room
-        self.create_link_type_via_api("Host", "Room", max_links=3)
-        linktype = LinkType.objects.get(
+        self.create_class_link_via_api("Host", "Room", max_links=3)
+        class_link = ClassLink.objects.get(
             source_class__name="Host", target_class__name="Room"
         )
-        self.assertEqual(str(linktype), "Host <-> Room (3)")
+        self.assertEqual(str(class_link), "Host <-> Room (3)")
 
         # Test creating a link between host1 and room1
-        self.create_link_via_api("Host.host1", "Room.room1")
+        self.create_object_link_via_api("Host.host1", "Room.room1")
 
         # Test str representation of the link
-        link = DynamicLink.objects.get(source__name="host1", target__name="room1")
+        link = ObjectLink.objects.get(source__name="host1", target__name="room1")
         self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
 
     def test_basic_operations(self) -> None:
         """Test basic operations of classes, objects, and links."""
-        # Try patching a non-existing linktype
+        # Try patching a non-existing ClassLink
         self.assert_patch_and_404(
-            "/dynamic/Room/Host/linktype/",
+            "/dynamic/Room/link/Host/",
             {"namespace": self.namespace.id, "max_links": 1},
         )
 
         # Test creating a link type between Host and Room
-        self.create_link_type_via_api("Host", "Room", max_links=1)
-        self.assert_get("/dynamic/Host/Room/linktype/")
-        self.assert_get("/dynamic/Room/Host/linktype/")
+        self.create_class_link_via_api("Host", "Room", max_links=1)
+        self.assert_get("/dynamic/Host/link/Room/")
+        self.assert_get("/dynamic/Room/link/Host/")
         self.assert_post_and_409(
-            "/dynamic/Host/Room/linktype/",
+            "/dynamic/Host/link/Room/",
             {"max_links": 1, "namespace": self.namespace.id},
         )
         # Upgrading links:
         for i in range(2, 4):
-            self.assert_patch("/dynamic/Host/Room/linktype/", {"max_links": i})
-            hrret = self.assert_get("/dynamic/Host/Room/linktype/")
-            rhret = self.assert_get("/dynamic/Room/Host/linktype/")
+            self.assert_patch("/dynamic/Host/link/Room/", {"max_links": i})
+            hrret = self.assert_get("/dynamic/Host/link/Room/")
+            rhret = self.assert_get("/dynamic/Room/link/Host/")
             self.assertEqual(hrret.data["max_links"], i)
             self.assertEqual(rhret.data["max_links"], i)
 
@@ -60,23 +60,21 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         # namespace_id = request.data.get("namespace", None)
         # AttributeError: 'list' object has no attribute 'get'
         nsret = self.assert_patch(
-            "/dynamic/Room/Host/linktype/", {"namespace": ns_create_ret.id}
+            "/dynamic/Room/link/Host/", {"namespace": ns_create_ret.id}
         )
         self.assertEqual(nsret.data["namespace"], ns_create_ret.id)
 
         # Try patching a non-existing namespace
-        self.assert_patch_and_404(
-            "/dynamic/Room/Host/linktype/", {"namespace": 999999999}
-        )
+        self.assert_patch_and_404("/dynamic/Room/link/Host/", {"namespace": 999999999})
 
         # Test str representation of the link type
-        linktype = LinkType.objects.get(
+        class_link = ClassLink.objects.get(
             source_class__name="Host", target_class__name="Room"
         )
-        self.assertEqual(str(linktype), "Host <-> Room (3)")
+        self.assertEqual(str(class_link), "Host <-> Room (3)")
 
         # Test creating a link between host1 and room1
-        self.create_link_via_api("Host.host1", "Room.room1")
+        self.create_object_link_via_api("Host.host1", "Room.room1")
         self.assert_get("/dynamic/Host/host1/link/Room/room1")
         self.assert_post_and_409(
             "/dynamic/Host/host1/link/Room/room1",
@@ -88,16 +86,16 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         )
 
         # Test str representation of the link
-        link = DynamicLink.objects.get(source__name="host1", target__name="room1")
+        link = ObjectLink.objects.get(source__name="host1", target__name="room1")
         self.assertEqual(str(link), "host1 [Host] <-> room1 [Room]")
 
     def test_failing_specific_link_get(self) -> None:
         """Test that fetching non-existent links fails."""
-        self.assert_get_and_404("/dynamic/Host/Room/linktype/")
+        self.assert_get_and_404("/dynamic/Host/link/Room/")
         self.assert_get_and_404(
             "/dynamic/Host/host1/link/Room/room1",
         )
-        self.create_link_type_via_api("Host", "Room", max_links=1)
+        self.create_class_link_via_api("Host", "Room", max_links=1)
         self.assert_get_and_404(
             "/dynamic/nope/host1/link/Room/room1",
         )
@@ -117,19 +115,19 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             "/dynamic/Host/host1/links/Nope/?transitive=true",
         )
 
-    def test_failing_linktype_creation(self) -> None:
-        """Test that creating linktypes between non-existing classes fails."""
+    def test_failing_ClassLink_creation(self) -> None:
+        """Test that creating ClassLinks between non-existing classes fails."""
         self.assert_post_and_404(
-            "/dynamic/Host/Nope/linktype/",
+            "/dynamic/Host/Nope/link/",
             {"max_links": 1, "namespace": self.namespace.id},
         )
         self.assert_post_and_404(
-            "/dynamic/Nope/Room/linktype/",
+            "/dynamic/Nope/Room/link/",
             {"max_links": 1, "namespace": self.namespace.id},
         )
         # Test that sending a non-existent namespace fails.
         self.assert_post_and_404(
-            "/dynamic/Host/Room/linktype/",
+            "/dynamic/Host/link/Room/",
             {"max_links": 1, "namespace": 999999},
         )
 
@@ -162,7 +160,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             {"namespace": self.namespace.id},
         )
         self.assert_post(
-            "/dynamic/Host/Room/linktype/",
+            "/dynamic/Host/link/Room/",
             {"max_links": 1, "namespace": self.namespace.id},
         )
         self.assert_post_and_404(
@@ -173,15 +171,15 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
     def test_loops_during_transitive_links(self) -> None:
         """Test that loops during transitive links don't break anything."""
         self.create_class_and_object("Person", "person1")
-        self.create_link_type_via_api("Host", "Room")
-        self.create_link_type_via_api("Room", "Building")
-        self.create_link_type_via_api("Building", "Person")
-        self.create_link_type_via_api("Building", "Host")
+        self.create_class_link_via_api("Host", "Room")
+        self.create_class_link_via_api("Room", "Building")
+        self.create_class_link_via_api("Building", "Person")
+        self.create_class_link_via_api("Building", "Host")
 
         # host1 -> room1 -> building1 -> person1
-        self.create_link_via_api("Host.host1", "Room.room1")
-        self.create_link_via_api("Room.room1", "Building.building1")
-        self.create_link_via_api("Building.building1", "Person.person1")
+        self.create_object_link_via_api("Host.host1", "Room.room1")
+        self.create_object_link_via_api("Room.room1", "Building.building1")
+        self.create_object_link_via_api("Building.building1", "Person.person1")
 
         # This creates the loop back to host1
         # host1 -> room1 -> building1 -> host1
@@ -189,7 +187,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         # host1 -> building1
         # Which again leads to the following secondary path to person1
         # host1 -> building1 -> person1
-        self.create_link_via_api("Building.building1", "Host.host1")
+        self.create_object_link_via_api("Building.building1", "Host.host1")
 
         self.check_link_exists_via_api(
             "Host.host1",
@@ -219,9 +217,9 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
 
     def test_that_link_creation_fails_when_max_links_is_reached(self) -> None:
         """Test that creating a link fails when the max number of links is reached."""
-        self.create_link_type_via_api("Host", "Room", max_links=1)
+        self.create_class_link_via_api("Host", "Room", max_links=1)
         # Test creating a link between host1 and room1
-        self.create_link_via_api("Host.host1", "Room.room1")
+        self.create_object_link_via_api("Host.host1", "Room.room1")
         # Test creating a link between host1 and room2, which should fail as we have
         # defined a link type between Host and Room with max_links=1
         self.assert_post_and_409(
@@ -229,23 +227,23 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
             {"namespace": self.namespace.id},
         )
 
-    def test_non_existing_linktype(self) -> None:
+    def test_non_existing_ClassLink(self) -> None:
         """Test that non-existing link types are handled correctly."""
-        self.assert_delete_and_404("/dynamic/Nope/Room/linktype/")
-        self.assert_delete_and_404("/dynamic/Host/Nope/linktype/")
-        self.assert_delete_and_404("/dynamic/Host/Room/linktype/")
+        self.assert_delete_and_404("/dynamic/Nope/Room/link/")
+        self.assert_delete_and_404("/dynamic/Host/Nope/link/")
+        self.assert_delete_and_404("/dynamic/Host/link/Room/")
 
-    def test_deleting_linktype(self) -> None:
+    def test_deleting_ClassLink(self) -> None:
         """Test that deleting a link type works."""
-        self.create_link_type_via_api("Host", "Room", max_links=1)
-        self.create_link_via_api("Host.host1", "Room.room1")
+        self.create_class_link_via_api("Host", "Room", max_links=1)
+        self.create_object_link_via_api("Host.host1", "Room.room1")
         # Verify that the link exists, bidirectionally
         self.assert_get("/dynamic/Host/host1/link/Room/room1")
         self.assert_get("/dynamic/Room/room1/link/Host/host1")
-        self.assert_delete("/dynamic/Host/Room/linktype/")
-        # Verify that the linktype is gone
-        self.assert_delete_and_404("/dynamic/Host/Room/linktype/")
-        self.assert_delete_and_404("/dynamic/Room/Host/linktype/")
+        self.assert_delete("/dynamic/Host/link/Room/")
+        # Verify that the ClassLink is gone
+        self.assert_delete_and_404("/dynamic/Host/link/Room/")
+        self.assert_delete_and_404("/dynamic/Room/link/Host/")
         # And that removing the link type also removed the link
         self.assert_get_and_404("/dynamic/Host/host1/link/Room/room1")
         self.assert_get_and_404("/dynamic/Room/room1/link/Host/host1")
@@ -263,14 +261,14 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
 
     def test_linking_between_objects(self) -> None:
         """Test that manipulating links between objects works."""
-        self.create_link_type_via_api("Host", "Room")
-        self.create_link_via_api("Host.host1", "Room.room1")
+        self.create_class_link_via_api("Host", "Room")
+        self.create_object_link_via_api("Host.host1", "Room.room1")
         self.assert_get("/dynamic/Host/host1/link/Room/room1")
         # implicit bidirectionality
         self.assert_get("/dynamic/Room/room1/link/Host/host1")
         self.assert_get_elements("/dynamic/Host/host1/links/", 1)
         self.assert_get_elements("/dynamic/Room/room1/links/", 1)
-        self.create_link_via_api("Host.host1", "Room.room2")
+        self.create_object_link_via_api("Host.host1", "Room.room2")
         self.assert_get_elements("/dynamic/Host/host1/links/", 2)
         self.assert_get_elements("/dynamic/Room/room1/links/", 1)
         self.assert_delete("/dynamic/Host/host1/link/Room/room1")
@@ -284,17 +282,17 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
 
     def test_multiple_links_to_same_class(self) -> None:
         """Test that multiple links to the same class works."""
-        self.create_link_type_via_api("Host", "Room")
+        self.create_class_link_via_api("Host", "Room")
         for room in ["room1", "room2"]:
-            self.create_link_via_api("Host.host1", f"Room.{room}")
+            self.create_object_link_via_api("Host.host1", f"Room.{room}")
         self.assert_get_elements("/dynamic/Host/host1/links/Room/", 2)
         self.assert_get_elements("/dynamic/Host/host1/links/", 2)
 
     def test_transitive_linking(self) -> None:
         """Test transitive linking."""
-        self.create_link_type_via_api("Host", "Room")
-        self.create_link_type_via_api("Room", "Building")
-        self.create_link_via_api("Host.host1", "Room.room1")
+        self.create_class_link_via_api("Host", "Room")
+        self.create_class_link_via_api("Room", "Building")
+        self.create_object_link_via_api("Host.host1", "Room.room1")
 
         self.check_link_exists_via_api(
             "Host.host1",
@@ -309,7 +307,7 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         )
 
         self.assert_get_and_404("/dynamic/Host/host1/links/Building/")
-        self.create_link_via_api("Room.room1", "Building.building1")
+        self.create_object_link_via_api("Room.room1", "Building.building1")
 
         self.check_link_exists_via_api(
             "Host.host1",
@@ -331,8 +329,8 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
 
         # Link person1 to building1, but first link Building to Person
         # This should create a transitive link between Host and Person via Room and Building
-        self.create_link_type_via_api("Building", "Person")
-        self.create_link_via_api("Building.building1", "Person.person1")
+        self.create_class_link_via_api("Building", "Person")
+        self.create_object_link_via_api("Building.building1", "Person.person1")
 
         self.check_link_exists_via_api(
             "Host.host1",
@@ -368,8 +366,8 @@ class DynamicObjectTestCase(HubuumDynamicClassesAndObjects):
         )
 
         # Allow links between Room to Person and then link room1 to person1
-        self.create_link_type_via_api("Room", "Person")
-        self.create_link_via_api("Room.room1", "Person.person1")
+        self.create_class_link_via_api("Room", "Person")
+        self.create_object_link_via_api("Room.room1", "Person.person1")
 
         self.check_link_exists_via_api(
             "Host.host1",

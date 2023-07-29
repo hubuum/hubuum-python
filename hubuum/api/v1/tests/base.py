@@ -13,7 +13,7 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient, APITestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.dynamic import DynamicClass, DynamicObject
+from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
 
 # We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
@@ -459,20 +459,20 @@ class HubuumDynamicBase(HubuumAPITestCase):
 
     def _create_dynamic_class(
         self, name: str = "Test", namespace: Namespace = None
-    ) -> DynamicClass:
+    ) -> HubuumClass:
         """Create a dynamic class."""
         if not namespace:
             namespace = self.namespace
 
         attributes = {"name": name, "namespace": namespace}
-        return DynamicClass.objects.create(**attributes)
+        return HubuumClass.objects.create(**attributes)
 
     def _create_dynamic_object(
         self,
-        dynamic_class: DynamicClass = None,
+        dynamic_class: HubuumClass = None,
         namespace: Namespace = None,
         **kwargs: Any,
-    ) -> DynamicObject:
+    ) -> HubuumObject:
         """Create a dynamic object."""
         attributes = {
             "json_data": {"key": "value", "listkey": [1, 2, 3]},
@@ -482,7 +482,7 @@ class HubuumDynamicBase(HubuumAPITestCase):
         for key, value in kwargs.items():
             attributes[key] = value
 
-        return DynamicObject.objects.create(dynamic_class=dynamic_class, **attributes)
+        return HubuumObject.objects.create(dynamic_class=dynamic_class, **attributes)
 
     def setUp(self):
         """Set up a default namespace."""
@@ -549,15 +549,15 @@ class HubuumDynamicBase(HubuumAPITestCase):
             )
         ]
 
-    def all_classes(self) -> List[DynamicClass]:
+    def all_classes(self) -> List[HubuumClass]:
         """Return all classes."""
         return [self.host_class, self.room_class, self.building_class]
 
-    def all_objects(self) -> List[DynamicObject]:
+    def all_objects(self) -> List[HubuumObject]:
         """Return all objects."""
         return self.hosts + self.rooms + self.buildings
 
-    def get_object_via_api(self, dynamic_class: str, name: str) -> DynamicObject:
+    def get_object_via_api(self, dynamic_class: str, name: str) -> HubuumObject:
         """Get a dynamic object."""
         return self.assert_get(f"/dynamic/{dynamic_class}/{name}")
 
@@ -565,7 +565,7 @@ class HubuumDynamicBase(HubuumAPITestCase):
         """Split a class.object string into class and object."""
         return class_object.split(".")
 
-    def create_link_type_via_api(
+    def create_class_link_via_api(
         self, class1: str, class2: str, max_links: int = 0, namespace: Namespace = None
     ) -> HttpResponse:
         """Create a link type between two classes.
@@ -576,11 +576,13 @@ class HubuumDynamicBase(HubuumAPITestCase):
         namespace = namespace or self.namespace
 
         return self.assert_post(
-            f"/dynamic/{class1}/{class2}/linktype/",
+            f"/dynamic/{class1}/link/{class2}/",
             {"max_links": max_links, "namespace": self.namespace.id},
         )
 
-    def create_link_via_api(self, class1_obj1: str, class2_obj2: str) -> HttpResponse:
+    def create_object_link_via_api(
+        self, class1_obj1: str, class2_obj2: str
+    ) -> HttpResponse:
         """Create a link between two objects.
 
         param class1_obj1: The class and object (class.object) of the source object
@@ -662,13 +664,13 @@ class HubuumDynamicBase(HubuumAPITestCase):
 
     def create_class_and_object(
         self, class_name: str, obj_name: str, json_data: Dict[str, Any] = None
-    ) -> Tuple[DynamicClass, DynamicObject]:
+    ) -> Tuple[HubuumClass, HubuumObject]:
         """Create a class and an object."""
-        dynamic_class = DynamicClass.objects.create(
+        dynamic_class = HubuumClass.objects.create(
             name=class_name,
             namespace=self.namespace,
         )
-        dynamic_object = DynamicObject.objects.create(
+        dynamic_object = HubuumObject.objects.create(
             name=obj_name,
             dynamic_class=dynamic_class,
             namespace=self.namespace,
@@ -683,7 +685,7 @@ class HubuumDynamicBase(HubuumAPITestCase):
         return super().tearDown()
 
 
-class HubuumDynamicClasses(HubuumDynamicBase):
+class HubuumHubuumClasses(HubuumDynamicBase):
     """A base class with dynamic classes already created.
 
     Utilizes the HubuumDynamicBase.create_classes method.
@@ -695,7 +697,7 @@ class HubuumDynamicClasses(HubuumDynamicBase):
         self.create_classes()
 
 
-class HubuumDynamicClassesAndObjects(HubuumDynamicClasses):
+class HubuumHubuumClassesAndObjects(HubuumHubuumClasses):
     """A base class with dynamic classes and objects already created.
 
     Utilizes the following methods:
