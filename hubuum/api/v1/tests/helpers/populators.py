@@ -1,38 +1,61 @@
 """Test classes prepopulated with data structures for testing of api/v1."""
 
 from itertools import zip_longest
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 from django.http import HttpResponse
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
-from hubuum.tests.helpers.populators import BasePopulator
 
 
-class APIv1Empty(HubuumAPITestCase, BasePopulator):
+class APIv1Empty(HubuumAPITestCase):
     """A base class for Hubuum API test cases with functionality to create dynamic structures.
 
-    After setup(), only four namespaces (namespace[1-4]) are created.
-    No classes or objects are created.
-
-    The following classes can be created via create_classes:
+    The following classes can be created via
     - Host
     - Room
     - Building
 
-    The following objects are created via create_objects:
+    The following objects are created:
     - Hosts (3, named host1, host2, host3)
     - Rooms (2, named room1, room2, room3)
     - Buildings (1, named building1)
     """
 
+    def _create_dynamic_class(
+        self, name: str = "Test", namespace: Namespace = None
+    ) -> HubuumClass:
+        """Create a dynamic class."""
+        if not namespace:
+            namespace = self.namespace
+
+        attributes = {"name": name, "namespace": namespace}
+        return HubuumClass.objects.create(**attributes)
+
+    def _create_dynamic_object(
+        self,
+        dynamic_class: HubuumClass = None,
+        namespace: Namespace = None,
+        **kwargs: Any,
+    ) -> HubuumObject:
+        """Create a dynamic object."""
+        attributes = {
+            "json_data": {"key": "value", "listkey": [1, 2, 3]},
+            "namespace": namespace,
+        }
+
+        for key, value in kwargs.items():
+            attributes[key] = value
+
+        return HubuumObject.objects.create(dynamic_class=dynamic_class, **attributes)
+
     def setUp(self):
         """Set up a default namespace."""
         super().setUp()
 
-        self.namespaces: List[Namespace] = []
+        self.namespaces = []
         for i in range(1, 4):
             self.namespaces.append(
                 self._create_namespace(namespacename=f"namespace{i}")
@@ -40,8 +63,13 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
 
         self.namespace = self.namespaces[0]
 
-        self.classes: List[HubuumClass] = []
-        self.objects: List[HubuumObject] = []
+        self.host_class = None
+        self.room_class = None
+        self.building_class = None
+
+        self.hosts = []
+        self.rooms = []
+        self.buildings = []
 
     def create_classes(self) -> None:
         """Create the dynamic classes.
@@ -51,41 +79,9 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
         - Room
         - Building
         """
-        self.classes.append(self.create_class_direct(name="Host"))
-        self.classes.append(self.create_class_direct(name="Room"))
-        self.classes.append(self.create_class_direct(name="Building"))
-
-    def get_class_from_cache(self, name: str) -> HubuumClass:
-        """Get a dynamic class from the internal cache.
-
-        param name: The name of the class to get.
-        """
-        for cls in self.classes:
-            if cls.name == name:
-                return cls
-        raise ValueError(f"Class {name} not found")
-
-    def get_objects_from_cache(
-        self, cls_obj_str: str
-    ) -> Union[HubuumObject, List[HubuumObject]]:
-        """Get a list of dynamic objects from the internal cache.
-
-        param cls_obj_str: A string of the form <class>.<object> or
-            <class> to get all objects of a class.
-        """
-        if "." in cls_obj_str:
-            cls, obj_name = self.split_class_object(cls_obj_str)
-
-            for hubuum_obj in self.objects:
-                if hubuum_obj.dynamic_class.name == cls and hubuum_obj.name == obj_name:
-                    return hubuum_obj
-            return None  # or raise an exception if an object with that name should always exist
-        else:
-            return [
-                hubuum_obj
-                for hubuum_obj in self.objects
-                if hubuum_obj.dynamic_class.name == cls_obj_str
-            ]
+        self.host_class = self._create_dynamic_class(name="Host")
+        self.room_class = self._create_dynamic_class(name="Room")
+        self.building_class = self._create_dynamic_class(name="Building")
 
     def create_objects(self) -> None:
         """Populate the classes with objects.
@@ -96,41 +92,37 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
         - Buildings (1, named building1)
         """
         # Create an array of hosts with names host1, host2, host3
-        for i in range(1, 4):
-            self.objects.append(
-                self.create_object_direct(
-                    dynamic_class=self.get_class_from_cache("Host"),
-                    namespace=self.namespace,
-                    name=f"host{i}",
-                )
+        self.hosts = [
+            self._create_dynamic_object(
+                dynamic_class=self.host_class, namespace=self.namespace, name=f"host{i}"
             )
+            for i in range(1, 4)
+        ]
 
-        # Create an array of rooms with names room1, room2
-        for i in range(1, 3):
-            self.objects.append(
-                self.create_object_direct(
-                    dynamic_class=self.get_class_from_cache("Room"),
-                    namespace=self.namespace,
-                    name=f"room{i}",
-                )
+        # Create an array of rooms with names room1, room2, room3
+        self.rooms = [
+            self._create_dynamic_object(
+                dynamic_class=self.room_class, namespace=self.namespace, name=f"room{i}"
             )
+            for i in range(1, 3)
+        ]
 
         # Create a building with name building1
-        self.objects.append(
-            self.create_object_direct(
-                dynamic_class=self.get_class_from_cache("Building"),
+        self.buildings = [
+            self._create_dynamic_object(
+                dynamic_class=self.building_class,
                 namespace=self.namespace,
                 name="building1",
             )
-        )
+        ]
 
     def all_classes(self) -> List[HubuumClass]:
         """Return all classes."""
-        return self.classes
+        return [self.host_class, self.room_class, self.building_class]
 
     def all_objects(self) -> List[HubuumObject]:
         """Return all objects."""
-        return self.objects
+        return self.hosts + self.rooms + self.buildings
 
     def get_object_via_api(self, dynamic_class: str, name: str) -> HubuumObject:
         """Get a dynamic object."""
@@ -263,13 +255,6 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
 class APIv1Classes(APIv1Empty):
     """A base class with dynamic classes already created.
 
-    Classes created are:
-    - Host
-    - Room
-    - Building
-
-    No objects are created.
-
     Utilizes the HubuumDynamicBase.create_classes method.
     """
 
@@ -281,18 +266,6 @@ class APIv1Classes(APIv1Empty):
 
 class APIv1Objects(APIv1Classes):
     """A base class with dynamic classes and objects already created.
-
-    No links are created.
-
-    Classes created are:
-    - Host
-    - Room
-    - Building
-
-    Objects created are:
-    - Hosts (3, named host1, host2, host3)
-    - Rooms (2, named room1, room2, room3)
-    - Buildings (1, named building1)
 
     Utilizes the following methods:
      - HubuumDynamicBase.create_classes
