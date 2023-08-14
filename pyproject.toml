@@ -60,7 +60,7 @@ tox = "^4"
 [tool.poetry.group.docs.dependencies]
 mkdocs = "1.5.2"
 mkdocs-material = "9.1.19"
-mkdocs-swagger-ui-tag = "0.6.3"
+mkdocs-swagger-ui-tag = "0.6.4"
 mkdocs-git-revision-date-localized-plugin = "1.2.0"
 mkdocstrings = { version = "0.22.0", extras = ["python"] }
 
