@@ -67,7 +67,8 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
     ) -> Union[HubuumObject, List[HubuumObject]]:
         """Get a list of dynamic objects from the internal cache.
 
-        param cls_obj_str: A string of the form <class>.<object> or <class> to get all objects of a class.
+        param cls_obj_str: A string of the form <class>.<object> or
+            <class> to get all objects of a class.
         """
         if "." in cls_obj_str:
             cls, obj_name = self.split_class_object(cls_obj_str)
