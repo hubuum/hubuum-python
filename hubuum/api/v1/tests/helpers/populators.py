@@ -14,12 +14,15 @@ from hubuum.tests.helpers.populators import BasePopulator
 class APIv1Empty(HubuumAPITestCase, BasePopulator):
     """A base class for Hubuum API test cases with functionality to create dynamic structures.
 
-    The following classes can be created via
+    After setup(), only four namespaces (namespace[1-4]) are created.
+    No classes or objects are created.
+
+    The following classes can be created via create_classes:
     - Host
     - Room
     - Building
 
-    The following objects are created:
+    The following objects are created via create_objects:
     - Hosts (3, named host1, host2, host3)
     - Rooms (2, named room1, room2, room3)
     - Buildings (1, named building1)
@@ -260,6 +263,13 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
 class APIv1Classes(APIv1Empty):
     """A base class with dynamic classes already created.
 
+    Classes created are:
+    - Host
+    - Room
+    - Building
+
+    No objects are created.
+
     Utilizes the HubuumDynamicBase.create_classes method.
     """
 
@@ -271,6 +281,18 @@ class APIv1Classes(APIv1Empty):
 
 class APIv1Objects(APIv1Classes):
     """A base class with dynamic classes and objects already created.
+
+    No links are created.
+
+    Classes created are:
+    - Host
+    - Room
+    - Building
+
+    Objects created are:
+    - Hosts (3, named host1, host2, host3)
+    - Rooms (2, named room1, room2, room3)
+    - Buildings (1, named building1)
 
     Utilizes the following methods:
      - HubuumDynamicBase.create_classes
