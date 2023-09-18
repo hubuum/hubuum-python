@@ -51,7 +51,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build Docker images
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: ${{ matrix.platform }}
@@ -145,7 +145,7 @@ jobs:
             type=raw,value=develop,enable=${{ endsWith(GitHub.ref, 'refs/heads/main') }}
 
       - name: Push Docker images
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64
