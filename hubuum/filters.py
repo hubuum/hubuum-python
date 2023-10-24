@@ -23,7 +23,7 @@ from hubuum.models.core import (
     ExtensionData,
     model_is_open,
 )
-from hubuum.models.dynamic import DynamicClass, DynamicObject
+from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace, Permission, User
 from hubuum.models.resources import (
     Host,
@@ -246,15 +246,15 @@ class NamespacePermissionFilter(RaiseBadRequestOnBadFilter):
         return filtered
 
 
-class DynamicClassFilterSet(NamespacePermissionFilter):
-    """Filterset class for DynamicClass."""
+class HubuumClassFilterSet(NamespacePermissionFilter):
+    """Filterset class for HubuumClass."""
 
     json_schema_lookup = JSONFieldLookupFilter(field_name="json_schema")
 
     class Meta:
         """Metadata for the class."""
 
-        model = DynamicClass
+        model = HubuumClass
         fields = {
             "name": _textual_lookups,
             "validate_schema": _boolean_lookups,
@@ -262,15 +262,15 @@ class DynamicClassFilterSet(NamespacePermissionFilter):
         fields.update(_hubuum_fields)
 
 
-class DynamicObjectFilterSet(NamespacePermissionFilter):
-    """Filterset class for DynamicClass."""
+class HubuumObjectFilterSet(NamespacePermissionFilter):
+    """Filterset class for HubuumClass."""
 
     json_data_lookup = JSONFieldLookupFilter(field_name="json_data")
 
     class Meta:
         """Metadata for the class."""
 
-        model = DynamicObject
+        model = HubuumObject
         fields = {
             "dynamic_class": _key_lookups,
         }

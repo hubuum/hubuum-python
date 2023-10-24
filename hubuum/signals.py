@@ -51,9 +51,9 @@ def _extra_fields(sender: Model, instance: object) -> Dict[str, Any]:
     if sender.__name__ != "AuthToken":
         extra_fields["_str"] = str(instance)
 
-    if sender.__name__ == "DynamicObject":
-        extra_fields["dynamic_class_id"] = instance.dynamic_class.id
-        extra_fields["dynamic_class_name"] = instance.dynamic_class.name
+    if sender.__name__ == "HubuumObject":
+        extra_fields["_class_id"] = instance.dynamic_class.id
+        extra_fields["_class_name"] = instance.dynamic_class.name
 
     return extra_fields
 

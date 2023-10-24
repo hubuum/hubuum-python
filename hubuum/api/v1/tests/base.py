@@ -1,14 +1,9 @@
 """Provide a base class for testing api/v1."""
 
 from base64 import b64encode
-from itertools import zip_longest
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Union
 from unittest.mock import MagicMock, Mock
 
-# We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
-# because the latter only supportes Z for UTC in python 3.11.
-# https://github.com/python/cpython/issues/80010
-from dateutil.parser import isoparse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -17,8 +12,12 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient, APITestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.dynamic import DynamicClass, DynamicObject
 from hubuum.models.iam import Namespace
+
+# We use dateutil.parser.isoparse instead of datetime.datetime.fromisoformat
+# because the latter only supportes Z for UTC in python 3.11.
+# https://github.com/python/cpython/issues/80010
+from hubuum.tools import is_iso_date
 
 
 def create_mocked_view(action: str, model_name: str) -> Mock:
@@ -247,14 +246,6 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self._assert_status_and_debug(response, status_code)
         return response
 
-    def _is_iso_date(self, value: str) -> bool:
-        """Assert that a value is a valid date."""
-        try:
-            isoparse(value)
-            return True
-        except ValueError:
-            return False
-
     def assert_list_contains(
         self, lst: List[Any], predicate: Callable[[Any], bool]
     ) -> None:
@@ -266,7 +257,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
 
     def assert_is_iso_date(self, value: str) -> None:
         """Assert that a value is a valid date."""
-        self.assertTrue(self._is_iso_date(value))
+        self.assertTrue(is_iso_date(value))
 
     def assert_delete(self, path: str, **kwargs: Any) -> HttpResponse:
         """Delete and assert status as 204."""
@@ -448,271 +439,3 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
 
 
 # TODO: For every endpoint we should have and check input validation.
-
-
-class HubuumDynamicBase(HubuumAPITestCase):
-    """A base class for Hubuum API test cases with functionality to create dynamic structures.
-
-    The following classes can be created via
-    - Host
-    - Room
-    - Building
-
-    The following objects are created:
-    - Hosts (3, named host1, host2, host3)
-    - Rooms (2, named room1, room2, room3)
-    - Buildings (1, named building1)
-    """
-
-    def _create_dynamic_class(
-        self, name: str = "Test", namespace: Namespace = None
-    ) -> DynamicClass:
-        """Create a dynamic class."""
-        if not namespace:
-            namespace = self.namespace
-
-        attributes = {"name": name, "namespace": namespace}
-        return DynamicClass.objects.create(**attributes)
-
-    def _create_dynamic_object(
-        self,
-        dynamic_class: DynamicClass = None,
-        namespace: Namespace = None,
-        **kwargs: Any,
-    ) -> DynamicObject:
-        """Create a dynamic object."""
-        attributes = {
-            "json_data": {"key": "value", "listkey": [1, 2, 3]},
-            "namespace": namespace,
-        }
-
-        for key, value in kwargs.items():
-            attributes[key] = value
-
-        return DynamicObject.objects.create(dynamic_class=dynamic_class, **attributes)
-
-    def setUp(self):
-        """Set up a default namespace."""
-        super().setUp()
-
-        self.namespaces = []
-        for i in range(1, 4):
-            self.namespaces.append(
-                self._create_namespace(namespacename=f"namespace{i}")
-            )
-
-        self.namespace = self.namespaces[0]
-
-        self.host_class = None
-        self.room_class = None
-        self.building_class = None
-
-        self.hosts = []
-        self.rooms = []
-        self.buildings = []
-
-    def create_classes(self) -> None:
-        """Create the dynamic classes.
-
-        The following classes are created:
-        - Host
-        - Room
-        - Building
-        """
-        self.host_class = self._create_dynamic_class(name="Host")
-        self.room_class = self._create_dynamic_class(name="Room")
-        self.building_class = self._create_dynamic_class(name="Building")
-
-    def create_objects(self) -> None:
-        """Populate the classes with objects.
-
-        The following objects are created:
-        - Hosts (3, named host1, host2, host3)
-        - Rooms (2, named room1, room2, room3)
-        - Buildings (1, named building1)
-        """
-        # Create an array of hosts with names host1, host2, host3
-        self.hosts = [
-            self._create_dynamic_object(
-                dynamic_class=self.host_class, namespace=self.namespace, name=f"host{i}"
-            )
-            for i in range(1, 4)
-        ]
-
-        # Create an array of rooms with names room1, room2, room3
-        self.rooms = [
-            self._create_dynamic_object(
-                dynamic_class=self.room_class, namespace=self.namespace, name=f"room{i}"
-            )
-            for i in range(1, 3)
-        ]
-
-        # Create a building with name building1
-        self.buildings = [
-            self._create_dynamic_object(
-                dynamic_class=self.building_class,
-                namespace=self.namespace,
-                name="building1",
-            )
-        ]
-
-    def all_classes(self) -> List[DynamicClass]:
-        """Return all classes."""
-        return [self.host_class, self.room_class, self.building_class]
-
-    def all_objects(self) -> List[DynamicObject]:
-        """Return all objects."""
-        return self.hosts + self.rooms + self.buildings
-
-    def get_object_via_api(self, dynamic_class: str, name: str) -> DynamicObject:
-        """Get a dynamic object."""
-        return self.assert_get(f"/dynamic/{dynamic_class}/{name}")
-
-    def split_class_object(self, class_object: str) -> Tuple[str, str]:
-        """Split a class.object string into class and object."""
-        return class_object.split(".")
-
-    def create_link_type_via_api(
-        self, class1: str, class2: str, max_links: int = 0, namespace: Namespace = None
-    ) -> HttpResponse:
-        """Create a link type between two classes.
-
-        param class1: The source class name (string)
-        param class2: The target class name (string)
-        """
-        namespace = namespace or self.namespace
-
-        return self.assert_post(
-            f"/dynamic/{class1}/{class2}/linktype/",
-            {"max_links": max_links, "namespace": self.namespace.id},
-        )
-
-    def create_link_via_api(self, class1_obj1: str, class2_obj2: str) -> HttpResponse:
-        """Create a link between two objects.
-
-        param class1_obj1: The class and object (class.object) of the source object
-        param class2_obj2: The class and object (class.object) of the target object
-        """
-        class1, obj1 = self.split_class_object(class1_obj1)
-        class2, obj2 = self.split_class_object(class2_obj2)
-        return self.assert_post(
-            f"/dynamic/{class1}/{obj1}/link/{class2}/{obj2}",
-            {"namespace": self.namespace.id},
-        )
-
-    def check_link_exists_via_api(
-        self,
-        class1_obj1: str,
-        class2: str,
-        expected_data_list: List[Dict[str, Any]],
-        transitive: bool = True,
-    ) -> HttpResponse:
-        """Check that a link exists between two objects.
-
-        param class1_obj1: The class and object (class.object) of the first object
-        param class2: The class of the second object
-        param expected_data_list: A list of dictionaries containing the expected data
-        param transitive: Whether the link should be transitive (default: True)
-        """
-        class1, obj1 = self.split_class_object(class1_obj1)
-        transitive = "true" if transitive else "false"
-
-        # Check that the correct number of links are returned
-
-        ret = self.assert_get(
-            f"/dynamic/{class1}/{obj1}/links/{class2}/?transitive={transitive}",
-        )
-
-        ret_length = len(ret.data)
-        expected_length = len(expected_data_list)
-        if ret_length != expected_length:  # pragma: no cover, debug when test fails
-            for returned, expected in zip_longest(ret.data, expected_data_list):
-                print("Expected:")
-                print(expected)
-                print("Returned:")
-                if returned:
-                    pret: Dict[str, Any] = {
-                        "name": returned["object"]["name"],
-                        "class": returned["object"]["dynamic_class"],
-                        "path": [
-                            f"{d['dynamic_class']}.{d['name']}"
-                            for d in returned["path"]
-                        ],
-                    }
-                    print(pret)
-                else:
-                    print(returned)
-
-        self.assertEqual(len(ret.data), len(expected_data_list))
-
-        for returned_obj in ret.data:
-            self.assertEqual(returned_obj["object"]["dynamic_class"], class2)
-
-        # Check each returned object against expected data
-        for expected_data, actual_data in zip(expected_data_list, ret.data):
-            self.assertEqual(len(actual_data["path"]), len(expected_data["path"]))
-
-            self.assertEqual(actual_data["object"]["name"], expected_data["name"])
-            self.assertEqual(
-                actual_data["object"]["dynamic_class"], expected_data["class"]
-            )
-
-            # Check each path item against expected values
-
-            for i, class_obj_pair in enumerate(expected_data["path"]):
-                expected_class, expected_obj = self.split_class_object(class_obj_pair)
-                path_item = actual_data["path"][i]
-                self.assertEqual(path_item["name"], expected_obj)
-                self.assertEqual(path_item["dynamic_class"], expected_class)
-
-        return ret
-
-    def create_class_and_object(
-        self, class_name: str, obj_name: str, json_data: Dict[str, Any] = None
-    ) -> Tuple[DynamicClass, DynamicObject]:
-        """Create a class and an object."""
-        dynamic_class = DynamicClass.objects.create(
-            name=class_name,
-            namespace=self.namespace,
-        )
-        dynamic_object = DynamicObject.objects.create(
-            name=obj_name,
-            dynamic_class=dynamic_class,
-            namespace=self.namespace,
-            json_data=json_data or {"name": "Noone"},
-        )
-        return dynamic_class, dynamic_object
-
-    def tearDown(self) -> None:
-        """Delete the namespace after the test."""
-        for namespace in self.namespaces:
-            namespace.delete()
-        return super().tearDown()
-
-
-class HubuumDynamicClasses(HubuumDynamicBase):
-    """A base class with dynamic classes already created.
-
-    Utilizes the HubuumDynamicBase.create_classes method.
-    """
-
-    def setUp(self):
-        """Set up a default namespace and creates the classes."""
-        super().setUp()
-        self.create_classes()
-
-
-class HubuumDynamicClassesAndObjects(HubuumDynamicClasses):
-    """A base class with dynamic classes and objects already created.
-
-    Utilizes the following methods:
-     - HubuumDynamicBase.create_classes
-     - HubuumDynamicBase.create_objects
-
-
-    """
-
-    def setUp(self):
-        """Set up a default namespace and creates the classes."""
-        super().setUp()
-        self.create_objects()

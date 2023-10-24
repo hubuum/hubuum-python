@@ -17,7 +17,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from hubuum.models.core import NamespacedHubuumModel
 
 
-class DynamicClass(NamespacedHubuumModel):
+class HubuumClass(NamespacedHubuumModel):
     """A user-created 'class'/'model'."""
 
     name = models.CharField(max_length=200, null=False, unique=True)
@@ -25,9 +25,9 @@ class DynamicClass(NamespacedHubuumModel):
     validate_schema = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        """Return a string representation of the DynamicClass instance.
+        """Return a string representation of the HubuumClass instance.
 
-        :return: A string representation of the DynamicClass instance.
+        :return: A string representation of the HubuumClass instance.
         """
         return f"{self.name}"
 
@@ -80,24 +80,24 @@ class DynamicClass(NamespacedHubuumModel):
 
     def get_transitive_paths(
         self, target_class: str, max_depth: int = 0
-    ) -> List[List["LinkType"]]:
+    ) -> List[List["ClassLink"]]:
         """Produce all possible paths that can lead from self to target_class.
 
-        Each path is represented as a list of LinkTypes.
+        Each path is represented as a list of ClassLinks.
         """
         queue = deque(
             [([], self, set([self]))]
         )  # queue elements are: (path, class, visited classes)
         paths = []
 
-        # Get the DynamicClass object for the target class.
-        target_class = DynamicClass.objects.get(name=target_class)
+        # Get the HubuumClass object for the target class.
+        target_class = HubuumClass.objects.get(name=target_class)
 
         while queue:
             path, node, visited = queue.popleft()
             if max_depth and len(path) >= max_depth:
                 break
-            link_types = LinkType.objects.filter(source_class=node)
+            link_types = ClassLink.objects.filter(source_class=node)
             for link_type in link_types:
                 if link_type.target_class in visited:
                     continue  # Avoid cycles.
@@ -112,43 +112,41 @@ class DynamicClass(NamespacedHubuumModel):
         return paths
 
 
-class DynamicObject(NamespacedHubuumModel):
+class HubuumObject(NamespacedHubuumModel):
     """A user-created object."""
 
     name = models.CharField(max_length=200, null=False)
-    dynamic_class = models.ForeignKey(
-        DynamicClass, null=False, on_delete=models.CASCADE
-    )
+    dynamic_class = models.ForeignKey(HubuumClass, null=False, on_delete=models.CASCADE)
     json_data = JSONField()
 
     class Meta:
-        """Define the DynamicObjects model's meta data."""
+        """Define the HubuumObjects model's meta data."""
 
         unique_together = ["name", "dynamic_class"]
 
     def __str__(self) -> str:
-        """Return a string representation of the DynamicObject instance.
+        """Return a string representation of the HubuumObject instance.
 
-        :return: A string representation of the DynamicObject instance.
+        :return: A string representation of the HubuumObject instance.
         """
         return f"{self.name} [{self.dynamic_class.name}]"
 
     def has_schema(self) -> bool:
-        """Determine if a JSON schema exists for the DynamicObject instance.
+        """Determine if a JSON schema exists for the HubuumObject instance.
 
         :return: A boolean indicating if a JSON schema exists.
         """
         return bool(self.dynamic_class.json_schema)
 
     def validation_required(self) -> bool:
-        """Determine if validation is required for the DynamicObject instance.
+        """Determine if validation is required for the HubuumObject instance.
 
         :return: A boolean indicating if validation is required.
         """
         return self.dynamic_class.validate_schema
 
     def validate_json(self) -> bool:
-        """Validate the DynamicObject instance against its schema if validation is required.
+        """Validate the HubuumObject instance against its schema if validation is required.
 
         :return: A boolean indicating if the instance data is valid.
 
@@ -168,8 +166,8 @@ class DynamicObject(NamespacedHubuumModel):
             return True
 
     def find_transitive_links(
-        self, target_class: DynamicClass, max_depth: int = 0
-    ) -> List[Dict[str, Union["DynamicObject", List["DynamicLink"]]]]:
+        self, target_class: HubuumClass, max_depth: int = 0
+    ) -> List[Dict[str, Union["HubuumObject", List["ObjectLink"]]]]:
         """Find all paths from self to any object of target_class."""
         # Get the possible paths and early exit if there's no possible link to the target_class.
         possible_paths = self.dynamic_class.get_transitive_paths(
@@ -179,10 +177,10 @@ class DynamicObject(NamespacedHubuumModel):
             return []
 
         def traverse(
-            possible_path: List[LinkType], current_path: List[DynamicObject]
-        ) -> List[List[DynamicObject]]:
+            possible_path: List[ClassLink], current_path: List[HubuumObject]
+        ) -> List[List[HubuumObject]]:
             """Traverse the possible paths and collect links that meet the path requirements."""
-            # First, we check the possible LinkTypes for the current node.
+            # First, we check the possible ClassLinks for the current node.
             # These are the class-based links.
             traversed_path = []
             if not possible_path:
@@ -212,7 +210,7 @@ class DynamicObject(NamespacedHubuumModel):
         return paths
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        """Save the DynamicObject instance.
+        """Save the HubuumObject instance.
 
         Validates the instance data if validation is required.
         """
@@ -220,31 +218,31 @@ class DynamicObject(NamespacedHubuumModel):
         super().save(*args, **kwargs)
 
 
-class LinkType(NamespacedHubuumModel):
+class ClassLink(NamespacedHubuumModel):
     """A user-created link type between two classes."""
 
     source_class = models.ForeignKey(
-        DynamicClass, related_name="source_links", on_delete=models.CASCADE
+        HubuumClass, related_name="source_links", on_delete=models.CASCADE
     )
     target_class = models.ForeignKey(
-        DynamicClass, related_name="target_links", on_delete=models.CASCADE
+        HubuumClass, related_name="target_links", on_delete=models.CASCADE
     )
     max_links = models.IntegerField()
 
     class Meta:
-        """Define the LinkType model's meta data."""
+        """Define the ClassLink model's meta data."""
 
         unique_together = ["source_class", "target_class"]
 
     def __str__(self) -> str:
-        """Return a string representation of the LinkType instance."""
+        """Return a string representation of the ClassLink instance."""
         return (
             f"{self.source_class.name} <-> {self.target_class.name} ({self.max_links})"
         )
 
 
-class DynamicLink(NamespacedHubuumModel):
-    """DynamicLink model represents a user-defined link between two objects.
+class ObjectLink(NamespacedHubuumModel):
+    """ObjectLink model represents a user-defined link between two objects.
 
     The model inherits from NamespacedHubuumModel, which includes fields:
         namespace: The namespace the object belongs to.
@@ -254,30 +252,30 @@ class DynamicLink(NamespacedHubuumModel):
     Fields:
     - source: The source object of the link.
     - target: The target object of the link.
-    - link_type: A ForeignKey to the LinkType model which defines the type of the link.
+    - link_type: A ForeignKey to the ClassLink model which defines the type of the link.
     """
 
     source = models.ForeignKey(
-        "DynamicObject",
+        "HubuumObject",
         on_delete=models.CASCADE,
         related_name="outbound_links",
     )
     target = models.ForeignKey(
-        "DynamicObject",
+        "HubuumObject",
         on_delete=models.CASCADE,
         related_name="inbound_links",
     )
     link_type = models.ForeignKey(
-        "LinkType",
+        "ClassLink",
         on_delete=models.CASCADE,
         related_name="links",
     )
 
     class Meta:
-        """Define the DynamicLink model's meta data."""
+        """Define the ObjectLink model's meta data."""
 
         unique_together = ["source", "target"]
 
     def __str__(self) -> str:
-        """Return a string representation of the DynamicLink instance."""
+        """Return a string representation of the ObjectLink instance."""
         return f"{self.source} <-> {self.target}"

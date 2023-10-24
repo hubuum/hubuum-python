@@ -20,7 +20,7 @@ from hubuum.models.core import (
     ExtensionData,
     ExtensionsModel,
 )
-from hubuum.models.dynamic import DynamicClass, DynamicLink, DynamicObject, LinkType
+from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
 from hubuum.models.iam import (
     Namespace,
     NamespacedHubuumModelWithExtensions,
@@ -324,13 +324,13 @@ class AttachmentSerializer(HubuumMetaSerializer):
         return file
 
 
-class DynamicClassSerializer(HubuumMetaSerializer):
-    """Serialize a DynamicClass object."""
+class HubuumClassSerializer(HubuumMetaSerializer):
+    """Serialize a HubuumClass object."""
 
     class Meta:
         """How to serialize the object."""
 
-        model = DynamicClass
+        model = HubuumClass
         fields = [
             "name",
             "updated_at",
@@ -340,8 +340,8 @@ class DynamicClassSerializer(HubuumMetaSerializer):
             "namespace",
         ]
 
-    def update(self, instance: DynamicClass, validated_data: Dict[str, Any]):
-        """Update the DynamicClass instance with the proposed schema if validation succeeds."""
+    def update(self, instance: HubuumClass, validated_data: Dict[str, Any]):
+        """Update the HubuumClass instance with the proposed schema if validation succeeds."""
         # Validating the schema to be additive implies validating
         # that the schema in itself is valid
         if "json_schema" in validated_data:
@@ -354,8 +354,8 @@ class DynamicClassSerializer(HubuumMetaSerializer):
         return instance
 
     def create(self, validated_data: Dict[str, Any]):
-        """Create a new DynamicClass instance with the proposed schema if validation succeeds."""
-        instance = DynamicClass(**validated_data)
+        """Create a new HubuumClass instance with the proposed schema if validation succeeds."""
+        instance = HubuumClass(**validated_data)
         proposed_schema = validated_data.get("json_schema", None)
 
         # Proposed_schema may be false or empty, so we need to check for None
@@ -366,8 +366,8 @@ class DynamicClassSerializer(HubuumMetaSerializer):
         return instance
 
 
-class DynamicObjectSerializer(HubuumMetaSerializer):
-    """Serialize a DynamicObject object."""
+class HubuumObjectSerializer(HubuumMetaSerializer):
+    """Serialize a HubuumObject object."""
 
     # Make the dynamic_class field read-only so that it's not required during initial validation
     # dynamic_class = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -377,7 +377,7 @@ class DynamicObjectSerializer(HubuumMetaSerializer):
     class Meta:
         """How to serialize the object."""
 
-        model = DynamicObject
+        model = HubuumObject
         fields = [
             "name",
             "updated_at",
@@ -484,8 +484,8 @@ class VendorSerializer(HubuumMetaSerializer):
         fields = "__all__"
 
 
-class LinkTypeSerializer(HubuumMetaSerializer):
-    """Serialize a LinkType object."""
+class ClassLinkSerializer(HubuumMetaSerializer):
+    """Serialize a ClassLink object."""
 
     source_class = serializers.SlugRelatedField(
         slug_field="name",
@@ -499,7 +499,7 @@ class LinkTypeSerializer(HubuumMetaSerializer):
     class Meta:
         """How to serialize the object."""
 
-        model = LinkType
+        model = ClassLink
         fields = [
             "source_class",
             "target_class",
@@ -510,14 +510,14 @@ class LinkTypeSerializer(HubuumMetaSerializer):
         ]
 
 
-class DynamicLinkSerializer(serializers.ModelSerializer):  # type: ignore
-    """Serializer for the DynamicLink model."""
+class ObjectLinkSerializer(serializers.ModelSerializer):  # type: ignore
+    """Serializer for the ObjectLink model."""
 
     source = serializers.SlugRelatedField(
-        slug_field="name", queryset=DynamicObject.objects.all()
+        slug_field="name", queryset=HubuumObject.objects.all()
     )
     target = serializers.SlugRelatedField(
-        slug_field="name", queryset=DynamicObject.objects.all()
+        slug_field="name", queryset=HubuumObject.objects.all()
     )
 
     path = serializers.SerializerMethodField(required=False)
@@ -525,10 +525,10 @@ class DynamicLinkSerializer(serializers.ModelSerializer):  # type: ignore
     class Meta:
         """How to serialize the object."""
 
-        model = DynamicLink
+        model = ObjectLink
         fields = ["source", "target", "path"]
 
-    def get_path(self, obj: DynamicLink):
+    def get_path(self, obj: ObjectLink):
         """Get the path to the object."""
         return getattr(obj, "path", None)
 
@@ -536,9 +536,9 @@ class DynamicLinkSerializer(serializers.ModelSerializer):  # type: ignore
 class PathSerializer(serializers.Serializer):  # type: ignore
     """Serialize a path to an object."""
 
-    object = DynamicObjectSerializer(read_only=True)  # noqa: A003 (redefine object)
+    object = HubuumObjectSerializer(read_only=True)  # noqa: A003 (redefine object)
     path = serializers.SerializerMethodField()
 
     def get_path(self, objects: Dict[str, Any]):
         """Display the path to the object as a name of classes we pass through."""
-        return DynamicObjectSerializer(objects["path"], many=True).data
+        return HubuumObjectSerializer(objects["path"], many=True).data
