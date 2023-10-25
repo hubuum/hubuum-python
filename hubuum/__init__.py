@@ -29,7 +29,7 @@ def get_module_versions() -> Dict[str, str]:  # pragma: no cover
             module_versions[dist.metadata["Name"]] = dist.version
 
         return module_versions
-    except Exception:
+    except ImportError:
         pass
 
     try:
@@ -40,7 +40,7 @@ def get_module_versions() -> Dict[str, str]:  # pragma: no cover
 
         return module_versions
 
-    except Exception:
+    except ImportError:
         pass
 
     return module_versions
@@ -54,13 +54,13 @@ def get_version() -> str:
     """Get the version via git."""
     try:
         cmd = "git describe --all --match 'v[0-9]*' --long --dirty --always"
-        p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE)
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         out, _ = p.communicate()
         if out:
             return out.decode().strip()
         else:  # pragma: no cover
             return ASSUMED_RELEASE
-    except Exception:  # pragma: no cover
+    except Exception:
         return ASSUMED_RELEASE
 
 
@@ -68,7 +68,7 @@ def get_build() -> str:
     """Get the version number based on the build."""
     try:
         cmd = "git log -n 1 --pretty=format:'%H'"
-        p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE)
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         out, _ = p.communicate()
         if out:
             return out.decode().strip()
