@@ -16,4 +16,5 @@ urlpatterns: List[resolvers.URLResolver] = [
     path("attachments/", include("hubuum.api.v1.endpoints.attachments")),
     path("resources/", include("hubuum.api.v1.endpoints.resources")),
     path("dynamic/", include("hubuum.api.v1.endpoints.dynamic")),
+    path(".meta/", include("hubuum.api.v1.endpoints.meta")),
 ]

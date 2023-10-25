@@ -46,7 +46,6 @@ class HubuumObjectTestCase(APIv1Objects):
 
         # Test creating a link between host1 and room1
         self.create_object_link_via_api("Host.host1", "Room.room1")
-        self.create_object_link_via_api("Host.host1", "Room.room1")
         self.assert_get("/dynamic/Host/host1/link/Room/room1")
         self.assert_post_and_409(
             "/dynamic/Host/host1/link/Room/room1",
@@ -60,11 +59,9 @@ class HubuumObjectTestCase(APIv1Objects):
     def test_failing_specific_link_get(self) -> None:
         """Test that fetching non-existent links fails."""
         self.assert_get_and_404("/dynamic/Host/link/Room/")
-        self.assert_get_and_404("/dynamic/Host/link/Room/")
         self.assert_get_and_404(
             "/dynamic/Host/host1/link/Room/room1",
         )
-        self.create_class_link_via_api("Host", "Room", max_links=1)
         self.create_class_link_via_api("Host", "Room", max_links=1)
         self.assert_get_and_404(
             "/dynamic/nope/host1/link/Room/room1",

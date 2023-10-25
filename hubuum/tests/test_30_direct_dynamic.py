@@ -3,7 +3,6 @@
 from typing import cast
 
 from hubuum.models.dynamic import HubuumClass, HubuumObject
-from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
 from hubuum.tests.base import HubuumModelTestCase
 
@@ -14,13 +13,11 @@ class DynamicBaseTestCase(HubuumModelTestCase):
     def create_class_direct(
         self, name: str = "Test", namespace: Namespace = None
     ) -> HubuumClass:
-    ) -> HubuumClass:
         """Create a dynamic class."""
         if not namespace:
             namespace = self.namespace
 
         attributes = {"name": name, "namespace": namespace}
-        return cast(HubuumClass, self._create_object(model=HubuumClass, **attributes))
         return cast(HubuumClass, self._create_object(model=HubuumClass, **attributes))
 
     def create_object_direct(
