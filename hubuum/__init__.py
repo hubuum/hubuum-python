@@ -54,7 +54,7 @@ def get_version() -> str:
     """Get the version via git."""
     try:
         cmd = "git describe --all --match 'v[0-9]*' --long --dirty --always"
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE)
         out, _ = p.communicate()
         if out:
             return out.decode().strip()
@@ -68,7 +68,7 @@ def get_build() -> str:
     """Get the version number based on the build."""
     try:
         cmd = "git log -n 1 --pretty=format:'%H'"
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE)
         out, _ = p.communicate()
         if out:
             return out.decode().strip()
