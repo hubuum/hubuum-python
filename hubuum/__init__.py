@@ -60,7 +60,7 @@ def get_version() -> str:
             return out.decode().strip()
         else:  # pragma: no cover
             return ASSUMED_RELEASE
-    except Exception:
+    except Exception:  # pragma: no cover
         return ASSUMED_RELEASE
 
 
