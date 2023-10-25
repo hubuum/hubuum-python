@@ -14856,6 +14856,75 @@
         ]
       }
     },
+    "/api/v1/.meta/version": {
+      "get": {
+        "operationId": "listVersions",
+        "description": "Get the version of the API.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      }
+    },
+    "/api/v1/.meta/runtimes": {
+      "get": {
+        "operationId": "listRuntimes",
+        "description": "Get the versions of the runtimes/subsystems.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      }
+    },
+    "/api/v1/.meta/debug": {
+      "get": {
+        "operationId": "listDebugs",
+        "description": "Get debug data.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      }
+    },
     "/api/auth/login/": {
       "post": {
         "operationId": "createLogin",
