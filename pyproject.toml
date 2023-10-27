@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hubuum"
-version = "0.1.0"
+version = "0.0.1"
 description = "An infrastructure database."
 authors = ["Terje Kvernes <terje@kvernes.no>"]
 maintainers = ["Terje Kvernes <terje@kvernes.no>"]

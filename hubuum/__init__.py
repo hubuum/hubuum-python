@@ -8,7 +8,7 @@ import django
 import django_filters
 import rest_framework
 
-TAG_VERSION = "0.1.0"
+TAG_VERSION = "0.0.1"
 
 
 # Covering this is annoying as different python versions have different
@@ -57,7 +57,7 @@ def get_version() -> str:
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         out, _ = p.communicate()
         if out:
-            return out.decode().strip()
+            return out.decode().strip().replace("tags/", "")
         else:  # pragma: no cover
             return TAG_VERSION
     except Exception:  # pragma: no cover
