@@ -9,14 +9,38 @@ Afterwards the user may push the commit and tag to the remote repository, which 
 trigger a GitHub Actions workflow to build and publish the package to PyPI.
 """
 
+import argparse
 import os
 import re
 import subprocess
-from typing import Optional
+from typing import Optional, Tuple
 
 SEMVER_PATTERN = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
 PYPROJECT_FILENAME = "pyproject.toml"
 TARGET_VARIABLE = "TAG_VERSION"
+
+
+def parse_arguments() -> Tuple[bool, Optional[str]]:
+    """Parse command-line arguments.
+
+    :returns: A tuple containing a boolean flag for the --dirty option and the version string.
+    """
+    parser = argparse.ArgumentParser(description="Prepare a release of the project.")
+    parser.add_argument(
+        "--dirty",
+        "-d",
+        action="store_true",
+        help="Allow the working directory to be dirty.",
+    )
+    parser.add_argument(
+        "version",
+        nargs="?",
+        default=None,
+        help="Semantic version for the release.",
+    )
+    args = parser.parse_args()
+
+    return args.dirty, args.version
 
 
 def remove_special_chars(input_str: str, chars_to_remove: str) -> str:
@@ -90,11 +114,13 @@ def update_variable_in_file(version: str, file_path: str, pattern: str) -> None:
 
 def main() -> None:
     """Execute the main script."""
-    if not is_working_tree_clean():
-        print("Working tree is not clean. Commit or stash changes before running.")
-        # return
+    dirty, version = parse_arguments()
 
-    version = input("Enter a valid semantic version: ").strip()
+    if not dirty and not is_working_tree_clean():
+        print("Working tree is not clean. Commit or stash changes before running.")
+        return
+
+    version = version if version else input("Enter a valid semantic version: ").strip()
 
     if not is_semver(version):
         print("Invalid semantic version.")
@@ -118,6 +144,7 @@ def main() -> None:
         subprocess.run(["git", "tag", f"v{version}"])
         print("Changes committed and tagged.")
     else:
+        subprocess.run(["git", "reset"])
         subprocess.run(["git", "checkout", "--", "pyproject.toml", init_path])
         print("Changes not committed and reverted.")
 
