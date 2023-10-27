@@ -20,6 +20,31 @@ PYPROJECT_FILENAME = "pyproject.toml"
 TARGET_VARIABLE = "TAG_VERSION"
 
 
+def check_changelog(version: str) -> bool:
+    """Check if the changelog contains an entry for the given version.
+
+    :param version: The version string to check.
+
+    :raises: FileNotFoundError if Changelog.md does not exist.
+    :raises: ValueError if the appropriate changelog entry is not found.
+
+    :returns: True if the entry is found, False otherwise.
+    """
+    try:
+        with open("Changelog.md", "r") as f:
+            changelog_content = f.read()
+    except FileNotFoundError as exc:
+        raise FileNotFoundError("Changelog.md not found.") from exc
+
+    pattern = rf"## \[{version}\] - \d{{4}}-\d{{2}}-\d{{2}}"
+    if re.search(pattern, changelog_content):
+        return True
+    else:
+        raise ValueError(
+            f"No {version} entry found in ChangeLog.md. Unable to continue."
+        )
+
+
 def parse_arguments() -> Tuple[bool, Optional[str]]:
     """Parse command-line arguments.
 
@@ -126,6 +151,13 @@ def main() -> None:
         print("Invalid semantic version.")
         return
 
+    if version:
+        try:
+            check_changelog(version)
+        except (FileNotFoundError, ValueError) as e:
+            print(e)
+            return
+
     update_variable_in_file(version, "pyproject.toml", r"^version =")
     subprocess.run(["git", "add", PYPROJECT_FILENAME])
 
@@ -141,8 +173,9 @@ def main() -> None:
 
     if confirm == "yes":
         subprocess.run(["git", "commit", "-m", f"Release {version}"])
-        subprocess.run(["git", "tag", f"v{version}"])
+        subprocess.run(["git", "tag", f"v{version}", "-m", f"Release {version}"])
         print("Changes committed and tagged.")
+        print("Please do: git push --follow-tags origin main")
     else:
         subprocess.run(["git", "reset"])
         subprocess.run(["git", "checkout", "--", "pyproject.toml", init_path])
