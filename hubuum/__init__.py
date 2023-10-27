@@ -8,7 +8,7 @@ import django
 import django_filters
 import rest_framework
 
-ASSUMED_RELEASE = "0.1.0"
+TAG_VERSION = "0.1.0"
 
 
 # Covering this is annoying as different python versions have different
@@ -59,9 +59,9 @@ def get_version() -> str:
         if out:
             return out.decode().strip()
         else:  # pragma: no cover
-            return ASSUMED_RELEASE
+            return TAG_VERSION
     except Exception:  # pragma: no cover
-        return ASSUMED_RELEASE
+        return TAG_VERSION
 
 
 def get_build() -> str:

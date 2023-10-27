@@ -13,10 +13,12 @@ from hubuum.exceptions import InvalidParam
 
 logger = get_logger("hubuum.manual")
 
+MIN_TOKEN_LENGTH = 10
+
 
 def _replace_token(token: str) -> str:
     """Replace a token with a shortened and safe version of it."""
-    if len(token) > 10:
+    if len(token) > MIN_TOKEN_LENGTH:
         return token[:3] + "..." + token[-3:]
 
     return "..."

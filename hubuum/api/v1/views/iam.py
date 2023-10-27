@@ -2,7 +2,6 @@
 from typing import Any, Dict, cast
 
 from django.contrib.auth.models import Group
-from django.http import HttpResponse
 from rest_framework import generics, status
 from rest_framework.exceptions import (
     MethodNotAllowed,
@@ -11,8 +10,8 @@ from rest_framework.exceptions import (
     ValidationError,
 )
 from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
-from rest_framework.views import Response
 
 from hubuum.api.v1.serializers import (
     GroupSerializer,
@@ -324,7 +323,7 @@ class NamespaceMembersGroup(
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Put associates a group with a namespace.
@@ -368,7 +367,7 @@ class NamespaceMembersGroup(
         create["has_read"] = True
 
         Permission.objects.create(**create)
-        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Delete disassociates a group with a namespace.
@@ -382,4 +381,4 @@ class NamespaceMembersGroup(
         # does not have permissions for the namespace. This confuses typing.
         permission = namespace.get_permissions_for_group(group)
         permission.delete()
-        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
