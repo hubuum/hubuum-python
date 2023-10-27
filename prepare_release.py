@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+"""Prepare a release of the project.
+
+This script is used to prepare a release of the project. It prompts the user for a
+semantic version, updates the version string in pyproject.toml and in hubuum/__init__.py,
+and performes a git commit and tags the commit with the new version.
+
+Afterwards the user may push the commit and tag to the remote repository, which should
+trigger a GitHub Actions workflow to build and publish the package to PyPI.
+"""
+
 import os
 import re
 import subprocess
@@ -78,6 +89,7 @@ def update_variable_in_file(version: str, file_path: str, pattern: str) -> None:
 
 
 def main() -> None:
+    """Execute the main script."""
     if not is_working_tree_clean():
         print("Working tree is not clean. Commit or stash changes before running.")
         # return
