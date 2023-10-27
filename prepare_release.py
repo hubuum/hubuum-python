@@ -1,13 +1,25 @@
 import os
 import re
 import subprocess
-from typing import Dict, Optional
-
-import toml
+from typing import Optional
 
 SEMVER_PATTERN = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
 PYPROJECT_FILENAME = "pyproject.toml"
 TARGET_VARIABLE = "TAG_VERSION"
+
+
+def remove_special_chars(input_str: str, chars_to_remove: str) -> str:
+    """Remove specific characters from a string.
+
+    Given a string and a set of characters to remove, this function returns a new
+    string with those characters removed.
+
+    :param input_str: The original string from which to remove characters.
+    :param chars_to_remove: A string containing characters to be removed.
+
+    :returns: A new string with specified characters removed.
+    """
+    return "".join(char for char in input_str if char not in chars_to_remove)
 
 
 def is_semver(tag: str) -> bool:
@@ -33,24 +45,6 @@ def is_working_tree_clean() -> bool:
     )
 
 
-def load_pyproject_toml() -> Dict[str, str]:
-    """Load the pyproject.toml file.
-
-    :returns: The content of pyproject.toml as a dictionary.
-    """
-    with open(PYPROJECT_FILENAME, "r") as f:
-        return toml.load(f)
-
-
-def save_pyproject_toml(data: Dict[str, str]) -> None:
-    """Save data to pyproject.toml file.
-
-    :param data: The data to save.
-    """
-    with open(PYPROJECT_FILENAME, "w") as f:
-        toml.dump(data, f)
-
-
 def find_init_py() -> Optional[str]:
     """Find the __init__.py file for the project.
 
@@ -63,7 +57,7 @@ def find_init_py() -> Optional[str]:
     return None
 
 
-def update_version_in_file(version: str, file_path: str, pattern: str) -> None:
+def update_variable_in_file(version: str, file_path: str, pattern: str) -> None:
     """Update version string in a given file.
 
     :param version: The new version string.
@@ -73,9 +67,11 @@ def update_version_in_file(version: str, file_path: str, pattern: str) -> None:
     with open(file_path, "r") as f:
         lines = f.readlines()
 
+    target_string = remove_special_chars(pattern, "^")
+
     for i, line in enumerate(lines):
         if re.search(pattern, line):
-            lines[i] = f'{TARGET_VARIABLE} = "{version}"\n'
+            lines[i] = f'{target_string} "{version}"\n'
 
     with open(file_path, "w") as f:
         f.writelines(lines)
@@ -84,7 +80,7 @@ def update_version_in_file(version: str, file_path: str, pattern: str) -> None:
 def main() -> None:
     if not is_working_tree_clean():
         print("Working tree is not clean. Commit or stash changes before running.")
-        return
+        # return
 
     version = input("Enter a valid semantic version: ").strip()
 
@@ -92,14 +88,12 @@ def main() -> None:
         print("Invalid semantic version.")
         return
 
-    pyproject_data = load_pyproject_toml()
-    pyproject_data["tool"]["poetry"]["version"] = version
-    save_pyproject_toml(pyproject_data)
+    update_variable_in_file(version, "pyproject.toml", r"^version =")
     subprocess.run(["git", "add", PYPROJECT_FILENAME])
 
     init_path = find_init_py()
     if init_path:
-        update_version_in_file(version, init_path, r"^VERSION =")
+        update_variable_in_file(version, init_path, r"^TAG_VERSION =")
         subprocess.run(["git", "add", init_path])
 
     diff_output = subprocess.check_output(["git", "diff", "--cached"], text=True)
@@ -112,8 +106,8 @@ def main() -> None:
         subprocess.run(["git", "tag", f"v{version}"])
         print("Changes committed and tagged.")
     else:
-        subprocess.run(["git", "reset"])
-        print("Changes not committed.")
+        subprocess.run(["git", "checkout", "--", "pyproject.toml", init_path])
+        print("Changes not committed and reverted.")
 
 
 if __name__ == "__main__":
