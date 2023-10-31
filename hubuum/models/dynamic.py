@@ -18,7 +18,20 @@ from hubuum.models.core import NamespacedHubuumModel
 
 
 class HubuumClass(NamespacedHubuumModel):
-    """A user-created 'class'/'model'."""
+    """A user-created 'class'/'model'.
+
+    :param name: The name of the class.
+    :param json_schema: The JSON schema of the class (optional)
+    :param validate_schema: A boolean indicating if the schema should be validated (optional).
+    :param namespace: The namespace the class belongs to.
+
+    The idea with namespaces for classes is that access to the entire structure may be limited
+    to a specific set of users who can perform actions on this namespace.
+
+    :raises: rest_framework.exceptions.ValidationError if the proposed schema is not valid.
+
+    :return: A HubuumClass instance.
+    """
 
     name = models.CharField(max_length=200, null=False, unique=True)
     json_schema = JSONField(blank=True, null=True)
@@ -113,7 +126,18 @@ class HubuumClass(NamespacedHubuumModel):
 
 
 class HubuumObject(NamespacedHubuumModel):
-    """A user-created object."""
+    """A user-created object.
+
+    :param name: The name of the object.
+    :param dynamic_class: The class of the object.
+    :param json_data: The data of the object.
+    :param namespace: The namespace the object belongs to.
+
+    :raises: rest_framework.exceptions.ValidationError if the instance data is invalid.
+
+    :return: A HubuumObject instance.
+
+    """
 
     name = models.CharField(max_length=200, null=False)
     dynamic_class = models.ForeignKey(HubuumClass, null=False, on_delete=models.CASCADE)

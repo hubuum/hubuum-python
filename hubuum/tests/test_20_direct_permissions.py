@@ -2,8 +2,8 @@
 from django.contrib.auth.models import Group
 from django.test import TestCase
 
+from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace, Permission, User
-from hubuum.models.resources import Host
 
 
 class PermissionsTestCase(TestCase):
@@ -50,9 +50,32 @@ class PermissionsTestCase(TestCase):
         self.one.groups.set([self.onegroup])
         self.two.groups.set([self.twogroup])
 
-        self.onehost = Host.objects.create(name="one", namespace=self.onenamespace)
-        self.twohost = Host.objects.create(name="two", namespace=self.twonamespace)
+        self.testclass = HubuumClass.objects.create(
+            name="Host",
+            json_schema={},
+            validate_schema=False,
+            namespace=self.onenamespace,
+        )
 
+        self.onehost = HubuumObject.objects.create(
+            name="one",
+            namespace=self.onenamespace,
+            dynamic_class=self.testclass,
+            json_data={"name": "one"},
+        )
+
+        self.twohost = HubuumObject.objects.create(
+            name="two",
+            namespace=self.twonamespace,
+            dynamic_class=self.testclass,
+            json_data={"name": "two"},
+        )
+
+        # FIXME: #259 This is actually broken. Sort of. The model name (the bit after the dash)
+        # is irrelevant for the permission check itself. All we do in has_perm is to check
+        # that this model exists. The read permissions are however correctly checke against
+        # the namespace for the object, so it works as expected, it just doesn't test what
+        # it says it tests.
         self.read_perm = "hubuum.read_host"
 
     def test_str_of_object(self):
