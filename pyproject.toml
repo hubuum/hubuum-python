@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hubuum"
-version = "0.1.0"
+version = "0.0.1"
 description = "An infrastructure database."
 authors = ["Terje Kvernes <terje@kvernes.no>"]
 maintainers = ["Terje Kvernes <terje@kvernes.no>"]
@@ -30,7 +30,6 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.7"
 Django = "^3 || ^4 || ^5"
-django_rest_knox = "4.2.0"
 djangorestframework = "3.14.0"
 django_filter = "23.3"
 django-structlog = "5.3.0"

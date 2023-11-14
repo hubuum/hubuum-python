@@ -9,6 +9,8 @@ from .logging import HubuumLoggingConfig
 from .request import HubuumRequestConfig
 from .sentry import HubuumSentryConfig
 
+SECRET_KEY_EXPECTED_LENGTH = 50
+
 
 # A configuration class for the environment that is used in this project.
 class HubuumBaseConfig(HubuumAbstractConfig):
@@ -72,7 +74,7 @@ class HubuumBaseConfig(HubuumAbstractConfig):
                     )
                 ) from exc
 
-        if not len(self.get("SECRET_KEY")) == 50:
+        if not len(self.get("SECRET_KEY")) == SECRET_KEY_EXPECTED_LENGTH:
             raise ValueError(
                 (
                     f"Invalid value for SECRET_KEY: {self.get('SECRET_KEY')}."
