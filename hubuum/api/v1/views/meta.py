@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from structlog.dev import ConsoleRenderer
 
 from hubuum import __version__, debug, runtimes
-from hubuum.permissions import IsAuthenticated
+from hubuum.permissions import IsAuthenticated, IsSuperOrAdmin
 
 
 def handle_debug_data(obj: Any) -> Any:
@@ -32,7 +32,7 @@ class VersionView(APIView):
 class RuntimesView(APIView):
     """View to get the versions of the runtimes/subsystems involved."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSuperOrAdmin]
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Get the versions of the runtimes/subsystems."""
@@ -42,7 +42,7 @@ class RuntimesView(APIView):
 class DebugView(APIView):
     """View to get debug data."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSuperOrAdmin]
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Get debug data."""

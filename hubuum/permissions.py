@@ -80,6 +80,22 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
         return super().has_object_permission(request, view, obj)
 
 
+# Meta views for runtimes and debugging are only accessible to superusers or admins,
+# but these views they do not operate on objects so we do not have an implementaiton for
+# has_object_permission.
+class IsSuperOrAdmin(IsAuthenticated):
+    """Permit super or admin users, irrespective of method."""
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        """Check if we're super/admin."""
+        if is_super_or_admin(typed_user_from_request(request)):
+            auth_logger.debug(
+                "has_perm", role="superuser or admin", user=request.user.username
+            )
+            return True
+        return False
+
+
 # A thing here. Everyone can read all namespaces. For multi-tenant installations we probably need:
 # 1. Tenant specific admin groups
 # 2. Limit visibility to a tenant's namespace / scope.

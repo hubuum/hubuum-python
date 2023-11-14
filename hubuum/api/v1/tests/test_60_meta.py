@@ -20,6 +20,13 @@ class TestVersion(HubuumAPITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), __version__)
 
+    def test_version_as_normal_user(self):
+        """Test the version endpoint as a normal user."""
+        client = self.get_user_client()
+        response = client.get("/api/v1/.meta/version")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode(), __version__)
+
     def test_version_no_auth(self):
         """Test the version endpoint without auth."""
         client = APIClient()
@@ -43,6 +50,12 @@ class TestVersion(HubuumAPITestCase):
         response = client.get("/api/v1/.meta/runtimes")
         self.assertEqual(response.status_code, 401)
 
+    def test_runtimes_normal_user(self):
+        """Test the runtimes endpoint as a normal user."""
+        client = self.get_user_client()
+        response = client.get("/api/v1/.meta/runtimes")
+        self.assertEqual(response.status_code, 403)
+
     def test_debug(self):
         """Test the debug endpoint."""
         response = self.client.get("/api/v1/.meta/debug")
@@ -55,3 +68,9 @@ class TestVersion(HubuumAPITestCase):
         client = APIClient()
         response = client.get("/api/v1/.meta/debug")
         self.assertEqual(response.status_code, 401)
+
+    def test_debug_normal_user(self):
+        """Test the debug endpoint as a normal user."""
+        client = self.get_user_client()
+        response = client.get("/api/v1/.meta/debug")
+        self.assertEqual(response.status_code, 403)
