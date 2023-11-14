@@ -82,7 +82,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             staff=False, superuser=False, username=username, groupname=groupname
         )
 
-    def _create_namespace(self, namespacename: str = "namespace1") -> None:
+    def _create_namespace(self, namespacename: str = "namespace1") -> Namespace:
         """Get or create the given namespace directly."""
         namespace, _ = Namespace.objects.get_or_create(name=namespacename)
         return namespace

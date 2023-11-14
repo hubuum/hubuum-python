@@ -5,12 +5,14 @@ from typing import Any, Dict, Tuple
 from django.db import IntegrityError, transaction
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveDestroyAPIView,
     RetrieveUpdateDestroyAPIView,
 )
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 
@@ -165,9 +167,39 @@ class HubuumObjectDetail(DynamicDetailView):
             name=self.kwargs["obj"],
         )
 
+        self.check_object_permissions(self.request, obj)
+
         serializer = self.get_serializer(obj)
         return Response(serializer.data)
 
+    def patch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
+        """Patch an object from a user defined class."""
+        obj = get_object_or_404(
+            self.queryset,
+            dynamic_class__name=self.kwargs["classname"],
+            name=self.kwargs["obj"],
+        )
+
+        self.check_object_permissions(self.request, obj)
+
+        serializer = self.get_serializer(obj, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Patch an object from a user defined class."""
+        obj = get_object_or_404(
+            self.queryset,
+            dynamic_class__name=self.kwargs["classname"],
+            name=self.kwargs["obj"],
+        )
+
+        self.check_object_permissions(self.request, obj)
+        obj.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class LinkAbstractView:
     """Abstract link class with shared utilities."""
