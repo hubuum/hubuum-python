@@ -196,7 +196,7 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
 
         if is_super_or_admin(typed_user_from_request(request)):
             auth_logger.debug(
-                "has_perm_o : S",
+                "has_perm_o_S:OK",
                 user=request.user.username,
                 view=view.__class__.__name__,
                 method=request.method,

@@ -94,7 +94,7 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
             fields = ("id",)
 
         internal_logger.debug(
-            "m:get_object",
+            "m_get_object",
             lookup_identifier=lookup_identifier,
             model_passed=model_name,
             model=queryset.model.__name__,
@@ -109,7 +109,7 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
                 obj = queryset.get(**{field: value})
                 if obj:
                     internal_logger.debug(
-                        "m:get_object:OK",
+                        "m_get_object:OK",
                         field=field,
                         value=value,
                     )

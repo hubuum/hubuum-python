@@ -151,7 +151,10 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             group.user_set.add(self.user)
 
     def grant(self, group: str, namespace: str, permissions: List[str]) -> None:
-        """Grant a set of permissions to a given group for a namespace."""
+        """Grant a set of permissions to a given group for a namespace.
+
+        Temporarily assumes superuser rights for the client.
+        """
         oldclient = self.client
         self.client = self.get_superuser_client()
         perms = {}

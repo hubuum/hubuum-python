@@ -64,6 +64,8 @@ class APIHostClean(APIv1Classes):
         self._create_host("one")
         self.client = self.get_user_client(username="tmp", groupname="tmpgroup")
         self.assert_patch_and_403("/dynamic/Host/one", {"name": "foo"})
+        self.grant("tmpgroup", self.namespace.name, ["has_write", "has_read"])
+        self.assert_patch_and_403("/dynamic/Host/one", {"name": "foo"})
         self.grant("tmpgroup", self.namespace.name, ["has_update", "has_read"])
         self.assert_patch("/dynamic/Host/one", {"name": "foo"})
         self.assert_get("/dynamic/Host/foo")
