@@ -163,6 +163,16 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self.assert_post_and_204(f"/iam/namespaces/{namespace}/groups/{group}", perms)
         self.client = oldclient
 
+    def revoke(self, group: str, namespace: str) -> None:
+        """Revoke all permissions from a given group for a namespace.
+
+        Temporarily assumes superuser rights for the client.
+        """
+        oldclient = self.client
+        self.client = self.get_superuser_client()
+        self.assert_delete(f"/iam/namespaces/{namespace}/groups/{group}")
+        self.client = oldclient
+
     def basic_auth(self, username: str, password: str) -> str:
         """Create a basic auth header for the given username and password."""
         token = b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")

@@ -74,6 +74,7 @@ class LogAnalyzer:
             "login": self.login,
             "logout": self.logout,
             "failure": self.failure,
+            "m_get_object": self.m_get_object,
         }
 
     #    def dummy(self, index: int) -> None:
@@ -364,6 +365,17 @@ class LogAnalyzer:
         }
 
         self._check_log_entry_count(log, 3)
+        self._check_log_values(log, expected_values)
+
+    def m_get_object(self, index: int) -> None:
+        """Check m_get_object entries."""
+        log = self.cap_logs[index]
+        expected_values = {
+            "event": "m_get_object",
+            "log_level": "debug",
+        }
+
+        self._check_log_entry_count(log, 6)
         self._check_log_values(log, expected_values)
 
     def failure(self, index: int) -> None:

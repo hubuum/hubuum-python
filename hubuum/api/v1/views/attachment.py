@@ -11,8 +11,8 @@ from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, ParseError  # NotAuthenticated,
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
-from rest_framework.views import Response
 
 from hubuum.api.v1.serializers import AttachmentManagerSerializer, AttachmentSerializer
 from hubuum.exceptions import (

@@ -129,9 +129,15 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
 
         log = LogAnalyzer(cap_logs, "GET", "/api/v1/iam/namespaces/nope", 404)
         log.check_events_are(
-            ["request_started", "request", "response", "request_finished"]
+            [
+                "request_started",
+                "request",
+                "m_get_object",
+                "response",
+                "request_finished",
+            ]
         )
-        log.check_levels_are(["info", "info", "warning", "info"])
+        log.check_levels_are(["info", "info", "debug", "warning", "info"])
         log.check_events()
 
     def test_logging_dynamic_object_creation(self) -> None:
