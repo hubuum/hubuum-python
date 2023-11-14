@@ -2332,7 +2332,7 @@ https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relation
 
     <span class="k">def</span> <span class="nf">grant_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Grant all permissions to the namespace to the given group."""</span>
-        <span class="n">create</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">create</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">create</span><span class="p">[</span><span class="s2">"namespace"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="n">create</span><span class="p">[</span><span class="s2">"group"</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
         <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">namespace_operations</span><span class="p">(</span><span class="n">fully_qualified</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -2489,7 +2489,7 @@ failure (None): None
 <span class="normal">139</span>
 <span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grant_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Grant all permissions to the namespace to the given group."""</span>
-    <span class="n">create</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">create</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">create</span><span class="p">[</span><span class="s2">"namespace"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
     <span class="n">create</span><span class="p">[</span><span class="s2">"group"</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
     <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">namespace_operations</span><span class="p">(</span><span class="n">fully_qualified</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
