@@ -3,7 +3,7 @@
 # pyright: reportIncompatibleVariableOverride=false
 
 import re
-from typing import List, Union, cast
+from typing import Any, Dict, List, Union, cast
 
 from django.contrib.auth.models import AbstractUser, AnonymousUser, Group
 from django.db import models
@@ -131,7 +131,7 @@ class Namespace(HubuumModel):
 
     def grant_all(self, group: Group) -> bool:
         """Grant all permissions to the namespace to the given group."""
-        create = {}
+        create: Dict[str, Any] = {}
         create["namespace"] = self
         create["group"] = group
         for perm in namespace_operations(fully_qualified=True):

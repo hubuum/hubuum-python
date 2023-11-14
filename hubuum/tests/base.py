@@ -35,7 +35,7 @@ class HubuumModelTestCase(TestCase):
         )
         self.assertIsNotNone(self.namespace)
 
-        self.attributes = {}
+        self.attributes: Dict[str, Any] = {}
         self.obj = None
 
     def tearDown(self):
