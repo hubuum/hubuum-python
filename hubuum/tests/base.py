@@ -7,7 +7,7 @@ from django.db.models import Model
 from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.core import Attachment, AttachmentManager, Extension
+from hubuum.models.core import Attachment, AttachmentManager
 from hubuum.models.iam import Namespace
 from hubuum.models.resources import Person, PurchaseOrder, Room, Vendor
 
@@ -73,10 +73,6 @@ class HubuumModelTestCase(TestCase):
         """Create an object with overridable default group ownership."""
         if not model:
             raise MissingParam
-
-        # Ick.
-        if model in (Extension, AttachmentManager):
-            kwargs["model"] = "host"
 
         obj, _ = model.objects.get_or_create(**kwargs)
         self.assertIsNotNone(obj)

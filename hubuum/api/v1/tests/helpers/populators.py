@@ -124,6 +124,10 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
             )
         )
 
+        self.hosts = self.objects[0:2]
+        self.rooms = self.objects[3:4]
+        self.buildings = self.objects[5]
+
     def all_classes(self) -> List[HubuumClass]:
         """Return all classes."""
         return self.classes

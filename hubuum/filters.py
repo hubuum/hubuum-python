@@ -16,13 +16,7 @@ from django.db.models import (
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
-from hubuum.models.core import (
-    Attachment,
-    AttachmentManager,
-    Extension,
-    ExtensionData,
-    model_is_open,
-)
+from hubuum.models.core import Attachment, AttachmentManager, model_is_open
 from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace, Permission, User
 from hubuum.models.resources import (
@@ -372,36 +366,6 @@ class AttachmentFilterSet(NamespacePermissionFilter):
             "original_filename": _textual_lookups,
         }
         fields.update(_hubuum_fields)
-
-
-class ExtensionFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Extension."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Extension
-        fields = {
-            "name": _textual_lookups,
-            "model": _textual_lookups,
-            "url": _textual_lookups,
-            "require_interpolation": _boolean_lookups,
-            "header": _textual_lookups,
-            "cache_time": _numeric_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class ExtensionDataFilterSet(NamespacePermissionFilter):
-    """FilterSet for the ExtensionData model with a custom json_data_lookup filter."""
-
-    json_data_lookup = JSONFieldLookupFilter(field_name="json_data")
-
-    class Meta:
-        """Meta class for ExtensionDataFilterSet."""
-
-        model = ExtensionData
-        fields = ["extension", "content_type", "object_id", "namespace"]
 
 
 class HostFilterSet(NamespacePermissionFilter):

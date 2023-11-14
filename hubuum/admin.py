@@ -4,7 +4,6 @@ from typing import List, Type
 
 from django.contrib import admin
 
-from hubuum.models.core import Extension, ExtensionData
 from hubuum.models.iam import HubuumModel, Namespace, Permission, User
 from hubuum.models.resources import (
     Host,
@@ -27,7 +26,5 @@ models: List[Type[HubuumModel]] = [
     PurchaseOrder,
     Namespace,
     Permission,
-    Extension,
-    ExtensionData,
 ]
 admin.site.register(models)

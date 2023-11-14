@@ -7,10 +7,10 @@ These models are the ones used by end users to create objects in Hubuum.
 
 from django.db import models
 
-from hubuum.models.iam import NamespacedHubuumModelWithExtensions
+from hubuum.models.iam import NamespacedHubuumModelWithAttachments
 
 
-class Host(NamespacedHubuumModelWithExtensions):
+class Host(NamespacedHubuumModelWithAttachments):
     """Host model, a portal into hosts of any kind."""
 
     name = models.CharField(max_length=255)
@@ -57,7 +57,7 @@ class Host(NamespacedHubuumModelWithExtensions):
         return self.name
 
 
-class HostType(NamespacedHubuumModelWithExtensions):
+class HostType(NamespacedHubuumModelWithAttachments):
     """The type of hosts supported.
 
     These are a touple of a short name and a description, ie:
@@ -84,7 +84,7 @@ class HostType(NamespacedHubuumModelWithExtensions):
         return self.name
 
 
-class Jack(NamespacedHubuumModelWithExtensions):
+class Jack(NamespacedHubuumModelWithAttachments):
     """The wall end of a network jack.
 
     Like the marking of power outlets, there are standards for such things.
@@ -111,7 +111,7 @@ class Jack(NamespacedHubuumModelWithExtensions):
         ordering = ["id"]
 
 
-class Person(NamespacedHubuumModelWithExtensions):
+class Person(NamespacedHubuumModelWithAttachments):
     """A person.
 
     Persons have rooms. Computers may have people. It's all very cozy.
@@ -137,7 +137,7 @@ class Person(NamespacedHubuumModelWithExtensions):
         ordering = ["id"]
 
 
-class PurchaseOrder(NamespacedHubuumModelWithExtensions):
+class PurchaseOrder(NamespacedHubuumModelWithAttachments):
     """Accounting, the order.
 
     When something is bought there is typically some identifier for the purchase.
@@ -161,7 +161,7 @@ class PurchaseOrder(NamespacedHubuumModelWithExtensions):
         return str(self.po_number)
 
 
-class Room(NamespacedHubuumModelWithExtensions):
+class Room(NamespacedHubuumModelWithAttachments):
     """A room.
 
     Possibly with a view. If your room_id contains a floor or building identifier, feel free to
@@ -183,7 +183,7 @@ class Room(NamespacedHubuumModelWithExtensions):
         return self.room_id
 
 
-class Vendor(NamespacedHubuumModelWithExtensions):
+class Vendor(NamespacedHubuumModelWithAttachments):
     """A vendor, they sell you things.
 
     Say thank you. Call your vendor today.

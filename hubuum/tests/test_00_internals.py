@@ -6,7 +6,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 
 from hubuum.exceptions import InvalidParam, MissingParam
 from hubuum.log import RequestColorTracker, filter_sensitive_data
-from hubuum.models.core import model_supports_attachments, model_supports_extensions
+from hubuum.models.core import model_supports_attachments
 from hubuum.models.iam import (
     Namespace,
     User,
@@ -15,11 +15,7 @@ from hubuum.models.iam import (
 )
 from hubuum.models.resources import Host
 from hubuum.tools import get_object
-from hubuum.validators import (
-    validate_model,
-    validate_model_can_have_attachments,
-    validate_model_can_have_extensions,
-)
+from hubuum.validators import validate_model, validate_model_can_have_attachments
 
 from .base import HubuumModelTestCase
 
@@ -104,20 +100,6 @@ class InternalsTestCase(HubuumModelTestCase):
             validate_model("nosuchmodel")
 
         self.assertTrue(validate_model("host"))
-
-    def test_extensions_validation_errors(self):
-        """Test exceptions from the extensions."""
-        # Test that extension support checking works.
-        self.assertTrue(model_supports_extensions("Host"))
-        self.assertTrue(model_supports_extensions(Host))
-
-        # Test that when we have a string, and a model with the name, but it does
-        # not support extensions.
-        with pytest.raises(ValidationError):
-            validate_model_can_have_extensions("user")
-
-        with pytest.raises(ValidationError):
-            validate_model_can_have_extensions("permission")
 
     def test_attachment_validation_errors(self):
         """Test exceptions from the attachments."""

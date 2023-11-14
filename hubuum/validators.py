@@ -4,7 +4,7 @@ This package is NOT allowed to import anything from internally in hubuum, except
 """
 
 import re
-from typing import List, Type
+from typing import Type
 
 import validators
 from django.db.models import Model
@@ -33,32 +33,12 @@ def _get_model(model: str) -> Type[Model]:
     return model
 
 
-def url_interpolation_fields(url: str) -> List[str]:
-    """Return the fields to be interpolated in the URL."""
-    return re.findall(url_interpolation_regexp, url)
-
-
-def validate_model_can_have_extensions(model: str) -> bool:
-    """Validate that the model can have extensions.
-
-    Requirements:
-     - Is a Hubuum model.
-     - Supports extensions.
-    """
-    model = _get_model(model)
-
-    if not model.supports_extensions():
-        raise ValidationError({"model": "Model does not support extensions."})
-
-    return True
-
-
 def validate_model_can_have_attachments(model: str) -> bool:
     """Validate that the model can have attachments.
 
     Requirements:
      - Is a Hubuum model.
-     - Supports extensions.
+     - Supports attachments.
     """
     model = _get_model(model)
 

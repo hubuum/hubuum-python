@@ -6,7 +6,7 @@ Hubuum is a non-opinionated content management database. Through the use of exte
 
 * A REST API to access your resources
 * Fine-grained group-based permissions
-* The possibility to extend models with generic JSON data
+* User-defined classes and fields, optionally defined through JSON Schemas
 
 ## Maintainers
 

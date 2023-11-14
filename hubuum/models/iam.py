@@ -11,12 +11,7 @@ from django.db.models import Model
 from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.core import (
-    AttachmentModel,
-    ExtensionsModel,
-    HubuumModel,
-    NamespacedHubuumModel,
-)
+from hubuum.models.core import AttachmentModel, HubuumModel, NamespacedHubuumModel
 from hubuum.tools import get_model, get_object
 
 
@@ -49,10 +44,8 @@ def namespace_operation_exists(permission: str, fully_qualified: bool = False) -
     return permission in namespace_operations()
 
 
-class NamespacedHubuumModelWithExtensions(
-    NamespacedHubuumModel, AttachmentModel, ExtensionsModel
-):
-    """An abstract model that provides Namespaces and Extensions."""
+class NamespacedHubuumModelWithAttachments(NamespacedHubuumModel, AttachmentModel):
+    """An abstract model that provides Namespaces with attachments."""
 
     class Meta:
         """Meta data for the class."""
@@ -178,11 +171,6 @@ class User(AbstractUser):
     def is_admin(self):
         """Check if the user is any type of admin (staff/superadmin) (or in a similar group?)."""
         return self.is_staff or self.is_superuser
-
-    @classmethod
-    def supports_extensions(cls) -> bool:
-        """Check if a class supports extensions."""
-        return False
 
     @classmethod
     def supports_attachments(cls) -> bool:

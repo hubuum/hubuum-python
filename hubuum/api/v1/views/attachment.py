@@ -29,7 +29,7 @@ from hubuum.models.core import (
     get_model,
     model_supports_attachments,
 )
-from hubuum.models.iam import Namespace, NamespacedHubuumModelWithExtensions
+from hubuum.models.iam import Namespace, NamespacedHubuumModelWithAttachments
 from hubuum.typing import typed_query_params_from_request
 
 from .base import HubuumDetail, HubuumList, LoggingMixin, MultipleFieldLookupORMixin
@@ -185,7 +185,7 @@ class AttachmentDetail(HubuumDetail):
     )
 
     def _ensure_size_limits(
-        self, instance: NamespacedHubuumModelWithExtensions, request: Request
+        self, instance: NamespacedHubuumModelWithAttachments, request: Request
     ) -> bool:
         """Ensure adding the attachment won't exceed size limits."""
         attachment = cast(

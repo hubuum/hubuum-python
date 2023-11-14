@@ -10,8 +10,7 @@
 
 ## Checking Code Style
 
-* `tox -e format` will run black, isort, and pylint on the codebase.
-* `tox -e flake8` will run flake8 with the required extensions on the codebase.
+* `tox -e lint` will run the current linting tools on the codebase.
 
 ## Checking Code Coverage
 

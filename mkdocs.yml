@@ -14,7 +14,6 @@ nav:
   - Using Hubuum:
       - Permissions: permissions.md
       - API: api.md
-      - Extensions: extensions.md
       - Logging: logging.md
       - Examples: examples.md
       - Swagger: swagger.md
