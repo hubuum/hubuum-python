@@ -66,8 +66,16 @@ class BasePopulator:
         params: kwargs: Any
         """
         namespace = self._get_namespace(namespace)
+        name = kwargs.get("name", "Test")
 
-        json_data = json_data or {"key": "value", "listkey": [1, 2, 3]}
+        json_data = json_data or {
+            "key": "value",
+            "listkey": [1, 2, 3],
+            "dictkey": {"one": "valueone", "two": {"name": name}},
+            "name": name,
+            "namespace_name": namespace.name,
+            "namespace_id": namespace.id,
+        }
 
         attributes: Dict[str, Any] = {
             "json_data": json_data,

@@ -271,6 +271,7 @@ class HubuumObjectFilterSet(NamespacePermissionFilter):
 
         model = HubuumObject
         fields = {
+            "name": _textual_lookups,
             "hubuum_class": _key_lookups,
         }
         fields.update(_hubuum_fields)
