@@ -26,7 +26,7 @@ from hubuum.api.v1.serializers import (
 from hubuum.api.v1.views.base import LoggingMixin
 from hubuum.exceptions import Conflict
 from hubuum.filters import HubuumClassFilterSet, HubuumObjectFilterSet
-from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
+from hubuum.models.core import ClassLink, HubuumClass, HubuumObject, ObjectLink
 from hubuum.models.iam import Namespace
 from hubuum.permissions import NameSpace as NamespacePermission
 
@@ -122,7 +122,7 @@ class HubuumObjectList(DynamicListView):
             return HubuumObject.objects.none()
 
         classname = self.kwargs["classname"]
-        return HubuumObject.objects.filter(dynamic_class__name=classname).order_by(
+        return HubuumObject.objects.filter(hubuum_class__name=classname).order_by(
             "name"
         )
 
@@ -135,11 +135,11 @@ class HubuumObjectList(DynamicListView):
         classname = self.kwargs["classname"]
 
         try:
-            dynamic_class = HubuumClass.objects.get(name=classname)
+            hubuum_class = HubuumClass.objects.get(name=classname)
         except HubuumClass.DoesNotExist as exc:
             raise NotFound(f"No HubuumClass found with name '{classname}'") from exc
 
-        serializer.save(dynamic_class=dynamic_class)
+        serializer.save(hubuum_class=hubuum_class)
 
 
 class HubuumObjectDetail(DynamicDetailView):
@@ -163,7 +163,7 @@ class HubuumObjectDetail(DynamicDetailView):
 
         obj = get_object_or_404(
             self.queryset,
-            dynamic_class__name=self.kwargs["classname"],
+            hubuum_class__name=self.kwargs["classname"],
             name=self.kwargs["obj"],
         )
 
@@ -176,7 +176,7 @@ class HubuumObjectDetail(DynamicDetailView):
         """Patch an object from a user defined class."""
         obj = get_object_or_404(
             self.queryset,
-            dynamic_class__name=self.kwargs["classname"],
+            hubuum_class__name=self.kwargs["classname"],
             name=self.kwargs["obj"],
         )
 
@@ -192,7 +192,7 @@ class HubuumObjectDetail(DynamicDetailView):
         """Patch an object from a user defined class."""
         obj = get_object_or_404(
             self.queryset,
-            dynamic_class__name=self.kwargs["classname"],
+            hubuum_class__name=self.kwargs["classname"],
             name=self.kwargs["obj"],
         )
 
@@ -200,6 +200,7 @@ class HubuumObjectDetail(DynamicDetailView):
         obj.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class LinkAbstractView:
     """Abstract link class with shared utilities."""
@@ -417,13 +418,13 @@ class ObjectLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
 
         extra_query = {}
         if targetclass:
-            extra_query = {"target__dynamic_class__name": targetclass}
+            extra_query = {"target__hubuum_class__name": targetclass}
 
         if transitive:
             source = self.get_object_from_model(
                 HubuumObject,
                 f"Source object '{classname}:{obj}' does not exist.",
-                dynamic_class__name=classname,
+                hubuum_class__name=classname,
                 name=obj,
             )
 
@@ -536,7 +537,7 @@ class ObjectLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: i
         # raise a 409 Conflict error
         source_links = ObjectLink.objects.filter(
             source=source_object,
-            target__dynamic_class__name=targetclass,
+            target__hubuum_class__name=targetclass,
         ).count()
 
         if link_type.max_links > 0 and source_links >= link_type.max_links:
@@ -586,14 +587,14 @@ class ObjectLinkDetailView(LinkAbstractView, RetrieveDestroyAPIView):  # type: i
         source_object = self.get_object_from_model(
             HubuumObject,
             "The specified source object does not exist.",
-            dynamic_class__name=classname,
+            hubuum_class__name=classname,
             name=obj,
         )
 
         target_object = self.get_object_from_model(
             HubuumObject,
             "The specified target object does not exist.",
-            dynamic_class__name=targetclass,
+            hubuum_class__name=targetclass,
             name=targetobject,
         )
 

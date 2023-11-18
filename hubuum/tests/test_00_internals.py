@@ -6,16 +6,14 @@ from rest_framework.exceptions import NotFound, ValidationError
 
 from hubuum.exceptions import InvalidParam, MissingParam
 from hubuum.log import RequestColorTracker, filter_sensitive_data
-from hubuum.models.core import model_supports_attachments
 from hubuum.models.iam import (
     Namespace,
     User,
     namespace_operation_exists,
     namespace_operations,
 )
-from hubuum.models.resources import Host
 from hubuum.tools import get_object
-from hubuum.validators import validate_model, validate_model_can_have_attachments
+from hubuum.validators import validate_model
 
 from .base import HubuumModelTestCase
 
@@ -101,20 +99,6 @@ class InternalsTestCase(HubuumModelTestCase):
 
         self.assertTrue(validate_model("host"))
 
-    def test_attachment_validation_errors(self):
-        """Test exceptions from the attachments."""
-        # Test that extension support checking works.
-        self.assertTrue(model_supports_attachments("Host"))
-        self.assertTrue(model_supports_attachments(Host))
-
-        # Test that when we have a string, and a model with the name, but it does
-        # not support attachments.
-        with pytest.raises(ValidationError):
-            validate_model_can_have_attachments("user")
-
-        with pytest.raises(ValidationError):
-            validate_model_can_have_attachments("permission")
-
     def test_filtering_of_sensitive_data(self):
         """Test that sensitive data is filtered from structlog records."""
         # create test data and the expected result
@@ -136,7 +120,7 @@ class InternalsTestCase(HubuumModelTestCase):
             filter_sensitive_data(None, None, [])
 
         with pytest.raises(InvalidParam):
-            filter_sensitive_data(None, None, Host)
+            filter_sensitive_data(None, None, Namespace)
 
     def test_request_color_tracker(self) -> None:
         """Test that the request color tracker works as expected."""

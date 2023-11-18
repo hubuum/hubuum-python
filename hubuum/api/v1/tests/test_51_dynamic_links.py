@@ -383,16 +383,16 @@ class HubuumObjectTestCase(APIv1Objects):
         )
 
         # Fetch each class by name
-        for dynamic_class in objectmap.keys():
-            self.assert_get(f"/dynamic/{dynamic_class}")
+        for hubuum_class in objectmap.keys():
+            self.assert_get(f"/dynamic/{hubuum_class}")
 
         # Fetch objects of a specific class
         self.assert_get_elements("/dynamic/Host/", len(objectmap["Host"]))
 
         # Fetch every object created in every class by name, and test that the name is correct
-        for dynamic_class, objects in objectmap.items():
+        for hubuum_class, objects in objectmap.items():
             for obj in objects:
-                ret = self.get_object_via_api(dynamic_class, obj)
+                ret = self.get_object_via_api(hubuum_class, obj)
                 self.assertEqual(ret.data["name"], obj)
 
     def test_404(self) -> None:

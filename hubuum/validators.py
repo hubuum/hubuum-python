@@ -10,6 +10,7 @@ import validators
 from django.db.models import Model
 from rest_framework.exceptions import ValidationError
 
+from hubuum.models.core import HubuumClass
 from hubuum.tools import get_model
 
 url_interpolation_regexp = re.compile("{(.*?)}")
@@ -33,19 +34,9 @@ def _get_model(model: str) -> Type[Model]:
     return model
 
 
-def validate_model_can_have_attachments(model: str) -> bool:
-    """Validate that the model can have attachments.
-
-    Requirements:
-     - Is a Hubuum model.
-     - Supports attachments.
-    """
-    model = _get_model(model)
-
-    if not model.supports_attachments():
-        raise ValidationError({"model": "Model does not support attachments."})
-
-    return True
+def validate_is_existing_hubuum_class(name: str) -> bool:
+    """Validate that a HubuumClass exists."""
+    return HubuumClass.objects.filter(name=name).exists()
 
 
 def validate_model(model_name: str) -> bool:

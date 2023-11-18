@@ -20,7 +20,7 @@ def is_iso_date(value: str) -> bool:
 
 
 def get_model(model: Union[str, Model]) -> Union[Model, None]:
-    """Return the model from a string. Returns None if it fails.."""
+    """Return the model from a string. Returns None if it fails."""
     try:
         return apps.get_model("hubuum", model)
     except LookupError:

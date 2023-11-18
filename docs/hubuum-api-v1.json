@@ -13484,7 +13484,7 @@
     },
     "/api/v1/dynamic/{classname}": {
       "get": {
-        "operationId": "hubuum_class_detail_get_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_get_api_v1_hubuum_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13514,7 +13514,7 @@
         ]
       },
       "put": {
-        "operationId": "hubuum_class_detail_put_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_put_api_v1_hubuum_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13563,7 +13563,7 @@
         ]
       },
       "patch": {
-        "operationId": "hubuum_class_detail_patch_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_patch_api_v1_hubuum_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13612,7 +13612,7 @@
         ]
       },
       "delete": {
-        "operationId": "hubuum_class_detail_delete_api_v1_dynamic_classname",
+        "operationId": "hubuum_class_detail_delete_api_v1_hubuum_classname",
         "description": "Get, Patch, or Destroy a user defined class.",
         "parameters": [
           {
@@ -13637,7 +13637,7 @@
     },
     "/api/v1/dynamic/{classname}/": {
       "get": {
-        "operationId": "hubuum_object_list_get_api_v1_dynamic_classname",
+        "operationId": "hubuum_object_list_get_api_v1_hubuum_classname",
         "description": "Get or Post a user defined object.",
         "parameters": [
           {
@@ -13650,10 +13650,10 @@
             }
           },
           {
-            "name": "dynamic_class",
+            "name": "hubuum_class",
             "required": false,
             "in": "query",
-            "description": "dynamic_class",
+            "description": "hubuum_class",
             "schema": {
               "type": "string"
             }
@@ -13928,7 +13928,7 @@
         ]
       },
       "post": {
-        "operationId": "hubuum_object_list_post_api_v1_dynamic_classname",
+        "operationId": "hubuum_object_list_post_api_v1_hubuum_classname",
         "description": "Get or Post a user defined object.",
         "parameters": [
           {
@@ -13979,7 +13979,7 @@
     },
     "/api/v1/dynamic/{classname}/{obj}": {
       "get": {
-        "operationId": "hubuum_object_detail_get_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_get_api_v1_hubuum_classname_obj",
         "description": "Get the queryset for this view.\n\nThis is overridden to filter by the classname.\nRequires a `classname` in the URL along with the `obj`.",
         "parameters": [
           {
@@ -14018,7 +14018,7 @@
         ]
       },
       "put": {
-        "operationId": "hubuum_object_detail_put_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_put_api_v1_hubuum_classname_obj",
         "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
@@ -14076,7 +14076,7 @@
         ]
       },
       "patch": {
-        "operationId": "hubuum_object_detail_patch_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_patch_api_v1_hubuum_classname_obj",
         "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
@@ -14134,7 +14134,7 @@
         ]
       },
       "delete": {
-        "operationId": "hubuum_object_detail_delete_api_v1_dynamic_classname_obj",
+        "operationId": "hubuum_object_detail_delete_api_v1_hubuum_classname_obj",
         "description": "Get, Patch, or Destroy an object from a user defined class.\n\nRequires a `classname` and `obj` in the URL.",
         "parameters": [
           {
@@ -14415,7 +14415,7 @@
     },
     "/api/v1/dynamic/{classname}/{obj}/links/": {
       "get": {
-        "operationId": "object_link_list_get_api_v1_dynamic_classname_obj_links",
+        "operationId": "object_link_list_get_api_v1_hubuum_classname_obj_links",
         "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
@@ -14496,7 +14496,7 @@
         ]
       },
       "post": {
-        "operationId": "object_link_list_post_api_v1_dynamic_classname_obj_links",
+        "operationId": "object_link_list_post_api_v1_hubuum_classname_obj_links",
         "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
@@ -14556,7 +14556,7 @@
     },
     "/api/v1/dynamic/{classname}/{obj}/link/{targetclass}/{targetobject}": {
       "get": {
-        "operationId": "object_link_detail_get_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "operationId": "object_link_detail_get_api_v1_hubuum_classname_obj_link_targetclass_targetobject",
         "description": "Get a specific ObjectLink between two objects.",
         "parameters": [
           {
@@ -14613,7 +14613,7 @@
         ]
       },
       "post": {
-        "operationId": "object_link_detail_post_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "operationId": "object_link_detail_post_api_v1_hubuum_classname_obj_link_targetclass_targetobject",
         "description": "Create a new link between two objects.",
         "parameters": [
           {
@@ -14689,7 +14689,7 @@
         ]
       },
       "delete": {
-        "operationId": "object_link_detail_delete_api_v1_dynamic_classname_obj_link_targetclass_targetobject",
+        "operationId": "object_link_detail_delete_api_v1_hubuum_classname_obj_link_targetclass_targetobject",
         "description": "Delete a specific ObjectLink between two objects.",
         "parameters": [
           {
@@ -14741,7 +14741,7 @@
     },
     "/api/v1/dynamic/{classname}/{obj}/links/{targetclass}/": {
       "get": {
-        "operationId": "object_link_list_get_api_v1_dynamic_classname_obj_links_targetclass",
+        "operationId": "object_link_list_get_api_v1_hubuum_classname_obj_links_targetclass",
         "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
@@ -14789,7 +14789,7 @@
         ]
       },
       "post": {
-        "operationId": "object_link_list_post_api_v1_dynamic_classname_obj_links_targetclass",
+        "operationId": "object_link_list_post_api_v1_hubuum_classname_obj_links_targetclass",
         "description": "ObjectLinkListView handles the API endpoints for listing and creating dynamic links.\n\nMethods\n-------\n- get_queryset: retrieves the queryset based on class name and object name/id",
         "parameters": [
           {
@@ -15975,7 +15975,7 @@
           "namespace": {
             "type": "integer"
           },
-          "dynamic_class": {
+          "hubuum_class": {
             "type": "string",
             "readOnly": true
           }

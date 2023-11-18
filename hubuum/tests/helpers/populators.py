@@ -3,7 +3,7 @@
 from typing import Any, Dict, cast
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.dynamic import HubuumClass, HubuumObject
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
 from hubuum.tools import get_model
 
@@ -54,14 +54,14 @@ class BasePopulator:
 
     def create_object_direct(
         self,
-        dynamic_class: HubuumClass = None,
+        hubuum_class: HubuumClass = None,
         namespace: Namespace = None,
         json_data: Dict[str, Any] = None,
         **kwargs: Any,
     ) -> HubuumObject:
         """Create a dynamic object.
 
-        params: dynamic_class: HubuumClass (default: None)
+        params: hubuum_class: HubuumClass (default: None)
         params: namespace: Namespace (default: self.namespace if available)
         params: kwargs: Any
         """
@@ -78,4 +78,4 @@ class BasePopulator:
         for key, value in kwargs.items():
             attributes[key] = value
 
-        return HubuumObject.objects.create(dynamic_class=dynamic_class, **attributes)
+        return HubuumObject.objects.create(hubuum_class=hubuum_class, **attributes)

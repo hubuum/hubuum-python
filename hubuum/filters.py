@@ -16,8 +16,13 @@ from django.db.models import (
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
-from hubuum.models.core import Attachment, AttachmentManager, model_is_open
-from hubuum.models.dynamic import HubuumClass, HubuumObject
+from hubuum.models.core import (
+    Attachment,
+    AttachmentManager,
+    HubuumClass,
+    HubuumObject,
+    model_is_open,
+)
 from hubuum.models.iam import Namespace, Permission, User
 from hubuum.models.resources import (
     Host,
@@ -266,7 +271,7 @@ class HubuumObjectFilterSet(NamespacePermissionFilter):
 
         model = HubuumObject
         fields = {
-            "dynamic_class": _key_lookups,
+            "hubuum_class": _key_lookups,
         }
         fields.update(_hubuum_fields)
 
@@ -344,7 +349,7 @@ class AttachmentManagerFilterSet(RaiseBadRequestOnBadFilter):
 
         model = AttachmentManager
         fields = {
-            "model": _textual_lookups,
+            "hubuum_class": _textual_lookups,
             "enabled": _boolean_lookups,
             "per_object_count_limit": _numeric_lookups,
             "per_object_individual_size_limit": _numeric_lookups,
@@ -360,7 +365,8 @@ class AttachmentFilterSet(NamespacePermissionFilter):
 
         model = Attachment
         fields = {
-            "object_id": _numeric_lookups,
+            "hubuum_class": _key_lookups,
+            "hubuum_object": _key_lookups,
             "sha256": _textual_lookups,
             "size": _numeric_lookups,
             "original_filename": _textual_lookups,

@@ -10,11 +10,10 @@ from django.urls import reverse
 from structlog import get_logger
 from structlog.testing import capture_logs
 
+from hubuum.api.v1.tests.helpers.populators import APIv1Objects
 from hubuum.api.v1.views.attachment import AttachmentAutoSchema, AttachmentDetail
 from hubuum.api.v1.views.base import HubuumDetail
 from hubuum.models.core import Attachment, HubuumModel
-from hubuum.models.iam import Namespace
-from hubuum.models.resources import Host, Person
 
 from .base import HubuumAPITestCase, create_mocked_view
 
@@ -62,37 +61,24 @@ class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
             self.assertEqual(operation_id, answer[i])
 
 
-class HubuumAttachmentTestCase(HubuumAPITestCase):
+class HubuumAttachmentTestCase(APIv1Objects):
     """Base class for testing Hubuum Attachments."""
 
     def setUp(self):
         """Set up the test environment for the class."""
+        super().setUp()
         self.client = self.get_superuser_client()
-        self.namespace, _ = Namespace.objects.get_or_create(name="test")
         self.file_content = b"this is a test file"
-
-    def tearDown(self) -> None:
-        """Tear down the test environment for the class."""
-        self.namespace.delete()
-        return super().tearDown()
 
     def _enable_attachments(self, model: str) -> HttpResponse:
         """Enable attachments for a model."""
         return self.assert_post(
-            "/attachments/manager/", {"model": model, "enabled": True}
+            "/attachments/manager/", {"hubuum_class": model, "enabled": True}
         )
 
     def _enable_attachments_for_hosts(self) -> HttpResponse:
         """Enable attachments for hosts."""
-        return self._enable_attachments("host")
-
-    def _create_host(self, name: str = "test_host") -> Host:
-        """Create a host."""
-        return Host.objects.create(name=name, namespace=self.namespace)
-
-    def _create_person(self, username: str = "test_person") -> Person:
-        """Create a person."""
-        return Person.objects.create(username=username, namespace=self.namespace)
+        return self._enable_attachments("Host")
 
     def _add_attachment(
         self, model: str, obj: HubuumModel, content: bytes
@@ -120,17 +106,17 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
     def test_attachment_create_and_enabled(self):
         """Test that attachments are enabled."""
         self._enable_attachments_for_hosts()
-        res = self.assert_get("/attachments/manager/host")
+        res = self.assert_get("/attachments/manager/Host")
 
         self.assert_post_and_400(
-            "/attachments/manager/", {"model": "host", "enabled": True}
+            "/attachments/manager/", {"dynamic_class": "Hos", "enabled": True}
         )
 
         self.assertEqual(res.data["enabled"], True)
         self.assertTrue(res.data["enabled"])
-        self.assert_patch("/attachments/manager/host", {"enabled": False})
+        self.assert_patch("/attachments/manager/Host", {"enabled": False})
 
-        res = self.assert_get("/attachments/manager/host")
+        res = self.assert_get("/attachments/manager/Host")
         self.assertEqual(res.data["enabled"], False)
         self.assertFalse(res.data["enabled"])
 
@@ -138,7 +124,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         """Test that unsupported models are rejected."""
         self.assert_post_and_400(
             "/attachments/manager/",
-            {"model": "user", "enabled": True, "namespace": self.namespace.id},
+            {"model": "Building", "enabled": True, "namespace": self.namespace.id},
         )
         self.assert_post_and_400(
             "/attachments/manager/",
@@ -148,35 +134,35 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
     def test_attachment_set_limits(self):
         """Test that attachment limitations can be set."""
         self._enable_attachments_for_hosts()
-        res = self.assert_get("/attachments/manager/host")
+        res = self.assert_get("/attachments/manager/Host")
         self.assertEqual(res.data["per_object_count_limit"], 0)
         self.assertEqual(res.data["per_object_individual_size_limit"], 0)
         self.assertEqual(res.data["per_object_total_size_limit"], 0)
 
-        self.assert_patch("/attachments/manager/host", {"per_object_count_limit": 1})
+        self.assert_patch("/attachments/manager/Host", {"per_object_count_limit": 1})
 
         # This will pass even though the per_object_total_size_limit is 0, as 0 is
         # considered unlimited.
         self.assert_patch(
-            "/attachments/manager/host", {"per_object_individual_size_limit": 20}
+            "/attachments/manager/Host", {"per_object_individual_size_limit": 20}
         )
         self.assert_patch(
-            "/attachments/manager/host", {"per_object_total_size_limit": 100}
+            "/attachments/manager/Host", {"per_object_total_size_limit": 100}
         )
 
         # Test that we can't set the total size limit to be smaller than the
         # individual size limit.
         self.assert_patch_and_400(
-            "/attachments/manager/host", {"per_object_total_size_limit": 19}
+            "/attachments/manager/Host", {"per_object_total_size_limit": 19}
         )
 
         # Test that we can't set the individual size limit to be larger than the
         # total size limit.
         self.assert_patch_and_400(
-            "/attachments/manager/host", {"per_object_individual_size_limit": 101}
+            "/attachments/manager/Host", {"per_object_individual_size_limit": 101}
         )
 
-        res = self.assert_get("/attachments/manager/host")
+        res = self.assert_get("/attachments/manager/Host")
         self.assertEqual(res.data["per_object_count_limit"], 1)
         self.assertEqual(res.data["per_object_individual_size_limit"], 20)
         self.assertEqual(res.data["per_object_total_size_limit"], 100)
@@ -185,7 +171,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         """Test that attachment limitations are adhered to."""
         self._enable_attachments_for_hosts()
         self.assert_patch(
-            "/attachments/manager/host",
+            "/attachments/manager/Host",
             {
                 "per_object_count_limit": 1,
                 "per_object_individual_size_limit": 20,
@@ -193,10 +179,10 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
             },
         )
 
-        host = self._create_host()
+        host = self.hosts[0]
         file = self._create_test_file(b"a test file")
         self.assert_post_and_201(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -204,16 +190,16 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         new_file = self._create_test_file(b"a new test file")
         # Test that we can't upload more than one attachment.
         self.assert_post_and_400(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": new_file, "namespace": self.namespace.id},
             format="multipart",
         )
 
-        self.assert_patch("/attachments/manager/host", {"per_object_count_limit": 5})
+        self.assert_patch("/attachments/manager/Host", {"per_object_count_limit": 5})
 
         new_file = self._create_test_file(b"a new test file")
         self.assert_post_and_201(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": new_file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -222,7 +208,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         # > 20 bytes
         file = self._create_test_file(b"this is a test file that is too large")
         self.assert_post_and_400(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -231,7 +217,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         # exceed the limit. 12+16=28 bytes, limit is 30 bytes.
         file = self._create_test_file(b"no space")
         self.assert_post_and_400(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -240,10 +226,10 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         """Test uploading of an attachment."""
         self._enable_attachments_for_hosts()
         file = self._create_test_file()
-        host = self._create_host()
+        host = self.hosts[0]
 
         res = self.assert_post_and_201(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -251,7 +237,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         file_hash = hashlib.sha256(self.file_content).hexdigest()
 
         file_meta = self.assert_get(
-            f"/attachments/data/host/{host.id}/{res.data['id']}"
+            f"/attachments/data/Host/{host.id}/{res.data['id']}"
         )
 
         self.assertEqual(file_meta.data["original_filename"], "test_file.txt")
@@ -259,7 +245,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self.assertEqual(file_meta.data["sha256"], file_hash)
 
         fileres = self.assert_get(
-            f"/attachments/data/host/{host.id}/{res.data['id']}/download"
+            f"/attachments/data/Host/{host.id}/{res.data['id']}/download"
         )
 
         self.assertEqual(fileres.content, self.file_content)
@@ -268,43 +254,44 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         """Test that permissions are enforced."""
         self._enable_attachments_for_hosts()
         file = self._create_test_file()
-        host = self._create_host()
+        host = self.hosts[0]
 
         att = self.assert_post_and_201(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
 
-        self.assert_get(f"/attachments/data/host/{host.id}/{att.data['id']}")
-        self.assert_get(f"/attachments/data/host/{host.id}/{att.data['id']}/download")
+        self.assert_get(f"/attachments/data/Host/{host.id}/{att.data['id']}")
+        self.assert_get(f"/attachments/data/Host/{host.id}/{att.data['id']}/download")
 
         self.client = self.get_user_client()
         self.assert_get_and_403(
-            f"/attachments/data/host/{host.id}/{att.data['id']}",
+            f"/attachments/data/Host/{host.id}/{att.data['id']}",
         )
         self.assert_delete_and_403(
-            f"/attachments/data/host/{host.id}/{att.data['id']}/download",
+            f"/attachments/data/Host/{host.id}/{att.data['id']}/download",
         )
 
-        new_host = Host.objects.create(name="new_host", namespace=self.namespace)
+        new_host = self.hosts[1]
         self.assert_get_and_404(
-            f"/attachments/data/host/{new_host.id}/{att.data['id']}"
+            f"/attachments/data/Host/{new_host.id}/{att.data['id']}"
         )
 
     def test_attachment_filtering(self):
         """Test that filtering works."""
-        for model in ["host", "room", "person"]:
+        for model in ["Host", "Room", "Person"]:
             self._enable_attachments(model)
 
-        host_one = self._create_host(name="host_one")
-        person_one = self._create_person(username="person_one")
-        person_two = self._create_person(username="person_two")
+        host_one = self.hosts[0]
 
-        self._add_attachment("host", host_one, b"host_one")
-        self._add_attachment("person", person_one, b"person_one")
-        self._add_attachment("person", person_two, b"person_two_one")
-        ptt = self._add_attachment("person", person_two, b"person_two_two")
+        room_one = self.rooms[0]
+        room_two = self.rooms[1]
+
+        self._add_attachment("Host", host_one, b"host_one")
+        self._add_attachment("Room", room_one, b"room_one")
+        self._add_attachment("Room", room_two, b"room_two_1")
+        ptt = self._add_attachment("Room", room_two, b"room_two_2")
         sha256 = ptt.data["sha256"]
 
         self.assert_get_elements("/attachments/data/", 4)
@@ -314,71 +301,75 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         )
         self.assert_get_elements("/attachments/data/?sha256__contains=ee", 2)
 
-        self.assert_get_elements("/attachments/data/?model=host", 1)
-        self.assert_get_elements("/attachments/data/?model=person", 3)
+        host_class_id = self.get_class_from_cache("Host").id
+        room_class_id = self.get_class_from_cache("Room").id
+        room_class_name = self.get_class_from_cache("Room").name
 
-        # Misspell person
-        self.assert_get_and_404("/attachments/data/?model=persona")
+        self.assert_get_elements(f"/attachments/data/?hubuum_class={host_class_id}", 1)
+        self.assert_get_elements(f"/attachments/data/?hubuum_class={room_class_id}", 3)
+        self.assert_get_elements(
+            f"/attachments/data/?hubuum_class__name={room_class_name}", 3
+        )
+
+        # No such class, no attachments
+        self.assert_get_elements("/attachments/data/?hubuum_class=9999", 0)
 
         # Fielderror
-        self.assert_get_and_400("/attachments/data/?modela=person")
+        self.assert_get_and_400("/attachments/data/?hubuum_classs=Room")
 
-        self.assert_get_elements("/attachments/data/host/", 1)
-        self.assert_get_elements("/attachments/data/person/", 3)
-        self.assert_get_elements(f"/attachments/data/person/{person_two.id}/", 2)
+        self.assert_get_elements("/attachments/data/Host/", 1)
+        self.assert_get_elements("/attachments/data/Room/", 3)
+        self.assert_get_elements(f"/attachments/data/Room/{room_two.id}/", 2)
         self.assert_get_elements(
-            f"/attachments/data/person/{person_two.id}/?sha256__endswith=ffffff", 0
+            f"/attachments/data/Room/{room_two.id}/?sha256__endswith=ffffff", 0
         )
         self.assert_get_elements(
-            f"/attachments/data/person/{person_two.id}/?sha256__endswith={sha256[-8:]}",
+            f"/attachments/data/Room/{room_two.id}/?sha256__endswith={sha256[-8:]}",
             1,
         )
 
         # Forgetting the query string separator (?).
-        self.assert_get_and_404("/attachments/data/person/username=person_two")
+        self.assert_get_and_404("/attachments/data/Room/name=room_two")
 
         # Filtering by owner objects
-        self.assert_get_elements("/attachments/data/person/?username=person_one", 1)
-        self.assert_get_elements("/attachments/data/person/?username=person_two", 2)
-        self.assert_get_elements(f"/attachments/data/person/?id={person_two.id}", 2)
-
-        # Filtering on sha256 in model listing (requires manipulation of the query)
+        url = "/attachments/data/Room/?hubuum_object"
+        self.assert_get_elements(f"{url}={room_one.id}", 1)
+        self.assert_get_elements(f"{url}={room_two.id}", 2)
         self.assert_get_elements(
-            f"/attachments/data/person/?username=person_two&sha256={sha256}", 1
+            f"/attachments/data/Room/?hubuum_object={room_two.id}", 2
         )
 
-        # Ironically, both of the attachments with sha256s that contain "ee" belong
-        # to person_two.
+        name_url = "/attachments/data/Room/?hubuum_object__name"
+
+        self.assert_get_elements(f"{name_url}={room_two.name}", 2)
+
+        self.assert_get_elements(f"{name_url}={room_two.name}&sha256={sha256}", 1)
+
+        self.assert_get_elements(f"{name_url}={room_two.name}&sha256__contains=e", 2)
+        self.assert_get_elements(f"{name_url}={room_two.name}&sha256__endswith=ffff", 0)
         self.assert_get_elements(
-            "/attachments/data/person/?username=person_two&sha256__contains=ee", 2
-        )
-        self.assert_get_elements(
-            "/attachments/data/person/?username=person_two&sha256__endswith=ffff", 0
-        )
-        self.assert_get_elements(
-            f"/attachments/data/person/?username=person_two&sha256__endswith={sha256[-8:]}",
-            1,
+            f"{name_url}={room_two.name}&sha256__endswith={sha256[-8:]}", 1
         )
 
         # Broken query string
-        self.assert_get_and_400("/attachments/data/person/?uname=person_two")
-        self.assert_get_and_400("/attachments/data/person/?id=foo")
+        self.assert_get_and_400("/attachments/data/Room/?uname=room_two")
+        self.assert_get_and_400("/attachments/data/Room/?id=foo")
 
     def test_attachment_data_duplicate(self):
         """Test uploading of an attachment."""
         self._enable_attachments_for_hosts()
         file = self._create_test_file()
-        host = self._create_host()
+        host = self.hosts[0]
 
         self.assert_post_and_201(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
 
         file = self._create_test_file()
         self.assert_post_and_409(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -390,68 +381,74 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self.assert_post_and_404("/attachments/data/nope/1", {})
 
         # Filter on model that does not support attachments
-        self.assert_get_and_400("/attachments/data/?model=namespace")
+        #        self.assert_get_and_400("/attachments/data/?hubuum_class=1")
 
         # Filter on non-existent model
-        self.assert_get_and_404("/attachments/data/?model=nope")
+        #        self.assert_get_and_404("/attachments/data/?hubuum_class=99")
 
-        host = self._create_host()
+        host = self.hosts[0]
         file = self._create_test_file()
         # Model exists, but does not have attachments enabled
         self.assert_post_and_400(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
 
-        # Model exists, but does not have support for attachments
-        self.assert_get_and_400("/attachments/data/namespace/1")
-        self.assert_post_and_400(
+        self.assert_get_and_404("/attachments/data/namespace/1")
+        self.assert_post_and_404(
             f"/attachments/data/namespace/{self.namespace.id}",
+            {"attachment": file, "namespace": self.namespace.id},
+            format="multipart",
+        )
+        # Model exists, but attachments are not enabled for it
+        self.assert_post_and_400(
+            f"/attachments/data/Host/{self.namespace.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
 
         # Model exists, has attachments enabled, but the attachment does not exist
         self._enable_attachments_for_hosts()
-        self.assert_get_and_404("/attachments/data/host/1")
-        self.assert_get_and_404("/attachments/data/host/wrongtypehere")
-
-        # No such host
-        self.assert_post_and_404("/attachments/data/host/99", {})
-
-        # Disable attachments for host, and try again
-        host = self._create_host()
-        self.assert_patch("/attachments/manager/host", {"enabled": False})
-        self.assert_post_and_400(
-            f"/attachments/data/host/{host.id}", format="multipart"
-        )
+        self.assert_get_and_404("/attachments/data/Host/1")
+        self.assert_get_and_404("/attachments/data/Host/wrongtypehere")
 
         # Uploading without setting format=multipart
+        # Note: doing this without host supporting attachments will give a 400.
         self.assert_post_and_415(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": "notafile", "namespace": self.namespace.id},
+        )
+
+        # No such host
+        self.assert_post_and_404("/attachments/data/Host/99", {})
+
+        # Disable attachments for host, and try again
+        host = self.hosts[0]
+        self.assert_patch("/attachments/manager/Host", {"enabled": False})
+        self.assert_post_and_400(
+            f"/attachments/data/Host/{host.id}", format="multipart"
         )
 
     def test_attachment_delete(self):
         """Test manually deleting an attachment."""
         self._enable_attachments_for_hosts()
         file = self._create_test_file()
-        host = self._create_host()
+        host = self.hosts[0]
 
         att = self.assert_post_and_201(
-            f"/attachments/data/host/{host.id}",
+            f"/attachments/data/Host/{host.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
 
-        self.assert_get(f"/attachments/data/host/{host.id}/{att.data['id']}")
-        self.assert_get(f"/attachments/data/host/{host.id}/{att.data['id']}/download")
+        self.assert_get(f"/attachments/data/Host/{host.id}/{att.data['id']}")
+        self.assert_get(f"/attachments/data/Host/{host.id}/{att.data['id']}/download")
 
-        self.assert_delete(f"/attachments/data/host/{host.id}/{att.data['id']}")
-        self.assert_get_and_404(f"/attachments/data/host/{host.id}/{att.data['id']}")
+        self.assert_delete(f"/attachments/data/Host/{host.id}/{att.data['id']}")
+        self.assert_get_and_404(f"/attachments/data/Host/{host.id}/{att.data['id']}")
         self.assert_get_and_404(
-            f"/attachments/data/host/{host.id}/{att.data['id']}/download"
+            f"/attachments/data/Host/{host.id}/{att.data['id']}/download"
         )
 
     # TODO: patch.object?

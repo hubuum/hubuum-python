@@ -2,7 +2,7 @@
 from django.contrib.auth.models import Group
 from django.test import TestCase
 
-from hubuum.models.dynamic import HubuumClass, HubuumObject
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace, Permission, User
 
 
@@ -60,14 +60,14 @@ class PermissionsTestCase(TestCase):
         self.onehost = HubuumObject.objects.create(
             name="one",
             namespace=self.onenamespace,
-            dynamic_class=self.testclass,
+            hubuum_class=self.testclass,
             json_data={"name": "one"},
         )
 
         self.twohost = HubuumObject.objects.create(
             name="two",
             namespace=self.twonamespace,
-            dynamic_class=self.testclass,
+            hubuum_class=self.testclass,
             json_data={"name": "two"},
         )
 

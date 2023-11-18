@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple, Union
 from django.http import HttpResponse
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
-from hubuum.models.dynamic import HubuumClass, HubuumObject
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
 from hubuum.tests.helpers.populators import BasePopulator
 
@@ -77,14 +77,14 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
             cls, obj_name = self.split_class_object(cls_obj_str)
 
             for hubuum_obj in self.objects:
-                if hubuum_obj.dynamic_class.name == cls and hubuum_obj.name == obj_name:
+                if hubuum_obj.hubuum_class.name == cls and hubuum_obj.name == obj_name:
                     return hubuum_obj
             return None  # or raise an exception if an object with that name should always exist
         else:
             return [
                 hubuum_obj
                 for hubuum_obj in self.objects
-                if hubuum_obj.dynamic_class.name == cls_obj_str
+                if hubuum_obj.hubuum_class.name == cls_obj_str
             ]
 
     def create_objects(self) -> None:
@@ -92,14 +92,14 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
 
         The following objects are created:
         - Hosts (3, named host1, host2, host3)
-        - Rooms (2, named room1, room2, room3)
+        - Rooms (2, named room1, room2)
         - Buildings (1, named building1)
         """
         # Create an array of hosts with names host1, host2, host3
         for i in range(1, 4):
             self.objects.append(
                 self.create_object_direct(
-                    dynamic_class=self.get_class_from_cache("Host"),
+                    hubuum_class=self.get_class_from_cache("Host"),
                     namespace=self.namespace,
                     name=f"host{i}",
                 )
@@ -109,7 +109,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
         for i in range(1, 3):
             self.objects.append(
                 self.create_object_direct(
-                    dynamic_class=self.get_class_from_cache("Room"),
+                    hubuum_class=self.get_class_from_cache("Room"),
                     namespace=self.namespace,
                     name=f"room{i}",
                 )
@@ -118,14 +118,14 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
         # Create a building with name building1
         self.objects.append(
             self.create_object_direct(
-                dynamic_class=self.get_class_from_cache("Building"),
+                hubuum_class=self.get_class_from_cache("Building"),
                 namespace=self.namespace,
                 name="building1",
             )
         )
 
-        self.hosts = self.objects[0:2]
-        self.rooms = self.objects[3:4]
+        self.hosts = self.objects[0:3]
+        self.rooms = self.objects[3:5]
         self.buildings = self.objects[5]
 
     def all_classes(self) -> List[HubuumClass]:
@@ -136,9 +136,9 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
         """Return all objects."""
         return self.objects
 
-    def get_object_via_api(self, dynamic_class: str, name: str) -> HubuumObject:
+    def get_object_via_api(self, hubuum_class: str, name: str) -> HubuumObject:
         """Get a dynamic object."""
-        return self.assert_get(f"/dynamic/{dynamic_class}/{name}")
+        return self.assert_get(f"/dynamic/{hubuum_class}/{name}")
 
     def split_class_object(self, class_object: str) -> Tuple[str, str]:
         """Split a class.object string into class and object."""
@@ -207,10 +207,9 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
                 if returned:
                     pret: Dict[str, Any] = {
                         "name": returned["object"]["name"],
-                        "class": returned["object"]["dynamic_class"],
+                        "class": returned["object"]["hubuum_class"],
                         "path": [
-                            f"{d['dynamic_class']}.{d['name']}"
-                            for d in returned["path"]
+                            f"{d['hubuum_class']}.{d['name']}" for d in returned["path"]
                         ],
                     }
                     print(pret)
@@ -220,7 +219,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
         self.assertEqual(len(ret.data), len(expected_data_list))
 
         for returned_obj in ret.data:
-            self.assertEqual(returned_obj["object"]["dynamic_class"], class2)
+            self.assertEqual(returned_obj["object"]["hubuum_class"], class2)
 
         # Check each returned object against expected data
         for expected_data, actual_data in zip(expected_data_list, ret.data):
@@ -228,7 +227,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
 
             self.assertEqual(actual_data["object"]["name"], expected_data["name"])
             self.assertEqual(
-                actual_data["object"]["dynamic_class"], expected_data["class"]
+                actual_data["object"]["hubuum_class"], expected_data["class"]
             )
 
             # Check each path item against expected values
@@ -237,7 +236,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
                 expected_class, expected_obj = self.split_class_object(class_obj_pair)
                 path_item = actual_data["path"][i]
                 self.assertEqual(path_item["name"], expected_obj)
-                self.assertEqual(path_item["dynamic_class"], expected_class)
+                self.assertEqual(path_item["hubuum_class"], expected_class)
 
         return ret
 
@@ -245,17 +244,17 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
         self, class_name: str, obj_name: str, json_data: Dict[str, Any] = None
     ) -> Tuple[HubuumClass, HubuumObject]:
         """Create a class and an object."""
-        dynamic_class = HubuumClass.objects.create(
+        hubuum_class = HubuumClass.objects.create(
             name=class_name,
             namespace=self.namespace,
         )
         dynamic_object = HubuumObject.objects.create(
             name=obj_name,
-            dynamic_class=dynamic_class,
+            hubuum_class=hubuum_class,
             namespace=self.namespace,
             json_data=json_data or {"name": "Noone"},
         )
-        return dynamic_class, dynamic_object
+        return hubuum_class, dynamic_object
 
     def tearDown(self) -> None:
         """Delete the namespace after the test."""

@@ -12,22 +12,22 @@ class APIHostClean(APIv1Classes):
         host_class = self.get_class_from_cache("Host")
         ns = namespace or self.namespace
         return self.create_object_direct(
-            dynamic_class=host_class, namespace=ns, name=name
+            hubuum_class=host_class, namespace=ns, name=name
         )
 
     def test_host_listing_clean(self):
         """Test that a user sees the correct number of hosts."""
         host_class = self.get_class_from_cache("Host")
         ns1 = self._create_namespace("namespace_1")
-        self.create_object_direct(dynamic_class=host_class, namespace=ns1, name="one")
+        self.create_object_direct(hubuum_class=host_class, namespace=ns1, name="one")
         self.client = self.get_user_client(username="tmp", groupname="tmpgroup")
         self.assert_get_elements("/dynamic/Host/", 0)
         self.grant("tmpgroup", ns1.name, ["has_read"])
         self.assert_get_elements("/dynamic/Host/", 1)
-        self.create_object_direct(dynamic_class=host_class, namespace=ns1, name="two")
+        self.create_object_direct(hubuum_class=host_class, namespace=ns1, name="two")
         self.assert_get_elements("/dynamic/Host/", 2)
         ns2 = self._create_namespace("namespace_2")
-        self.create_object_direct(dynamic_class=host_class, namespace=ns2, name="three")
+        self.create_object_direct(hubuum_class=host_class, namespace=ns2, name="three")
         self.assert_get_elements("/dynamic/Host/", 2)
 
         for ns in [ns1, ns2]:
@@ -84,10 +84,10 @@ class APIHost(APIv1Objects):
         self.assert_get_elements("/dynamic/Host/", 0)
         self.grant("tmpgroup", ns1.name, ["has_read"])
         self.assert_get_elements("/dynamic/Host/", 3)
-        self.create_object_direct(dynamic_class=host_class, namespace=ns1, name="one")
+        self.create_object_direct(hubuum_class=host_class, namespace=ns1, name="one")
         self.assert_get_elements("/dynamic/Host/", 4)
         ns2 = self.namespaces[1]
-        self.create_object_direct(dynamic_class=host_class, namespace=ns2, name="two")
+        self.create_object_direct(hubuum_class=host_class, namespace=ns2, name="two")
         self.assert_get_elements("/dynamic/Host/", 4)
 
     def test_field_validation(self):

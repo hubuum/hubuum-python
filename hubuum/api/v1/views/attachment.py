@@ -8,7 +8,7 @@ from django.core.exceptions import FieldError
 from django.db.models import Model
 from django.urls import resolve
 from rest_framework import generics, status
-from rest_framework.exceptions import NotFound, ParseError  # NotAuthenticated,
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -23,12 +23,7 @@ from hubuum.exceptions import (
     UnsupportedAttachmentModelError,
 )
 from hubuum.filters import AttachmentFilterSet, AttachmentManagerFilterSet
-from hubuum.models.core import (
-    Attachment,
-    AttachmentManager,
-    get_model,
-    model_supports_attachments,
-)
+from hubuum.models.core import Attachment, AttachmentManager, HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace, NamespacedHubuumModelWithAttachments
 from hubuum.typing import typed_query_params_from_request
 
@@ -82,7 +77,10 @@ class AttachmentManagerList(HubuumList):
 
 
 class AttachmentManagerDetail(HubuumDetail):
-    """Get, Patch, or Destroy an attachment."""
+    """Get, Patch, or Destroy an attachment manager.
+
+    AttachmentManager objects are used to configure attachments for a given hubuum class.
+    """
 
     schema = AutoSchema(
         tags=["Attachment"],
@@ -90,7 +88,7 @@ class AttachmentManagerDetail(HubuumDetail):
 
     queryset = AttachmentManager.objects.all()
     serializer_class = AttachmentManagerSerializer
-    lookup_fields = ("id", "model")
+    lookup_fields = ("id", "hubuum_class")
 
 
 class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, LoggingMixin):
@@ -106,51 +104,44 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
 
     def _get_model(self, model_name: str) -> Model:
         """Get the model, or raise 404."""
-        model_name_lower = model_name.lower()
-        model = get_model(model_name_lower)
+        obj = HubuumClass.objects.filter(name=model_name).first()
 
-        if model is None:
-            raise NotFound(detail=f"Model {model_name} does not exist.")
+        if obj is None:
+            raise NotFound(detail=f"Class {model_name} does not exist.")
 
-        if not model_supports_attachments(model):
-            raise UnsupportedAttachmentModelError()
+        if not obj.supports_attachments():
+            raise UnsupportedAttachmentModelError(
+                f"Class {model_name} does not support attachments."
+            )
 
-        return model
+        return obj
 
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get all attachments for a given model."""
         attachments = []
 
         if self.kwargs.get("model"):
-            model_name = self.kwargs.get("model").lower()
+            model_name = self.kwargs.get("model")
             model = self._get_model(model_name)
-            content_type = ContentType.objects.get_for_model(model)
 
-            # Get all attachments for the content_type, ie, the model in question.
-            # But filter out the attachments that belong to objects that match the
+            # Filter out the attachments that belong to objects that match the
             # query parameters.
-            model_filter: Dict[str, str] = {}
             attachment_filter: Dict[str, str] = {}
 
             for key, value in typed_query_params_from_request(request).items():
-                if key.startswith("sha256"):
-                    attachment_filter[key] = value
-                else:
-                    model_filter[key] = value
+                attachment_filter[key] = value
 
-            if self.kwargs.get("instance"):
-                model_filter["id"] = self.kwargs.get("instance")
+            if kwargs.get("instance"):
+                attachment_filter["hubuum_object"] = kwargs.get("instance")
 
             try:
                 attachments = Attachment.objects.filter(
-                    content_type=content_type,
-                    **attachment_filter,
-                    object_id__in=model.objects.filter(
-                        **model_filter,
-                    ),
+                    hubuum_class=model, **attachment_filter
                 )
-            except (ValueError, FieldError) as exc:
+            except FieldError as exc:
                 raise ParseError(detail="Invalid query parameter.") from exc
+            except ValueError as exc:
+                raise ParseError(detail="Invalid parameter value.") from exc
         else:
             # Be helpful and translate model= to content_type=.
             # QueryDict is immutable, so we need to make a copy.
@@ -167,8 +158,10 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
                 attachments = Attachment.objects.filter(
                     **modified_query_dict,
                 )
-            except (ValueError, FieldError) as exc:
+            except FieldError as exc:
                 raise ParseError(detail="Invalid query parameter.") from exc
+            except ValueError as exc:
+                raise ParseError(detail="Invalid parameter value.") from exc
 
         return Response(AttachmentSerializer(attachments, many=True).data)
 
@@ -213,6 +206,20 @@ class AttachmentDetail(HubuumDetail):
 
         return True
 
+    def _get_model(self, model_name: str) -> HubuumClass:
+        """Get the model, or raise 404."""
+        obj = HubuumClass.objects.filter(name=model_name).first()
+
+        if obj is None:
+            raise NotFound(detail=f"Class {model_name} does not exist.")
+
+        if not obj.supports_attachments():
+            raise UnsupportedAttachmentModelError(
+                f"Class {model_name} does not support attachments."
+            )
+
+        return obj
+
     def _get_attachment(
         self, request: Request, *args: Any, **kwargs: Any
     ) -> Attachment:
@@ -220,26 +227,18 @@ class AttachmentDetail(HubuumDetail):
         # This view is called by the URL pattern that includes the part:
         # /data/<model>/... as such there is now way to get here and have
         # the model kwarg be None.
-        model_name = self.kwargs.get("model").lower()
+        model_name = self.kwargs.get("model")
         obj_id = self.kwargs.get("instance")
         attachment_id = self.kwargs.get("attachment")
 
-        model = get_model(model_name)
-
-        if model is None:
-            raise NotFound(detail=f"Model {model_name} does not exist.")
-
-        if not model_supports_attachments(model):
-            raise UnsupportedAttachmentModelError()
-
-        content_type = ContentType.objects.get_for_model(model)
+        cls = self._get_model(model_name)
 
         obj = None
         for field in self.lookup_fields:
             try:
                 obj = Attachment.objects.get(
-                    content_type=content_type,
-                    object_id=obj_id,
+                    hubuum_class=cls,
+                    hubuum_object=obj_id,
                     **{field: attachment_id},
                 )
             except (Attachment.DoesNotExist, ValueError):
@@ -286,28 +285,26 @@ class AttachmentDetail(HubuumDetail):
         # /data/<model>/... as such there is now way to get here and have
         # the model kwarg be None.
         model_name = kwargs["model"]
+        cls = self._get_model(model_name)
 
-        model = get_model(model_name)
+        obj = self.get_object("instance", HubuumObject)
 
-        if model is None:
-            raise NotFound(detail=f"Model {model_name} does not exist.")
-
-        if not model_supports_attachments(model):
-            raise UnsupportedAttachmentModelError()
-
-        content_type = ContentType.objects.get_for_model(model)
-        obj = self.get_object(model=model, lookup_identifier="instance")
-
-        # Note that the validator requires content_type and object_id to be
-        # present in the request data, but we got them from the URL, so we
-        # have to manually add them back into the request data.
-        request.data["content_type"] = content_type.id
-        request.data["object_id"] = cast(int, obj.id)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not obj:
+            raise NotFound(detail="Object not found.")
 
         if not obj.attachments_are_enabled():
             raise AttachmentsNotEnabledError()
+
+        if not self.check_object_permissions(request, obj):
+            PermissionDenied("No permission to add attachments to this object.")
+
+        # Note that the validator requires hubuum_class and hubuum_object to be
+        # present in the request data, but we got them from the URL, so we
+        # have to manually add them back into the request data.
+        request.data["hubuum_object"] = cast(int, obj.id)
+        request.data["hubuum_class"] = cast(int, cls.id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         self._ensure_size_limits(obj, request)
 
@@ -317,8 +314,8 @@ class AttachmentDetail(HubuumDetail):
         attachment_data = Attachment(
             namespace=namespace,
             attachment=request.data.get("attachment"),
-            content_type=content_type,
-            object_id=obj.id,
+            hubuum_class=cls,
+            hubuum_object=obj,
         )
         attachment_data.save()
 

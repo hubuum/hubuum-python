@@ -12,8 +12,14 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
 from hubuum.exceptions import Conflict
-from hubuum.models.core import Attachment, AttachmentManager
-from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
+from hubuum.models.core import (
+    Attachment,
+    AttachmentManager,
+    ClassLink,
+    HubuumClass,
+    HubuumObject,
+    ObjectLink,
+)
 from hubuum.models.iam import Namespace, Permission, User
 from hubuum.models.resources import (
     Host,
@@ -248,10 +254,10 @@ class HubuumClassSerializer(HubuumMetaSerializer):
 class HubuumObjectSerializer(HubuumMetaSerializer):
     """Serialize a HubuumObject object."""
 
-    # Make the dynamic_class field read-only so that it's not required during initial validation
-    # dynamic_class = serializers.PrimaryKeyRelatedField(read_only=True)
+    # Make the hubuum_class field read-only so that it's not required during initial validation
+    # hubuum_class = serializers.PrimaryKeyRelatedField(read_only=True)
 
-    dynamic_class = serializers.SlugRelatedField(slug_field="name", read_only=True)
+    hubuum_class = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         """How to serialize the object."""
@@ -263,7 +269,7 @@ class HubuumObjectSerializer(HubuumMetaSerializer):
             "created_at",
             "json_data",
             "namespace",
-            "dynamic_class",
+            "hubuum_class",
         ]
 
 

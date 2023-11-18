@@ -10,7 +10,7 @@ from hubuum.api.v1.views.dynamic import (
     HubuumObjectDetail,
     HubuumObjectList,
 )
-from hubuum.models.dynamic import HubuumClass, HubuumObject
+from hubuum.models.core import HubuumClass, HubuumObject
 
 
 class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
@@ -96,14 +96,14 @@ class DynamicBaseTestCase(HubuumAPITestCase):
 
     def create_object_direct(
         self,
-        dynamic_class: str = None,
+        hubuum_class: str = None,
         namespace: int = None,
         name: str = None,
         json_data: Dict[str, Any] = None,
     ) -> HubuumObject:
         """Create a dynamic object."""
         ret = self.assert_post(
-            f"/dynamic/{dynamic_class}/",
+            f"/dynamic/{hubuum_class}/",
             {
                 "name": name,
                 "namespace": namespace,
@@ -133,7 +133,7 @@ class HubuumClassTestCase(DynamicBaseTestCase):
         },
     }
 
-    def test_creating_dynamic_class(self):
+    def test_creating_hubuum_class(self):
         """Test creating a dynamic class."""
         ret = self.create_class_direct(name="Test")
         self.assertEqual(ret.data["name"], "Test")
@@ -143,7 +143,7 @@ class HubuumClassTestCase(DynamicBaseTestCase):
         cret = self.create_class_direct()
         json_data = {"key": "value", "listkey": [1, 2, 3]}
         oret = self.create_object_direct(
-            dynamic_class=cret.data["name"],
+            hubuum_class=cret.data["name"],
             json_data=json_data,
             name="test",
             namespace=cret.data["namespace"],
@@ -158,7 +158,7 @@ class HubuumClassTestCase(DynamicBaseTestCase):
         )
         json_data = {"age": 42}
         oret = self.create_object_direct(
-            dynamic_class=cret.data["name"],
+            hubuum_class=cret.data["name"],
             json_data=json_data,
             name="test_name",
             namespace=cret.data["namespace"],
