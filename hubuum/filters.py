@@ -24,15 +24,6 @@ from hubuum.models.core import (
     model_is_open,
 )
 from hubuum.models.iam import Namespace, Permission, User
-from hubuum.models.resources import (
-    Host,
-    HostType,
-    Jack,
-    Person,
-    PurchaseOrder,
-    Room,
-    Vendor,
-)
 from hubuum.typing import typed_user_from_request
 
 _key_lookups = ["exact"]  # in?
@@ -371,111 +362,5 @@ class AttachmentFilterSet(NamespacePermissionFilter):
             "sha256": _textual_lookups,
             "size": _numeric_lookups,
             "original_filename": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class HostFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Host."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Host
-        fields = {
-            "name": _textual_lookups,
-            "fqdn": _textual_lookups,
-            "serial": _textual_lookups,
-            "registration_date": _date_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class HostTypeFilterSet(NamespacePermissionFilter):
-    """FilterSet class for HostType."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = HostType
-        fields = {"name": _textual_lookups, "description": _textual_lookups}
-        fields.update(_hubuum_fields)
-
-
-class JackFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Jack."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Jack
-        fields = {
-            "name": _textual_lookups,
-            "building": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class PersonFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Person."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Person
-        fields = {
-            "username": _textual_lookups,
-            "section": _textual_lookups,
-            "department": _textual_lookups,
-            "email": _textual_lookups,
-            "office_phone": _textual_lookups,
-            "mobile_phone": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class PurchaseOrderFilterSet(NamespacePermissionFilter):
-    """FilterSet class for PurchaseOrder."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = PurchaseOrder
-        fields = {
-            "order_date": _date_lookups,
-            "po_number": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class RoomFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Room."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Room
-        fields = {
-            "room_id": _textual_lookups,
-            "building": _textual_lookups,
-            "floor": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class VendorFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Vendor."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Vendor
-        fields = {
-            "vendor_name": _textual_lookups,
-            "vendor_url": _textual_lookups,
-            "vendor_credentials": _textual_lookups,
-            "contact_name": _textual_lookups,
-            "contact_email": _textual_lookups,
-            "contact_phone": _textual_lookups,
         }
         fields.update(_hubuum_fields)

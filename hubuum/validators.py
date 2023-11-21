@@ -39,19 +39,6 @@ def validate_is_existing_hubuum_class(name: str) -> bool:
     return HubuumClass.objects.filter(name=name).exists()
 
 
-def validate_model(model_name: str) -> bool:
-    """Validate that the textual name of the model is valid.
-
-    Requirements:
-     - Is a string.
-     - Resolves as the name of a Hubuum model.
-
-     _get_model will raise a ValidationError if the model is not found.
-    """
-    _get_model(model_name)
-    return True
-
-
 def validate_url(url: str) -> bool:
     """Validate that the URL field is valid.
 

@@ -7,8 +7,6 @@ from dateutil.parser import parse
 from django.db import models
 from structlog.types import EventDict
 
-from hubuum.tools import get_model
-
 
 class LogAnalyzer:
     """A class used to validate log entries captured during testing.
@@ -140,11 +138,6 @@ class LogAnalyzer:
 
         """
         self.expected_response_model_string = model
-        if model:
-            model = get_model(model)
-            assert issubclass(model, models.Model), "model must be a Django model"
-
-        self.expected_response_model = model
         self.expected_response_content = content
 
     def get_log(self, index: int) -> EventDict:

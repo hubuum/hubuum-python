@@ -11,8 +11,8 @@ from django.db.models import Model
 from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.core import AttachmentModel, HubuumModel, NamespacedHubuumModel
-from hubuum.tools import get_model, get_object
+from hubuum.models.core import HubuumModel
+from hubuum.tools import get_object
 
 
 def namespace_operations(fully_qualified: bool = False) -> List[str]:
@@ -42,15 +42,6 @@ def namespace_operation_exists(permission: str, fully_qualified: bool = False) -
         return permission in namespace_operations(fully_qualified=True)
 
     return permission in namespace_operations()
-
-
-class NamespacedHubuumModelWithAttachments(NamespacedHubuumModel, AttachmentModel):
-    """An abstract model that provides Namespaces with attachments."""
-
-    class Meta:
-        """Meta data for the class."""
-
-        abstract = True
 
 
 class Permission(HubuumModel):
@@ -158,7 +149,7 @@ class User(AbstractUser):
     """Extension to the default User class."""
 
     model_permissions_pattern = re.compile(
-        r"^hubuum.(create|read|update|delete|namespace)_(\w+)$"
+        r"^hubuum.(create|read|update|delete|namespace)$"
     )
     lookup_fields = ["id", "username", "email"]
 
@@ -275,18 +266,16 @@ class User(AbstractUser):
 
         try:
             match = re.match(User.model_permissions_pattern, perm)
-            operation, model = match.groups()  # type: ignore
+            operation = match.groups()[0]  # type: ignore
         except AttributeError as exc:
             raise MissingParam(
                 f"Unknown permission '{perm}' passed to has_perm"
             ) from exc
 
-        if namespace_operation_exists(operation) and get_model(model):
+        if namespace_operation_exists(operation):
             field = "has_" + operation
         else:
-            raise MissingParam(
-                f"Unknown operation or model '{operation} / {model}' passed to has_perm"
-            )
+            raise MissingParam(f"Unknown operation '{operation}' passed to has_perm")
 
         # We should always get an object to test against.
         if obj:

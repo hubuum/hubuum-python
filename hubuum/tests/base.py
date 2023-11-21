@@ -9,7 +9,6 @@ from django.test import TestCase
 from hubuum.exceptions import MissingParam
 from hubuum.models.core import Attachment, AttachmentManager
 from hubuum.models.iam import Namespace
-from hubuum.models.resources import Person, PurchaseOrder, Room, Vendor
 
 
 class HubuumModelTestCase(TestCase):
@@ -82,15 +81,7 @@ class HubuumModelTestCase(TestCase):
     def _test_str(self):
         """Test that stringifying objects works as expected."""
         obj = self.obj
-        if isinstance(obj, Person):
-            self.assertEqual(str(obj), self.attribute("username"))
-        elif isinstance(obj, PurchaseOrder):
-            self.assertEqual(str(obj), self.attribute("po_number"))
-        elif isinstance(obj, Room):
-            self.assertEqual(str(obj), self.attribute("room_id"))
-        elif isinstance(obj, Vendor):
-            self.assertEqual(str(obj), self.attribute("vendor_name"))
-        elif isinstance(obj, (Attachment, AttachmentManager)):
+        if isinstance(obj, (Attachment, AttachmentManager)):
             self.assertEqual(str(obj), str(obj.id))
         else:
             self.assertEqual(str(obj), self.attribute("name"))

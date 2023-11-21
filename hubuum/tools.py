@@ -56,7 +56,7 @@ def get_object(
 
     for field in fields:
         try:
-            obj = cast(Model, cls.objects.get(**{field: lookup_value}))
+            obj = cls.objects.get(**{field: lookup_value})
             if obj:
                 return obj
 

@@ -19,7 +19,7 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
         """Test redirects of incomplete URLs."""
         self.client = self.get_superuser_client()
         self.assert_get_and_301("/iam/users")
-        self.assert_get_and_301("/resources/hosts")
+        self.assert_get_and_301("/dynamic")
 
     def test_user_access_without_authentication(self):
         """Test unauthenticated user access."""
@@ -41,10 +41,10 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
 
     def test_logout(self):
         """Test authenticated logout."""
-        self.assert_get("/resources/hosts/")
+        self.assert_get("/.meta/version")
         # TODO: #17 Note that logout returns 200 in normal django context,
         self.assert_post_and_204("/api/auth/logout/")
-        self.assert_get_and_401("/resources/hosts/")
+        self.assert_get_and_401("/.meta/version")
 
     def test_logout_without_authentication(self):
         """Test unauthenticated logout."""
@@ -53,25 +53,25 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
 
     def test_force_expire(self):
         """Test using a forcibly expired token."""
-        self.assert_get("/resources/hosts/")
+        self.assert_get("/.meta/version")
         token = AuthToken.objects.get(user=self.user)
         minute_after_expiry = token.expiry + timedelta(minutes=1)
         with mock.patch("django.utils.timezone.now") as mock_future:
             mock_future.return_value = minute_after_expiry
-            self.assert_get_and_401("/resources/hosts/")
+            self.assert_get_and_401("/.meta/version")
 
     def test_is_active_false(self):
         """Test using an inactive user."""
-        self.assert_get("/resources/hosts/")
+        self.assert_get("/.meta/version")
         self.user.is_active = False
         self.user.save()
-        self.assert_get_and_401("/resources/hosts/")
+        self.assert_get_and_401("/.meta/version")
 
     def test_is_deleted(self):
         """Test using a deleted user."""
-        self.assert_get("/resources/hosts/")
+        self.assert_get("/.meta/version")
         self.user.delete()
-        self.assert_get_and_401("/resources/hosts/")
+        self.assert_get_and_401("/.meta/version")
 
     def test_login_with_invalid_credentials(self):
         """Test logging in with invalid credentials."""

@@ -21,15 +21,6 @@ from hubuum.models.core import (
     ObjectLink,
 )
 from hubuum.models.iam import Namespace, Permission, User
-from hubuum.models.resources import (
-    Host,
-    HostType,
-    Jack,
-    Person,
-    PurchaseOrder,
-    Room,
-    Vendor,
-)
 
 
 class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
@@ -264,6 +255,7 @@ class HubuumObjectSerializer(HubuumMetaSerializer):
 
         model = HubuumObject
         fields = [
+            "id",
             "name",
             "updated_at",
             "created_at",
@@ -271,21 +263,6 @@ class HubuumObjectSerializer(HubuumMetaSerializer):
             "namespace",
             "hubuum_class",
         ]
-
-
-class HostSerializer(HubuumMetaSerializer):
-    """Serialize a Host object."""
-
-    # serializers.HyperlinkedModelSerializer
-    #    externals = serializers.SerializerMethodField()
-    #    _mod_dns = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Host
-        fields = "__all__"
-        # fields = ['id', 'name', '_mod_dns']
 
 
 class NamespaceSerializer(HubuumMetaSerializer):
@@ -306,66 +283,6 @@ class PermissionSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  
         """How to serialize the object."""
 
         model = Permission
-        fields = "__all__"
-
-
-class HostTypeSerializer(HubuumMetaSerializer):
-    """Serialize a HostType object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = HostType
-        fields = "__all__"
-
-
-class JackSerializer(HubuumMetaSerializer):
-    """Serialize a Jack object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Jack
-        fields = "__all__"
-
-
-class PersonSerializer(HubuumMetaSerializer):
-    """Serialize a Person object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Person
-        fields = "__all__"
-
-
-class RoomSerializer(HubuumMetaSerializer):
-    """Serialize a Room object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Room
-        fields = "__all__"
-
-
-class PurchaseOrderSerializer(HubuumMetaSerializer):
-    """Serialize a PurchaseOrder object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = PurchaseOrder
-        fields = "__all__"
-
-
-class VendorSerializer(HubuumMetaSerializer):
-    """Serialize a Vendor object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Vendor
         fields = "__all__"
 
 

@@ -2,7 +2,7 @@
 from typing import List
 
 import pytest
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import InvalidParam, MissingParam
 from hubuum.log import RequestColorTracker, filter_sensitive_data
@@ -13,7 +13,6 @@ from hubuum.models.iam import (
     namespace_operations,
 )
 from hubuum.tools import get_object
-from hubuum.validators import validate_model
 
 from .base import HubuumModelTestCase
 
@@ -63,7 +62,7 @@ class InternalsTestCase(HubuumModelTestCase):
         """Test the internals of has_perm."""
         # These should never happen, but are handled.
         test = User.objects.get(username="test")
-        self.assertFalse(test.has_perm("hubuum.read_namespace", None))
+        self.assertFalse(test.has_perm("hubuum.read", None))
         with pytest.raises(MissingParam):
             test.has_perm("nosuchperm", None)
         with pytest.raises(MissingParam):
@@ -83,21 +82,6 @@ class InternalsTestCase(HubuumModelTestCase):
             test.has_namespace("rootnotfound.no.reallyno")
         with pytest.raises(NotFound):
             test.has_namespace(12)
-
-    def test_validate_model(self):
-        """Test validate_model interface."""
-        # Test that we require data["model"] to be a string
-        with pytest.raises(ValidationError):
-            validate_model({})
-
-        with pytest.raises(ValidationError):
-            validate_model({})
-
-        # Test that when we have a string, we have a model with that name.
-        with pytest.raises(ValidationError):
-            validate_model("nosuchmodel")
-
-        self.assertTrue(validate_model("host"))
 
     def test_filtering_of_sensitive_data(self):
         """Test that sensitive data is filtered from structlog records."""

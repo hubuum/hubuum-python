@@ -20,8 +20,8 @@ from hubuum.exceptions import (
     AttachmentTooBig,
 )
 from hubuum.filters import AttachmentFilterSet, AttachmentManagerFilterSet
-from hubuum.models.core import Attachment, AttachmentManager
-from hubuum.models.iam import Namespace, NamespacedHubuumModelWithAttachments
+from hubuum.models.core import Attachment, AttachmentManager, HubuumObject
+from hubuum.models.iam import Namespace
 from hubuum.typing import typed_query_params_from_request
 
 from .base import HubuumClassAndObjectMixin, HubuumDetail, HubuumList, LoggingMixin
@@ -163,9 +163,7 @@ class AttachmentDetail(HubuumClassAndObjectMixin, HubuumDetail):
         tags=["Attachment"],
     )
 
-    def _ensure_size_limits(
-        self, instance: NamespacedHubuumModelWithAttachments, request: Request
-    ) -> bool:
+    def _ensure_size_limits(self, instance: HubuumObject, request: Request) -> bool:
         """Ensure adding the attachment won't exceed size limits."""
         attachment = cast(
             Attachment,

@@ -14,6 +14,7 @@ from structlog.types import EventDict
 
 from hubuum.api.v1.tests.base import HubuumAPITestCase
 from hubuum.api.v1.tests.helpers.logging import LogAnalyzer
+from hubuum.api.v1.tests.helpers.populators import BasePopulator
 from hubuum.log import (
     collapse_request_id,
     critical,
@@ -67,18 +68,14 @@ class HubuumLoggingProcessorTestCase(HubuumAPITestCase):
             self.assertEqual(processed_event["request_id"], expected_request_id)
 
 
-class HubuumLoggingTestCase(HubuumAPITestCase):
+class HubuumLoggingTestCase(HubuumAPITestCase, BasePopulator):
     """Test class for logging."""
 
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
         self.namespace, _ = Namespace.objects.get_or_create(name="namespace")
-        self.host_data = {
-            "name": "test",
-            "fqdn": "test.domain.tld",
-            "namespace": self.namespace.id,
-        }
+        self.host_class = self.create_class_direct("Host", namespace=self.namespace)
 
     def tearDown(self):
         """Clean up after tests."""
@@ -171,12 +168,15 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
         """Test logging of a host being created."""
         with capture_logs() as cap_logs:
             get_logger().bind()
-            host_blob = self.assert_post("/resources/hosts/", self.host_data)
+            host_blob = self.assert_post(
+                "/dynamic/Host/",
+                {"name": "test", "namespace": self.namespace.id, "json_data": {}},
+            )
             host_id = host_blob.data["id"]
 
         cap_logs = self._prune_permissions(cap_logs)
 
-        log = LogAnalyzer(cap_logs, "POST", "/api/v1/resources/hosts/", 201)
+        log = LogAnalyzer(cap_logs, "POST", "/api/v1/dynamic/Host/", 201)
         log.set_user("superuser")
         log.set_instance_id(host_id)
         log.set_response_content(
@@ -184,7 +184,6 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 {
                     "id": host_id,
                     "name": "test",
-                    "fqdn": "test.domain.tld",
                     "namespace": self.namespace.id,
                 }
             ],
@@ -195,12 +194,11 @@ class HubuumLoggingTestCase(HubuumAPITestCase):
                 "request_started",
                 "request",
                 "created",
-                "created",
                 "response",
                 "request_finished",
             ]
         )
-        log.check_levels_are(["info", "info", "info", "debug", "info", "info"])
+        log.check_levels_are(["info", "info", "info", "info", "info"])
         log.check_events()
 
     def test_manual_logging(self) -> None:

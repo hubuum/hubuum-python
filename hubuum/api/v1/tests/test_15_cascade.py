@@ -1,25 +1,27 @@
 """Test cascading effects on models."""
+from hubuum.models.iam import Namespace
+
 from .base import HubuumAPITestCase
+from .helpers.populators import BasePopulator
 
 
-class APICascade(HubuumAPITestCase):
+class APICascade(HubuumAPITestCase, BasePopulator):
     """Test cascading effects on models."""
 
     def test_cascading_namespaces(self):
         """Test what happens when a namespace goes away."""
         self.client = self.get_superuser_client()
         self.assert_post("/iam/namespaces/", {"name": "yes"})
-        nsblob = self.assert_get("/iam/namespaces/yes")
-        self.assert_post(
-            "/resources/hosts/", {"name": "host1", "namespace": nsblob.data["id"]}
-        )
-        self.assert_post(
-            "/resources/hosts/", {"name": "host2", "namespace": nsblob.data["id"]}
-        )
-        self.assert_get_elements("/resources/hosts/", 2)
-        self.assert_get("/resources/hosts/host1")
+        self.assert_get("/iam/namespaces/yes")
+        ns = Namespace.objects.get(name="yes")
+        host_class = self.create_class_direct("Host", namespace=ns)
+        self.create_object_direct(host_class, namespace=ns, name="host1")
+        self.create_object_direct(host_class, namespace=ns, name="host2")
+        self.assert_get_elements("/dynamic/Host/", 2)
+        self.assert_get("/dynamic/Host/host1")
         self.assert_delete("/iam/namespaces/yes")
-        self.assert_get_elements("/resources/hosts/", 0)
+        self.assert_get_elements("/dynamic/Host/", 0)
+        host_class.delete()
 
     def test_cascading_permissions(self):
         """Test what happens when a namespace goes away."""
