@@ -10,6 +10,7 @@ from rest_framework import generics, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.schemas.openapi import AutoSchema
 
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.permissions import NameSpace
 from hubuum.typing import typed_user_from_request
 
@@ -55,6 +56,53 @@ class LoggingMixin:
         user = typed_user_from_request(cast(HttpRequest, self.request))
         self._log("deleted", instance.__class__.__name__, user, instance)
         super().perform_destroy(instance)
+
+
+class HubuumClassAndObjectMixin:
+    """Mixin to get the class and instance from the kwargs."""
+
+    def get_hubuum_class(self, class_identifier: str = None) -> HubuumClass:
+        """Get the class from the class_identifier.
+
+        :raises: 404 if class is not found.
+        :return: HubuumClass instance
+        """
+        class_object = None
+
+        class_object = HubuumClass.objects.filter(name=class_identifier).first()
+
+        if class_object is None:
+            raise NotFound(detail=f"Class {class_identifier} not found.")
+
+        return class_object
+
+    def get_hubuum_object(
+        self, hubuum_class: HubuumClass, object_identifier: str = None
+    ) -> HubuumObject:
+        """Get the object from the object_identifier.
+
+        :raises: 404 if object is not found.
+        :return: HubuumObject instance
+        """
+        hubuum_object = None
+
+        if object_identifier.isnumeric():
+            hubuum_object = HubuumObject.objects.filter(
+                hubuum_class=hubuum_class, id=object_identifier
+            ).first()
+            if hubuum_object:
+                return hubuum_object
+
+        hubuum_object = HubuumObject.objects.filter(
+            hubuum_class=hubuum_class, name=object_identifier
+        ).first()
+
+        if not hubuum_object:
+            raise NotFound(
+                detail=f"Object {hubuum_class.name}:{object_identifier} not found."
+            )
+
+        return hubuum_object
 
 
 class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods

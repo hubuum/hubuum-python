@@ -350,7 +350,7 @@ class AttachmentManagerFilterSet(RaiseBadRequestOnBadFilter):
 
         model = AttachmentManager
         fields = {
-            "hubuum_class": _textual_lookups,
+            "hubuum_class": _key_lookups,
             "enabled": _boolean_lookups,
             "per_object_count_limit": _numeric_lookups,
             "per_object_individual_size_limit": _numeric_lookups,

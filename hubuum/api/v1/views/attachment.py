@@ -3,9 +3,7 @@
 from typing import Any, Dict, cast
 
 import structlog
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError
-from django.db.models import Model
 from django.urls import resolve
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
@@ -20,14 +18,13 @@ from hubuum.exceptions import (
     AttachmentSizeLimitExceededError,
     AttachmentsNotEnabledError,
     AttachmentTooBig,
-    UnsupportedAttachmentModelError,
 )
 from hubuum.filters import AttachmentFilterSet, AttachmentManagerFilterSet
-from hubuum.models.core import Attachment, AttachmentManager, HubuumClass, HubuumObject
+from hubuum.models.core import Attachment, AttachmentManager
 from hubuum.models.iam import Namespace, NamespacedHubuumModelWithAttachments
 from hubuum.typing import typed_query_params_from_request
 
-from .base import HubuumDetail, HubuumList, LoggingMixin, MultipleFieldLookupORMixin
+from .base import HubuumClassAndObjectMixin, HubuumDetail, HubuumList, LoggingMixin
 
 manual_logger = structlog.get_logger("hubuum.manual")
 
@@ -50,7 +47,7 @@ class AttachmentAutoSchema(AutoSchema):
 
         # Order is relevant, so use a list of tuples and not a dict.
         path_mapping: Dict[str, str] = [
-            ("{model}", "Model"),
+            ("{class}", "Class"),
             ("{instance}", "Instance"),
             ("{instance}/", "Object"),
             ("{attachment}", "Attachment"),
@@ -64,7 +61,7 @@ class AttachmentAutoSchema(AutoSchema):
         return operation_id_base
 
 
-class AttachmentManagerList(HubuumList):
+class AttachmentManagerList(HubuumClassAndObjectMixin, HubuumList):
     """Get: List attachmentmanagers. Post: Add attachmentmanager."""
 
     schema = AutoSchema(
@@ -75,8 +72,18 @@ class AttachmentManagerList(HubuumList):
     serializer_class = AttachmentManagerSerializer
     filterset_class = AttachmentManagerFilterSet
 
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Add an attachment manager."""
+        # Check if the class is a valid hubuum class, or raise 404.
+        hubuum_class = self.get_hubuum_class(request.data.get("class"))
 
-class AttachmentManagerDetail(HubuumDetail):
+        # Convert the hubuum_class parameter from its name to its ID
+        del request.data["class"]
+        request.data["hubuum_class"] = hubuum_class.id
+        return super().post(request, *args, **kwargs)
+
+
+class AttachmentManagerDetail(HubuumClassAndObjectMixin, HubuumDetail):
     """Get, Patch, or Destroy an attachment manager.
 
     AttachmentManager objects are used to configure attachments for a given hubuum class.
@@ -88,10 +95,24 @@ class AttachmentManagerDetail(HubuumDetail):
 
     queryset = AttachmentManager.objects.all()
     serializer_class = AttachmentManagerSerializer
-    lookup_fields = ("id", "hubuum_class")
+
+    def get_object(self) -> AttachmentManager:
+        """Get the attachment manager we're working on."""
+        class_identifier = self.kwargs.get("class") or self.request.data.get("class")
+        if not class_identifier:
+            raise ParseError(detail="No class identifier provided.")
+
+        hubuum_class = self.get_hubuum_class(class_identifier)
+
+        try:
+            return AttachmentManager.objects.get(hubuum_class=hubuum_class)
+        except AttachmentManager.DoesNotExist as exc:
+            raise NotFound(
+                detail="No attachment manager found for {hubuum_class}."
+            ) from exc
 
 
-class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, LoggingMixin):
+class AttachmentList(HubuumClassAndObjectMixin, generics.CreateAPIView, LoggingMixin):
     """Get: List attachment data for a model. Post: Add attachment data to a model."""
 
     schema = AttachmentAutoSchema(
@@ -102,76 +123,41 @@ class AttachmentList(MultipleFieldLookupORMixin, generics.CreateAPIView, Logging
     serializer_class = AttachmentSerializer
     filterset_class = AttachmentFilterSet
 
-    def _get_model(self, model_name: str) -> Model:
-        """Get the model, or raise 404."""
-        obj = HubuumClass.objects.filter(name=model_name).first()
-
-        if obj is None:
-            raise NotFound(detail=f"Class {model_name} does not exist.")
-
-        if not obj.supports_attachments():
-            raise UnsupportedAttachmentModelError(
-                f"Class {model_name} does not support attachments."
-            )
-
-        return obj
-
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get all attachments for a given model."""
-        attachments = []
+        attachments: Attachment = []
 
-        if self.kwargs.get("model"):
-            model_name = self.kwargs.get("model")
-            model = self._get_model(model_name)
+        attachment_filter: Dict[str, str] = {}
 
-            # Filter out the attachments that belong to objects that match the
-            # query parameters.
-            attachment_filter: Dict[str, str] = {}
+        for key, value in typed_query_params_from_request(request).items():
+            attachment_filter[key] = value
 
-            for key, value in typed_query_params_from_request(request).items():
-                attachment_filter[key] = value
+        if self.kwargs.get("class"):
+            cls = self.get_hubuum_class(self.kwargs.get("class"))
+            attachment_filter["hubuum_class"] = cls
 
-            if kwargs.get("instance"):
-                attachment_filter["hubuum_object"] = kwargs.get("instance")
-
-            try:
-                attachments = Attachment.objects.filter(
-                    hubuum_class=model, **attachment_filter
+            if self.kwargs.get("instance"):
+                attachment_filter["hubuum_object"] = self.get_hubuum_object(
+                    cls, kwargs.get("instance")
                 )
-            except FieldError as exc:
-                raise ParseError(detail="Invalid query parameter.") from exc
-            except ValueError as exc:
-                raise ParseError(detail="Invalid parameter value.") from exc
-        else:
-            # Be helpful and translate model= to content_type=.
-            # QueryDict is immutable, so we need to make a copy.
-            modified_query_dict: Dict[str, str] = {}
-            for key, value in typed_query_params_from_request(request).items():
-                if key == "model":
-                    model = self._get_model(value)
-                    content_type = ContentType.objects.get_for_model(model)
-                    modified_query_dict["content_type"] = content_type
-                else:
-                    modified_query_dict[key] = value
 
-            try:
-                attachments = Attachment.objects.filter(
-                    **modified_query_dict,
-                )
-            except FieldError as exc:
-                raise ParseError(detail="Invalid query parameter.") from exc
-            except ValueError as exc:
-                raise ParseError(detail="Invalid parameter value.") from exc
+        try:
+            attachments = self.get_queryset().filter(**attachment_filter)
+        except FieldError as exc:
+            raise ParseError(detail="Invalid query parameter.") from exc
+        except ValueError as exc:
+            raise ParseError(detail="Invalid parameter value.") from exc
 
         return Response(AttachmentSerializer(attachments, many=True).data)
 
 
-class AttachmentDetail(HubuumDetail):
+class AttachmentDetail(HubuumClassAndObjectMixin, HubuumDetail):
     """Get, Patch, or Destroy an attachment metadata."""
 
     parser_classes = (MultiPartParser,)
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
+    lookup_fields = ["id", "sha256"]
 
     schema = AttachmentAutoSchema(
         tags=["Attachment"],
@@ -206,50 +192,35 @@ class AttachmentDetail(HubuumDetail):
 
         return True
 
-    def _get_model(self, model_name: str) -> HubuumClass:
-        """Get the model, or raise 404."""
-        obj = HubuumClass.objects.filter(name=model_name).first()
-
-        if obj is None:
-            raise NotFound(detail=f"Class {model_name} does not exist.")
-
-        if not obj.supports_attachments():
-            raise UnsupportedAttachmentModelError(
-                f"Class {model_name} does not support attachments."
-            )
-
-        return obj
-
     def _get_attachment(
         self, request: Request, *args: Any, **kwargs: Any
     ) -> Attachment:
         """Get an attachment object, or raise 404."""
         # This view is called by the URL pattern that includes the part:
-        # /data/<model>/... as such there is now way to get here and have
+        # /data/<class>/... as such there is now way to get here and have
         # the model kwarg be None.
-        model_name = self.kwargs.get("model")
-        obj_id = self.kwargs.get("instance")
         attachment_id = self.kwargs.get("attachment")
 
-        cls = self._get_model(model_name)
+        cls = self.get_hubuum_class(self.kwargs.get("class"))
+        obj = self.get_hubuum_object(cls, self.kwargs.get("instance"))
 
-        obj = None
+        attachment = None
         for field in self.lookup_fields:
             try:
-                obj = Attachment.objects.get(
+                attachment = Attachment.objects.get(
                     hubuum_class=cls,
-                    hubuum_object=obj_id,
+                    hubuum_object=obj,
                     **{field: attachment_id},
                 )
             except (Attachment.DoesNotExist, ValueError):
                 pass
 
-        if obj:
-            self.check_object_permissions(request, obj)
+        if attachment:
+            self.check_object_permissions(request, attachment)
         else:
             raise NotFound(detail="Attachment not found.")
 
-        return obj
+        return attachment
 
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get an attachment metadata."""
@@ -284,10 +255,8 @@ class AttachmentDetail(HubuumDetail):
         # This view is called by the URL pattern that includes the part:
         # /data/<model>/... as such there is now way to get here and have
         # the model kwarg be None.
-        model_name = kwargs["model"]
-        cls = self._get_model(model_name)
-
-        obj = self.get_object("instance", HubuumObject)
+        cls = self.get_hubuum_class(self.kwargs.get("class"))
+        obj = self.get_hubuum_object(cls, self.kwargs.get("instance"))
 
         if not obj:
             raise NotFound(detail="Object not found.")

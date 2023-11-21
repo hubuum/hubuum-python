@@ -35,24 +35,24 @@ class HubuumAttachmentSchemaTestCase(HubuumAPITestCase):
         # to break key-value pairs into multiple lines, causing the line
         # length to exceed limits.
         question = [
-            "/prefix/doesntmatter/{model}",
-            "/attachments/data/{model}",
-            "/{model}/",
-            "/{model}/{instance}",
-            "/{model}/{instance}/",
-            "/{model}/{instance}/{attachment}",
-            "/{model}/{instance}/{attachment}/download",
+            "/prefix/doesntmatter/{class}",
+            "/attachments/data/{class}",
+            "/{class}/",
+            "/{class}/{instance}",
+            "/{class}/{instance}/",
+            "/{class}/{instance}/{attachment}",
+            "/{class}/{instance}/{attachment}/download",
         ]
 
         # The first three are the same because the prefix is stripped
         answer = [
-            "listMockModelsModel",
-            "listMockModelsModel",
-            "listMockModelsModel",
-            "listMockModelsModelInstance",
-            "listMockModelsModelInstanceObject",
-            "listMockModelsModelInstanceObjectAttachment",
-            "listMockModelsModelInstanceObjectAttachmentDownload",
+            "listMockModelsClass",
+            "listMockModelsClass",
+            "listMockModelsClass",
+            "listMockModelsClassInstance",
+            "listMockModelsClassInstanceObject",
+            "listMockModelsClassInstanceObjectAttachment",
+            "listMockModelsClassInstanceObjectAttachmentDownload",
         ]
 
         # Enumerate through the lists and test each one
@@ -70,10 +70,10 @@ class HubuumAttachmentTestCase(APIv1Objects):
         self.client = self.get_superuser_client()
         self.file_content = b"this is a test file"
 
-    def _enable_attachments(self, model: str) -> HttpResponse:
+    def _enable_attachments(self, cls: str) -> HttpResponse:
         """Enable attachments for a model."""
         return self.assert_post(
-            "/attachments/manager/", {"hubuum_class": model, "enabled": True}
+            "/attachments/manager/", {"class": cls, "enabled": True}
         )
 
     def _enable_attachments_for_hosts(self) -> HttpResponse:
@@ -81,12 +81,12 @@ class HubuumAttachmentTestCase(APIv1Objects):
         return self._enable_attachments("Host")
 
     def _add_attachment(
-        self, model: str, obj: HubuumModel, content: bytes
+        self, cls: str, obj: HubuumModel, content: bytes
     ) -> HttpResponse:
         """Add an attachment to an object."""
         file = self._create_test_file(content)
         return self.assert_post_and_201(
-            f"/attachments/data/{model}/{obj.id}",
+            f"/attachments/data/{cls}/{obj.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -108,8 +108,8 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self._enable_attachments_for_hosts()
         res = self.assert_get("/attachments/manager/Host")
 
-        self.assert_post_and_400(
-            "/attachments/manager/", {"dynamic_class": "Hos", "enabled": True}
+        self.assert_post_and_404(
+            "/attachments/manager/", {"class": "Hos", "enabled": True}
         )
 
         self.assertEqual(res.data["enabled"], True)
@@ -120,15 +120,16 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self.assertEqual(res.data["enabled"], False)
         self.assertFalse(res.data["enabled"])
 
-    def test_attachment_unsupported_model(self):
-        """Test that unsupported models are rejected."""
+    def test_attachment_unsupported_class(self):
+        """Test that unsupported classes are rejected."""
         self.assert_post_and_400(
             "/attachments/manager/",
-            {"model": "Building", "enabled": True, "namespace": self.namespace.id},
+            {"class": "Building", "enabled": True, "namespace": self.namespace.id},
         )
-        self.assert_post_and_400(
+        # Namespace exists, but is not a usable class.
+        self.assert_post_and_404(
             "/attachments/manager/",
-            {"model": "namespace", "enabled": True, "namespace": self.namespace.id},
+            {"class": "namespace", "enabled": True, "namespace": self.namespace.id},
         )
 
     def test_attachment_set_limits(self):
@@ -280,8 +281,8 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
 
     def test_attachment_filtering(self):
         """Test that filtering works."""
-        for model in ["Host", "Room", "Person"]:
-            self._enable_attachments(model)
+        for cls in ["Host", "Room", "Building"]:
+            self._enable_attachments(cls)
 
         host_one = self.hosts[0]
 
@@ -381,10 +382,10 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self.assert_post_and_404("/attachments/data/nope/1", {})
 
         # Filter on model that does not support attachments
-        #        self.assert_get_and_400("/attachments/data/?hubuum_class=1")
+        #        self.assert_get_and_400("/attachments/data/?class=1")
 
         # Filter on non-existent model
-        #        self.assert_get_and_404("/attachments/data/?hubuum_class=99")
+        #        self.assert_get_and_404("/attachments/data/?class=99")
 
         host = self.hosts[0]
         file = self._create_test_file()
@@ -398,12 +399,6 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self.assert_get_and_404("/attachments/data/namespace/1")
         self.assert_post_and_404(
             f"/attachments/data/namespace/{self.namespace.id}",
-            {"attachment": file, "namespace": self.namespace.id},
-            format="multipart",
-        )
-        # Model exists, but attachments are not enabled for it
-        self.assert_post_and_400(
-            f"/attachments/data/Host/{self.namespace.id}",
             {"attachment": file, "namespace": self.namespace.id},
             format="multipart",
         )
@@ -472,7 +467,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
                 url = reverse(
                     "download_attachment",
                     kwargs={
-                        "model": "mymodel",
+                        "class": "mymodel",
                         "instance": 1,
                         "attachment": "myattachment",
                     },

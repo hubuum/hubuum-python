@@ -100,11 +100,7 @@ class NamespacedHubuumModel(HubuumModel):
 class AttachmentManager(HubuumModel):
     """Managing what models may have attachments and what constraints are imposed."""
 
-    hubuum_class: str = models.CharField(
-        max_length=255,
-        null=False,
-        unique=True,
-    )
+    hubuum_class = models.ForeignKey("HubuumClass", on_delete=models.CASCADE)
     enabled = models.BooleanField(default=False, null=False)
     per_object_count_limit = models.PositiveIntegerField(default=0, null=False)
     per_object_individual_size_limit = models.PositiveIntegerField(
@@ -166,7 +162,7 @@ class AttachmentModel(models.Model):
     def attachments_are_enabled(self) -> bool:
         """Check if the model is ready to receive attachments."""
         return AttachmentManager.objects.filter(
-            hubuum_class=self.hubuum_class.name, enabled=True
+            hubuum_class=self.hubuum_class, enabled=True
         ).exists()
 
     def attachments(self) -> List[Attachment]:
@@ -191,19 +187,19 @@ class AttachmentModel(models.Model):
     def attachment_individual_size_limit(self) -> int:
         """Return the max size of an attachment for the object."""
         return AttachmentManager.objects.get(
-            hubuum_class=self.hubuum_class.name, enabled=True
+            hubuum_class=self.hubuum_class, enabled=True
         ).per_object_individual_size_limit
 
     def attachment_total_size_limit(self) -> int:
         """Return the size limit of attachments for the object."""
         return AttachmentManager.objects.get(
-            hubuum_class=self.hubuum_class.name, enabled=True
+            hubuum_class=self.hubuum_class, enabled=True
         ).per_object_total_size_limit
 
     def attachment_count_limit(self) -> int:
         """Return the count limit of attachments for the object."""
         return AttachmentManager.objects.get(
-            hubuum_class=self.hubuum_class.name, enabled=True
+            hubuum_class=self.hubuum_class, enabled=True
         ).per_object_count_limit
 
 

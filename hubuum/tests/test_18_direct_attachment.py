@@ -59,14 +59,15 @@ class AttachmentTestCase(HubuumModelTestCase, BasePopulator):
         self._test_str()
 
 
-class AttachmentManagerTestCase(HubuumModelTestCase):
+class AttachmentManagerTestCase(HubuumModelTestCase, BasePopulator):
     """Define the test suite for the AttachmentManager model."""
 
     def setUp(self):
         """Set up defaults for the test object."""
         super().setUp()
+        self.cls = self.create_class_direct(name="Host")
         self.attributes = {
-            "hubuum_class": "Host",
+            "hubuum_class": self.cls,
             "enabled": True,
         }
         self.obj = AttachmentManager.objects.create(**self.attributes)
