@@ -26,10 +26,6 @@ def models_that_are_open() -> Tuple[str]:
     return ("user", "group")
 
 
-def class_supports_attachments(model: str) -> bool:
-    """Check if a model supports attachments."""
-
-
 class HubuumModel(models.Model):
     """Base model for Hubuum Objects."""
 
