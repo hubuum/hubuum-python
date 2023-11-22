@@ -6,11 +6,11 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="A single pane of glass." name="description"/>
-<link href="../api/" rel="prev"/>
-<link href="../logging/" rel="next"/>
+<link href="../permissions/" rel="prev"/>
+<link href="../api/" rel="next"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
 <meta content="mkdocs-1.5.3, mkdocs-material-9.2.7" name="generator"/>
-<title>Extensions - Hubuum</title>
+<title>Authentication - Hubuum</title>
 <link href="../assets/stylesheets/main.046329b4.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.85d0ee34.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -25,7 +25,7 @@
 <input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
 <label class="md-overlay" for="__drawer"></label>
 <div data-md-component="skip">
-<a class="md-skip" href="#extensions">
+<a class="md-skip" href="#authentication">
           Skip to content
         </a>
 </div>
@@ -49,7 +49,7 @@
 <div class="md-header__topic" data-md-component="header-topic">
 <span class="md-ellipsis">
             
-              Extensions
+              Authentication
             
           </span>
 </div>
@@ -222,24 +222,17 @@
   </span>
 </a>
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../api/">
-<span class="md-ellipsis">
-    API
-  </span>
-</a>
-</li>
 <li class="md-nav__item md-nav__item--active">
 <input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
 <label class="md-nav__link md-nav__link--active" for="__toc">
 <span class="md-ellipsis">
-    Extensions
+    Authentication
   </span>
 <span class="md-nav__icon md-icon"></span>
 </label>
 <a class="md-nav__link md-nav__link--active" href="./">
 <span class="md-ellipsis">
-    Extensions
+    Authentication
   </span>
 </a>
 <nav aria-label="Table of contents" class="md-nav md-nav--secondary">
@@ -249,40 +242,24 @@
     </label>
 <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#overview">
-    Overview
-  </a>
-<nav aria-label="Overview" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#interpolation-fields">
-    Interpolation fields
+<a class="md-nav__link" href="#deleting-a-single-token">
+    Deleting a single token
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#populating-the-data-for-an-object">
-    Populating the data for an object
+<a class="md-nav__link" href="#purging-all-tokens-for-a-user">
+    Purging all tokens for a user
   </a>
 </li>
 </ul>
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#example-usage">
-    Example usage
-  </a>
-<nav aria-label="Example usage" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#register-a-new-extension">
-    Register a new extension
-  </a>
-</li>
-</ul>
-</nav>
-</li>
-</ul>
-</nav>
+<a class="md-nav__link" href="../api/">
+<span class="md-ellipsis">
+    API
+  </span>
+</a>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="../logging/">
@@ -374,77 +351,39 @@
 </div>
 <div class="md-content" data-md-component="content">
 <article class="md-content__inner md-typeset">
-<h1 id="extensions">Extensions<a class="headerlink" href="#extensions" title="Permanent link">¶</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
-<p>Hubuum supports <code>extensions</code> to extend basic storage functionality of object models. Each extension applies to a specific model, and objects of that model will then have the option to have associated data from the extension applied to them.</p>
-<p>The only currently supported extension type is to retrieve data from a REST endpoint and store it as JSON for the object in question. An extension has the following properties:</p>
-<ul>
-<li><code>name</code>: The name of the extension. This is a globally unique identifier for the extension.</li>
-<li><code>content_type</code>: The model that the extension applies to.</li>
-<li><code>url</code>: The URL endpoint that the extensions uses to fetch data. Supports interpolation fields.</li>
-<li><code>require_interpolation</code> (optional): If set to true, the URL has to have at least one interpolation field.</li>
-<li><code>header</code> (optional): A header to send with the request. This is a formatted HTTP header string. Typically used to pass authentication information.</li>
-<li><code>cache_time</code> (optional, defaults to 60s): The time in seconds to cache the response from the endpoint.</li>
-</ul>
-<h3 id="interpolation-fields">Interpolation fields<a class="headerlink" href="#interpolation-fields" title="Permanent link">¶</a></h3>
-<p>A url may take interpolation fields on the form of <code>{fieldname}</code> where the fieldname is a field on the object. For example, if the URL is <code>http://example.com/users/{username}/</code>, and the object has a field <code>username</code> with the value <code>admin</code>, the URL will be interpolated to <code>http://example.com/users/admin/</code> for that object. If you do not require interpolation, you can set <code>require_interpolation</code> to false and the URL will be used as-is.</p>
-<h3 id="populating-the-data-for-an-object">Populating the data for an object<a class="headerlink" href="#populating-the-data-for-an-object" title="Permanent link">¶</a></h3>
-<p>There is currently no automatic population of an objects extension data. This also implies that the cache_data field is unused. There is an issue on how to do this gracefully: <a href="https://github.com/terjekv/hubuum/issues/69">https://github.com/terjekv/hubuum/issues/69</a></p>
-<h2 id="example-usage">Example usage<a class="headerlink" href="#example-usage" title="Permanent link">¶</a></h2>
-<h3 id="register-a-new-extension">Register a new extension<a class="headerlink" href="#register-a-new-extension" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Assume we have a host in the database with the FQDN test.example.tld, and ID=1</span>
-<span class="c1"># This host resides in the namespace with ID=1</span>
-
-<span class="c1"># Create a new extension</span>
-POST<span class="w"> </span>/api/v1/extensions/<span class="w"> </span>-d<span class="w"> </span><span class="s1">'{</span>
-<span class="s1">    "name": "example",</span>
-<span class="s1">    "content_type": "host",</span>
-<span class="s1">    "url": "https://example.tld/hostname/{fqdn}/",</span>
-<span class="s1">    "header": "Authorization: Bearer sh...=="</span>
-<span class="s1">}'</span>
-<span class="c1"># We assume this gives is the ID for the extension as '1'</span>
-
-<span class="c1"># Populate data for the host test.example.tld</span>
-<span class="c1"># Assume that the endpoint returns the following JSON:</span>
-<span class="c1"># { "foo": "bar" }</span>
-<span class="nv">data</span><span class="o">=</span><span class="k">$(</span><span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-type: application/json"</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="s2">"https://example.tld/hostname/test.example.tld"</span><span class="w"> </span><span class="k">)</span>
-
-<span class="c1"># Add the data to the object</span>
-<span class="c1"># Note that the namespace and extension IDs are used, not their names</span>
-<span class="c1"># The object ID is the ID of the host</span>
-POST<span class="w"> </span>/api/v1/extension_data/<span class="w"> </span>-d<span class="w"> </span><span class="s2">"{</span>
-<span class="s2">    'namespace': 1,</span>
-<span class="s2">    'extension': 1,</span>
-<span class="s2">    'content_type': 'host',</span>
-<span class="s2">    'object_id': 1,</span>
-<span class="s2">    'json_data': </span><span class="si">${</span><span class="nv">data</span><span class="si">}</span>
-<span class="s2">}"</span>
-
-<span class="c1"># We can now search for the data using the extension API. Note that we do not</span>
-<span class="c1"># limit this search to any specific namespace or extension id.</span>
-GET<span class="w"> </span>/api/v1/extension_data/?content_type<span class="o">=</span>host<span class="p">&amp;</span><span class="nv">json_data_lookup__foo</span><span class="o">=</span>bar
-
-<span class="c1"># This should return at least one hit, an extension data with our object:</span>
-<span class="o">{</span>
-<span class="w">    </span><span class="s2">"id"</span>:<span class="w"> </span><span class="m">1</span>,
-<span class="w">    </span><span class="s2">"namespace"</span>:<span class="w"> </span><span class="m">1</span>,
-<span class="w">    </span><span class="s2">"extension"</span>:<span class="w"> </span><span class="m">1</span>,
-<span class="w">    </span><span class="s2">"content_type"</span>:<span class="w"> </span><span class="s2">"host"</span>,
-<span class="w">    </span><span class="s2">"object_id"</span>:<span class="w"> </span><span class="m">1</span>,
-<span class="w">    </span><span class="s2">"json_data"</span>:<span class="w"> </span><span class="o">{</span>
-<span class="w">        </span><span class="s2">"foo"</span>:<span class="w"> </span><span class="s2">"bar"</span>
-<span class="w">    </span><span class="o">}</span>
-<span class="o">}</span>
+<h1 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">¶</a></h1>
+<p>Hubuum uses <a href="https://www.django-rest-framework.org/">Django REST Framework</a> for its API. In typical REST fashion, the authentication endpoint for username and password returns a token, which is then used for the rest of the API. The endpoint is <code>/api/auth/login</code> and one can code such as this to log in:_</p>
+<div class="highlight"><pre><span></span><code>```python
+basic_auth = b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+client = APIClient()
+client.credentials(HTTP_AUTHORIZATION=auth)
+client.post("/api/auth/login/")
+```
 </code></pre></div>
+<p>In return, on a successful login, one will get a JSON blob akin to this. Note that the token in the example is truncated for brevity. By default the token is 64 characters long, and has an expiry of 10 hours. Every login from a user will generate a new token, and every generated token is valid until it expires.</p>
+<div class="highlight"><pre><span></span><code>```json
+{
+    "expiry": "2023-11-23T09:33:53.990672Z",
+    "token":"b61...77f" 
+}
+```
+</code></pre></div>
+<p>Using the token is done as follows:</p>
+<div class="highlight"><pre><span></span><code>```python
+client = APIClient()
+client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+```
+</code></pre></div>
+<h2 id="deleting-a-single-token">Deleting a single token<a class="headerlink" href="#deleting-a-single-token" title="Permanent link">¶</a></h2>
+<p>Any token can be deleted by calling the <code>/api/auth/logout</code> endpoint. This will invalidate the token in question.</p>
+<h2 id="purging-all-tokens-for-a-user">Purging all tokens for a user<a class="headerlink" href="#purging-all-tokens-for-a-user" title="Permanent link">¶</a></h2>
+<p>If you need to purge all tokens for a user, you can do so by calling the <code>/api/auth/logoutall</code> endpoint. This will invalidate all tokens for the user owning the token in question.</p>
 <hr/>
 <div class="md-source-file">
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 25, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">November 22, 2023</span>
 </small>
 </div>
 </article>

@@ -7,7 +7,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="A single pane of glass." name="description"/>
 <link href="../configuration/" rel="prev"/>
-<link href="../api/" rel="next"/>
+<link href="../authentication/" rel="next"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
 <meta content="mkdocs-1.5.3, mkdocs-material-9.2.7" name="generator"/>
 <title>Permissions - Hubuum</title>
@@ -248,16 +248,16 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../api/">
+<a class="md-nav__link" href="../authentication/">
 <span class="md-ellipsis">
-    API
+    Authentication
   </span>
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../extensions/">
+<a class="md-nav__link" href="../api/">
 <span class="md-ellipsis">
-    Extensions
+    API
   </span>
 </a>
 </li>
@@ -363,24 +363,27 @@
 <li><code>namespace</code>: The group can create, read, update and delete objects in the namespace, and also create, read, update and delete the namespace itself.</li>
 </ul>
 <h2 id="example-usage">Example usage<a class="headerlink" href="#example-usage" title="Permanent link">¶</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1"># Create a new namespace</span>
-POST<span class="w"> </span>/api/v1/namespaces/<span class="w"> </span>-d<span class="w"> </span><span class="s1">'{</span>
-<span class="s1">    "name": "example_namespace"</span>
-<span class="s1">}'</span>
+<div class="highlight"><pre><span></span><code>```bash
+# Create a new namespace
+POST /api/v1/namespaces/ -d '{
+    "name": "example_namespace"
+}'
 
-<span class="c1"># Create a new group</span>
-POST<span class="w"> </span>/api/v1/groups/<span class="w"> </span>-d<span class="w"> </span><span class="s1">'{</span>
-<span class="s1">    "name": "example_group"</span>
-<span class="s1">}'</span>
+# Create a new group
+POST /api/v1/groups/ -d '{
+    "name": "example_group"
+}'
 
-<span class="c1"># Give the group read access to the namespace</span>
-POST<span class="w"> </span>/api/v1/namespaces/example_namespace/groups/example_group<span class="w"> </span>-d<span class="w"> </span><span class="s1">'{</span>
-<span class="s1">    "read": true</span>
-<span class="s1">}'</span>
+# Give the group read access to the namespace
+POST /api/v1/namespaces/example_namespace/groups/example_group -d '{
+    "read": true
+}'
+```
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Note that deleting a namespace deletes all objects in the namespace, and cannot be undone.
+<p>Note that deleting a namespace deletes all classes and objects in the namespace, and also their relations!
+Deleting a namespace is a destructive act that <strong>cannot be undone</strong>.
 Deleting the namespace also deletes all permission objects for the namespace,
 but the groups themselves are not deleted.</p>
 </div>
@@ -389,7 +392,7 @@ but the groups themselves are not deleted.</p>
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 28, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">November 22, 2023</span>
 </small>
 </div>
 </article>

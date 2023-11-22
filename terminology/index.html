@@ -185,8 +185,13 @@
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#extension">
-    Extension
+<a class="md-nav__link" href="#class">
+    Class
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#object">
+    Object
   </a>
 </li>
 <li class="md-nav__item">
@@ -253,16 +258,16 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../api/">
+<a class="md-nav__link" href="../authentication/">
 <span class="md-ellipsis">
-    API
+    Authentication
   </span>
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../extensions/">
+<a class="md-nav__link" href="../api/">
 <span class="md-ellipsis">
-    Extensions
+    API
   </span>
 </a>
 </li>
@@ -359,9 +364,11 @@
 <h1 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">¶</a></h1>
 <h2 id="namespace">Namespace<a class="headerlink" href="#namespace" title="Permanent link">¶</a></h2>
 <p>A namespace is a collection that an object belongs to. Every object in hubuum belongs to one and only one namespace. A namespace is identified by a unique name. A namespace can have zero or more groups with permissions for the namespace, and these groups can have zero or more users. Each group has a set of <a href="../permissions/#namespaces">permissions</a> to the namespace in question.</p>
-<h2 id="extension">Extension<a class="headerlink" href="#extension" title="Permanent link">¶</a></h2>
-<p>An <a href="../extensions/">extension</a> adds a json_data field to an object. The json_data field can be used to store any data that is relevant to the object. The extension can also have a header and a URL. The header is a string that is sent to the URL when the object is requested, typically used for authorization. The URL is used to fetch data from an external source and store it in the json_data field. The URL may have interpolation fields that are replaced when the URL is fetched. Typically this interpolation is used to ensure a unique URL for each object.</p>
-<p>Extensions main purpose is to be able to dynamically update the data belonging to a model without having to update the model itself.</p>
+<h2 id="class">Class<a class="headerlink" href="#class" title="Permanent link">¶</a></h2>
+<p>Every data object in Hubuum belongs to a Hubuum Class. These classes are user-defined, and may optionally use JSON validation schemas to enforce data integrity. One may also attach a schema to a class but not enforce it, only to have Hubuum warn when objects break the contract.</p>
+<p>Classes are identified by a unique name.</p>
+<h2 id="object">Object<a class="headerlink" href="#object" title="Permanent link">¶</a></h2>
+<p>An object is an instance of a class. It is a JSON document that may either be free-form or adhere to a JSON schema. Objects are identified by a unique name within each class.</p>
 <h2 id="group">Group<a class="headerlink" href="#group" title="Permanent link">¶</a></h2>
 <p>Groups contain users and have permissions for any number of namespaces.</p>
 <hr/>
@@ -369,7 +376,7 @@
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 28, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">November 22, 2023</span>
 </small>
 </div>
 </article>

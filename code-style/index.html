@@ -223,16 +223,16 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../api/">
+<a class="md-nav__link" href="../authentication/">
 <span class="md-ellipsis">
-    API
+    Authentication
   </span>
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../extensions/">
+<a class="md-nav__link" href="../api/">
 <span class="md-ellipsis">
-    Extensions
+    API
   </span>
 </a>
 </li>
@@ -365,15 +365,13 @@
 <h2 id="general">General<a class="headerlink" href="#general" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="https://black.readthedocs.io/en/stable/">Black</a> is the code style used for this project. It is enforced by the CI.</li>
-<li><a href="https://pycqa.github.io/isort/">isort</a> is used to sort imports, also enforced by the CI.</li>
-<li><a href="https://flake8.pycqa.org/en/latest/">flake8</a> is used to enforce the code style.</li>
-<li><a href="https://pylint.org/">pylint</a> is used to check code quality. Anything below 10/10 is considered a failure.</li>
+<li><a href="https://docs.astral.sh/ruff/">ruff</a> is used to sort imports, general formatting, and linting. It is also enforced by the CI.</li>
 <li><a href="https://coverage.readthedocs.io/en/latest/">coverage</a> is used to check code coverage. Anything below 100% is considered a failure.</li>
 </ul>
+<p>Ruff is used to replace pylint, flake8, and isort. It is also used to run black. It is configured via the <code>pyproject.toml</code> file.</p>
 <h2 id="checking-code-style">Checking Code Style<a class="headerlink" href="#checking-code-style" title="Permanent link">¶</a></h2>
 <ul>
-<li><code>tox -e format</code> will run black, isort, and pylint on the codebase.</li>
-<li><code>tox -e flake8</code> will run flake8 with the required extensions on the codebase.</li>
+<li><code>tox -e lint</code> will run the current linting tools on the codebase.</li>
 </ul>
 <h2 id="checking-code-coverage">Checking Code Coverage<a class="headerlink" href="#checking-code-coverage" title="Permanent link">¶</a></h2>
 <ul>
@@ -390,7 +388,7 @@
 <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 28, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">November 22, 2023</span>
 </small>
 </div>
 </article>
