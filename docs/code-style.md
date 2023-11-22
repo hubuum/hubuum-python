@@ -3,10 +3,10 @@
 ## General
 
 * [Black](https://black.readthedocs.io/en/stable/) is the code style used for this project. It is enforced by the CI.
-* [isort](https://pycqa.github.io/isort/) is used to sort imports, also enforced by the CI.
-* [flake8](https://flake8.pycqa.org/en/latest/) is used to enforce the code style.
-* [pylint](https://pylint.org/) is used to check code quality. Anything below 10/10 is considered a failure.
+* [ruff](https://docs.astral.sh/ruff/) is used to sort imports, general formatting, and linting. It is also enforced by the CI.
 * [coverage](https://coverage.readthedocs.io/en/latest/) is used to check code coverage. Anything below 100% is considered a failure.
+
+Ruff is used to replace pylint, flake8, and isort. It is also used to run black. It is configured via the `pyproject.toml` file.
 
 ## Checking Code Style
 

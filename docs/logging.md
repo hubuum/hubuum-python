@@ -52,6 +52,10 @@ Hubuum applies a request_id to contextually related log entries. This request_id
 
 Notice how the request_id also applies to the cascading events caused by the deletion of the namespace "namespace1". Also note that the dots would be colored according to the request_id for the entry.
 
+## Corrolation IDs
+
+Hubuum supports the use of corrolation IDs. These are IDs that are passed in via the `X-Corrolation-ID` header. If this header is present, Hubuum will log it in addition to the request_id for the request. This allows for the correlation of logs across multiple services and / or requests.
+
 ## Sentry
 
 Hubuum can be configured to send logs to [Sentry](https://sentry.io/). To do this, set the `SENTRY_DSN` environment variable to the DSN for your Sentry project.

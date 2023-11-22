@@ -1,12 +1,18 @@
 # Examples of using the hubuum API
 
-```bash
-# Get the user with the username "admin" (it is unique)
-GET /api/v1/users/?username=admin
+    ```bash
+    # Get the user with the username "admin" (it is unique)
+    GET /api/v1/users/?username=admin
 
-# Get hosts that end with "example.tld" in FQDN
-GET /api/v1/dynamic/Host/?name__endswith=example.tld
-```
+    # Assume there is only one user with the username "admin"
+    GET /api/v1/users/admin
+
+    # Change the email address of the user with the username "admin"
+    PUT /api/v1/users/admin {"email": "admin@localhost"}
+
+    # Get hosts that end with "example.tld" in their name
+    GET /api/v1/dynamic/Host/?name__endswith=example.tld
+    ```
 
 !!! note
 

@@ -12,9 +12,11 @@ Via extensions you can tell Hubuum where to find your data, from as many sources
 
 With hubuum you can...
 
-- list all network devices and names a host has, and see if different sources give different answers.
-- combine searches from different sources to find the resources you are looking for.
-- cache data from other sources to reduce the load on those sources.
+- define your own data structures and their relationships.
+- populate your data structures as JSON, and enforce validation when required.
+- draw in data from any source into any object, structuring it as your organization requires.
+- look up and search within these JSON structures in an efficient way, via a REST interface.
+- offload the work of searching and indexing to Hubuum, and focus on your data.
 - control permissions to one object set in one application instead of having to do it in multiple places.
 - know that REST is your interface, no matter what data you are accessing.
   
