@@ -99,9 +99,6 @@ class AttachmentManagerDetail(HubuumClassAndObjectMixin, HubuumDetail):
     def get_object(self) -> AttachmentManager:
         """Get the attachment manager we're working on."""
         class_identifier = self.kwargs.get("class") or self.request.data.get("class")
-        if not class_identifier:
-            raise ParseError(detail="No class identifier provided.")
-
         hubuum_class = self.get_hubuum_class(class_identifier)
 
         try:
@@ -255,9 +252,6 @@ class AttachmentDetail(HubuumClassAndObjectMixin, HubuumDetail):
         # the model kwarg be None.
         cls = self.get_hubuum_class(self.kwargs.get("class"))
         obj = self.get_hubuum_object(cls, self.kwargs.get("instance"))
-
-        if not obj:
-            raise NotFound(detail="Object not found.")
 
         if not obj.attachments_are_enabled():
             raise AttachmentsNotEnabledError()

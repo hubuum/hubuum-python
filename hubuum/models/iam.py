@@ -163,11 +163,6 @@ class User(AbstractUser):
         """Check if the user is any type of admin (staff/superadmin) (or in a similar group?)."""
         return self.is_staff or self.is_superuser
 
-    @classmethod
-    def supports_attachments(cls) -> bool:
-        """Check if a class supports attachments."""
-        return False
-
     @property
     def group_list(self) -> List[str]:
         """List the names of all the groups the user is a member of."""
@@ -264,18 +259,10 @@ class User(AbstractUser):
         """
         field = None
 
-        try:
-            match = re.match(User.model_permissions_pattern, perm)
-            operation = match.groups()[0]  # type: ignore
-        except AttributeError as exc:
-            raise MissingParam(
-                f"Unknown permission '{perm}' passed to has_perm"
-            ) from exc
-
-        if namespace_operation_exists(operation):
-            field = "has_" + operation
-        else:
-            raise MissingParam(f"Unknown operation '{operation}' passed to has_perm")
+        match = re.match(User.model_permissions_pattern, perm)
+        if not match:
+            raise MissingParam(f"Unknown permission '{perm}' passed to has_perm")
+        field = "has_" + match.groups()[0]
 
         # We should always get an object to test against.
         if obj:

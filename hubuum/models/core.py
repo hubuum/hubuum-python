@@ -46,26 +46,6 @@ class HubuumModel(models.Model):
 
         abstract = True
 
-    def supports_attachments(self) -> bool:
-        """Check if a HubuumClass or a HubuumObject supports attachments.
-
-        For a HubuumClass, this means it itself supports attachments.
-        For a HubuumObject, this means the class it is a member of supports attachments.
-
-        For all other models and objects, this returns False.
-        """
-        name: str = ""
-        if isinstance(self, HubuumClass):
-            name = self.name
-        elif isinstance(self, HubuumObject):
-            name = self.hubuum_class.name
-        else:
-            return False
-
-        return AttachmentManager.objects.filter(
-            hubuum_class=name, enabled=True
-        ).exists()
-
     def get_auto_id(self) -> int:
         """Get the auto ID of the object."""
         return cast(int, self.id)
@@ -169,7 +149,7 @@ class AttachmentModel(models.Model):
         """List all attachments registered to the object."""
         if not self.attachments_are_enabled():
             raise UnsupportedAttachmentModelError(
-                f"Attachments are not enabled for {self.hubuum_class.name}"
+                f"Attachments are not enabled for {self.hubuum_class.name}."
             )
 
         return Attachment.objects.filter(
@@ -241,11 +221,11 @@ class HubuumClass(NamespacedHubuumModel):
         :return: The found HubuumObject instance, or None if not found.
         """
         try:
-            return self.objects.get(name=identifier, hubuum_class=self)
+            return HubuumObject.objects.get(name=identifier, hubuum_class=self)
         except HubuumObject.DoesNotExist:
             if identifier.isdigit():
                 try:
-                    return self.objects.get(pk=identifier, hubuum_class=self)
+                    return HubuumObject.objects.get(pk=identifier, hubuum_class=self)
                 except HubuumObject.DoesNotExist:
                     pass
 

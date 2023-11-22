@@ -53,9 +53,6 @@ class HubuumModelTestCase(TestCase):
 
     def _test_can_create_object(self, model: Model = None, **kwargs: Any) -> object:
         """Create a generic object of any model."""
-        if "namespace" not in kwargs and model not in [Namespace, AttachmentManager]:
-            kwargs["namespace"] = self.namespace
-
         return self._create_object(model=model, **kwargs)
 
     def _test_has_identical_values(

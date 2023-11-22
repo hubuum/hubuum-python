@@ -179,6 +179,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase, BasePopulator):
         log = LogAnalyzer(cap_logs, "POST", "/api/v1/dynamic/Host/", 201)
         log.set_user("superuser")
         log.set_instance_id(host_id)
+        log.expected_response_class = "Host"
         log.set_response_content(
             [
                 {

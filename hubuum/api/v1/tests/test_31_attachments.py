@@ -168,6 +168,20 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self.assertEqual(res.data["per_object_individual_size_limit"], 20)
         self.assertEqual(res.data["per_object_total_size_limit"], 100)
 
+    def test_creating_attachment_on_nonexistent_object(self):
+        """Test that creating attachments on nonexistent objects fails."""
+        self._enable_attachments_for_hosts()
+        file = self._create_test_file(b"a test file")
+        self.assert_post_and_404(
+            "/attachments/data/Host/hostdoesnotexist",
+            {"attachment": file, "namespace": self.namespace.id},
+            format="multipart",
+        )
+
+    def test_missing_attachment_manager(self):
+        """Test fetching the attachment manager for a class without one."""
+        self.assert_get_and_404("/attachments/manager/Host")
+
     def test_attachment_limit_adherence(self):
         """Test that attachment limitations are adhered to."""
         self._enable_attachments_for_hosts()

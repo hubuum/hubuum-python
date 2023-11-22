@@ -1,6 +1,6 @@
 """Base view classes for Hubuum API v1."""
 
-from typing import List, Type, cast
+from typing import List, cast
 
 import structlog
 from django.contrib.auth.models import AbstractUser
@@ -84,18 +84,7 @@ class HubuumClassAndObjectMixin:
         :raises: 404 if object is not found.
         :return: HubuumObject instance
         """
-        hubuum_object = None
-
-        if object_identifier.isnumeric():
-            hubuum_object = HubuumObject.objects.filter(
-                hubuum_class=hubuum_class, id=object_identifier
-            ).first()
-            if hubuum_object:
-                return hubuum_object
-
-        hubuum_object = HubuumObject.objects.filter(
-            hubuum_class=hubuum_class, name=object_identifier
-        ).first()
+        hubuum_object = hubuum_class.get_object(object_identifier)
 
         if not hubuum_object:
             raise NotFound(
@@ -124,22 +113,15 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     If no matches are found, return 404.
     """
 
-    def get_object(
-        self, lookup_identifier: str = "val", model: Type[Model] = None
-    ) -> Model:
+    def get_object(self, lookup_identifier: str = "val") -> Model:
         """Perform the actual lookup based on the view's lookup_fields.
 
         raises: 404 if not found.
         return: object
         """
         model_name = None
-        if model is None:  # type: ignore
-            queryset = cast(QuerySet[Model], self.get_queryset())
-            fields = cast(List[str], self.lookup_fields)
-        else:
-            model_name = model.__name__
-            queryset = model.objects.all()
-            fields = ("id",)
+        queryset = cast(QuerySet[Model], self.get_queryset())
+        fields = cast(List[str], self.lookup_fields)
 
         internal_logger.debug(
             "m_get_object",

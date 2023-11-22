@@ -3,6 +3,7 @@ import hashlib
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from hubuum.exceptions import UnsupportedAttachmentModelError
 from hubuum.models.core import Attachment, AttachmentManager
 from hubuum.tests.base import HubuumModelTestCase
 from hubuum.tests.helpers.populators import BasePopulator
@@ -57,6 +58,16 @@ class AttachmentTestCase(HubuumModelTestCase, BasePopulator):
     def test_str(self):
         """Test that stringifying objects works as expected."""
         self._test_str()
+
+    def test_objects_without_support_raises_exception(self):
+        """Objects without support for attachments should raise an exception."""
+        self.attachment_manager.enabled = False
+        self.attachment_manager.save()
+
+        with self.assertRaisesMessage(
+            UnsupportedAttachmentModelError, "Attachments are not enabled for Host."
+        ):
+            self.host.attachments()
 
 
 class AttachmentManagerTestCase(HubuumModelTestCase, BasePopulator):
