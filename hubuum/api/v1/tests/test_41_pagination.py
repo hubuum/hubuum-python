@@ -5,19 +5,20 @@ from urllib.parse import parse_qs, urlparse
 from rest_framework.response import Response
 
 from hubuum.models.iam import Namespace
-from hubuum.models.resources import Host
 
 from .base import HubuumAPITestCase
+from .helpers.populators import BasePopulator
 
 
-class HubuumPaginationTestCase(HubuumAPITestCase):
+class HubuumPaginationTestCase(HubuumAPITestCase, BasePopulator):
     """Test case for pagination in the Hubuum project."""
 
     def setUp(self):
         """Set up the test environment."""
         super().setUp()
         self.namespace, _ = Namespace.objects.get_or_create(name="namespace1")
-        self.hosts_url = "/resources/hosts/"
+        self.hosts_url = "/dynamic/Host/"
+        self.host_class = self.create_class_direct("Host", namespace=self.namespace)
         self._create_hosts(250)
 
     def tearDown(self) -> None:
@@ -34,10 +35,8 @@ class HubuumPaginationTestCase(HubuumAPITestCase):
         :return: None
         """
         for i in range(num_hosts):
-            Host.objects.create(
-                name=f"hostname-{i}",
-                fqdn=f"hostname-{i}.domain.tld",
-                namespace=self.namespace,
+            self.create_object_direct(
+                self.host_class, namespace=self.namespace, name=f"hostname-{i}"
             )
 
     def test_pagination(self):

@@ -1,6 +1,6 @@
 """Base view classes for Hubuum API v1."""
 
-from typing import List, Type, cast
+from typing import List, cast
 
 import structlog
 from django.contrib.auth.models import AbstractUser
@@ -10,6 +10,7 @@ from rest_framework import generics, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.schemas.openapi import AutoSchema
 
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.permissions import NameSpace
 from hubuum.typing import typed_user_from_request
 
@@ -57,6 +58,42 @@ class LoggingMixin:
         super().perform_destroy(instance)
 
 
+class HubuumClassAndObjectMixin:
+    """Mixin to get the class and instance from the kwargs."""
+
+    def get_hubuum_class(self, class_identifier: str = None) -> HubuumClass:
+        """Get the class from the class_identifier.
+
+        :raises: 404 if class is not found.
+        :return: HubuumClass instance
+        """
+        class_object = None
+
+        class_object = HubuumClass.objects.filter(name=class_identifier).first()
+
+        if class_object is None:
+            raise NotFound(detail=f"Class {class_identifier} not found.")
+
+        return class_object
+
+    def get_hubuum_object(
+        self, hubuum_class: HubuumClass, object_identifier: str = None
+    ) -> HubuumObject:
+        """Get the object from the object_identifier.
+
+        :raises: 404 if object is not found.
+        :return: HubuumObject instance
+        """
+        hubuum_object = hubuum_class.get_object(object_identifier)
+
+        if not hubuum_object:
+            raise NotFound(
+                detail=f"Object {hubuum_class.name}:{object_identifier} not found."
+            )
+
+        return hubuum_object
+
+
 class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     """A mixin to allow us to look up objects beyond just the primary key.
 
@@ -76,25 +113,18 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
     If no matches are found, return 404.
     """
 
-    def get_object(
-        self, lookup_identifier: str = "val", model: Type[Model] = None
-    ) -> Model:
+    def get_object(self, lookup_identifier: str = "val") -> Model:
         """Perform the actual lookup based on the view's lookup_fields.
 
         raises: 404 if not found.
         return: object
         """
         model_name = None
-        if model is None:  # type: ignore
-            queryset = cast(QuerySet[Model], self.get_queryset())
-            fields = cast(List[str], self.lookup_fields)
-        else:
-            model_name = model.__name__
-            queryset = model.objects.all()
-            fields = ("id",)
+        queryset = cast(QuerySet[Model], self.get_queryset())
+        fields = cast(List[str], self.lookup_fields)
 
         internal_logger.debug(
-            "m:get_object",
+            "m_get_object",
             lookup_identifier=lookup_identifier,
             model_passed=model_name,
             model=queryset.model.__name__,
@@ -109,7 +139,7 @@ class MultipleFieldLookupORMixin:  # pylint: disable=too-few-public-methods
                 obj = queryset.get(**{field: value})
                 if obj:
                     internal_logger.debug(
-                        "m:get_object:OK",
+                        "m_get_object:OK",
                         field=field,
                         value=value,
                     )

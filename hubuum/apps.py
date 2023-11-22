@@ -6,7 +6,7 @@ from django.conf import settings
 
 from hubuum import config
 
-SKIP_SETTINGS = ["SECRET_KEY", "BASE_DIR"]
+SKIP_SETTINGS = ["SECRET_KEY", "BASE_DIR", "PASSWORD_RESET_TIMEOUT_DAYS", "USE_L10N"]
 
 
 class HubuumApiConfig(AppConfig):

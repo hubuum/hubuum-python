@@ -11,13 +11,8 @@ from django.db.models import Model
 from rest_framework.exceptions import NotFound
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.core import (
-    AttachmentModel,
-    ExtensionsModel,
-    HubuumModel,
-    NamespacedHubuumModel,
-)
-from hubuum.tools import get_model, get_object
+from hubuum.models.core import HubuumModel
+from hubuum.tools import get_object
 
 
 def namespace_operations(fully_qualified: bool = False) -> List[str]:
@@ -47,17 +42,6 @@ def namespace_operation_exists(permission: str, fully_qualified: bool = False) -
         return permission in namespace_operations(fully_qualified=True)
 
     return permission in namespace_operations()
-
-
-class NamespacedHubuumModelWithExtensions(
-    NamespacedHubuumModel, AttachmentModel, ExtensionsModel
-):
-    """An abstract model that provides Namespaces and Extensions."""
-
-    class Meta:
-        """Meta data for the class."""
-
-        abstract = True
 
 
 class Permission(HubuumModel):
@@ -165,7 +149,7 @@ class User(AbstractUser):
     """Extension to the default User class."""
 
     model_permissions_pattern = re.compile(
-        r"^hubuum.(create|read|update|delete|namespace)_(\w+)$"
+        r"^hubuum.(create|read|update|delete|namespace)$"
     )
     lookup_fields = ["id", "username", "email"]
 
@@ -178,16 +162,6 @@ class User(AbstractUser):
     def is_admin(self):
         """Check if the user is any type of admin (staff/superadmin) (or in a similar group?)."""
         return self.is_staff or self.is_superuser
-
-    @classmethod
-    def supports_extensions(cls) -> bool:
-        """Check if a class supports extensions."""
-        return False
-
-    @classmethod
-    def supports_attachments(cls) -> bool:
-        """Check if a class supports attachments."""
-        return False
 
     @property
     def group_list(self) -> List[str]:
@@ -285,20 +259,10 @@ class User(AbstractUser):
         """
         field = None
 
-        try:
-            match = re.match(User.model_permissions_pattern, perm)
-            operation, model = match.groups()  # type: ignore
-        except AttributeError as exc:
-            raise MissingParam(
-                f"Unknown permission '{perm}' passed to has_perm"
-            ) from exc
-
-        if namespace_operation_exists(operation) and get_model(model):
-            field = "has_" + operation
-        else:
-            raise MissingParam(
-                f"Unknown operation or model '{operation} / {model}' passed to has_perm"
-            )
+        match = re.match(User.model_permissions_pattern, perm)
+        if not match:
+            raise MissingParam(f"Unknown permission '{perm}' passed to has_perm")
+        field = "has_" + match.groups()[0]
 
         # We should always get an object to test against.
         if obj:

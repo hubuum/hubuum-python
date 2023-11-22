@@ -13,8 +13,8 @@ nav:
       - Configuration: configuration.md
   - Using Hubuum:
       - Permissions: permissions.md
+      - Authentication: authentication.md
       - API: api.md
-      - Extensions: extensions.md
       - Logging: logging.md
       - Examples: examples.md
       - Swagger: swagger.md

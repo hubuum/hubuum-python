@@ -2,8 +2,9 @@
 from django.contrib.auth.models import Group
 from django.test import TestCase
 
+from hubuum.exceptions import MissingParam
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace, Permission, User
-from hubuum.models.resources import Host
 
 
 class PermissionsTestCase(TestCase):
@@ -50,10 +51,37 @@ class PermissionsTestCase(TestCase):
         self.one.groups.set([self.onegroup])
         self.two.groups.set([self.twogroup])
 
-        self.onehost = Host.objects.create(name="one", namespace=self.onenamespace)
-        self.twohost = Host.objects.create(name="two", namespace=self.twonamespace)
+        self.testclass = HubuumClass.objects.create(
+            name="Host",
+            json_schema={},
+            validate_schema=False,
+            namespace=self.onenamespace,
+        )
 
-        self.read_perm = "hubuum.read_host"
+        self.onehost = HubuumObject.objects.create(
+            name="one",
+            namespace=self.onenamespace,
+            hubuum_class=self.testclass,
+            json_data={"name": "one"},
+        )
+
+        self.twohost = HubuumObject.objects.create(
+            name="two",
+            namespace=self.twonamespace,
+            hubuum_class=self.testclass,
+            json_data={"name": "two"},
+        )
+
+        self.read_perm = "hubuum.read"
+
+    def test_wrong_permission_type(self):
+        """Test that an invalid permission operation raises the correct exception."""
+        invalid_permission = "hubuum.invalid"
+        with self.assertRaisesMessage(
+            MissingParam,
+            f"Unknown permission '{invalid_permission}' passed to has_perm",
+        ):
+            self.one.has_perm(invalid_permission, self.onehost)
 
     def test_str_of_object(self):
         """Test that the stringify method performs as expected."""

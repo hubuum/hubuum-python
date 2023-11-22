@@ -1,39 +1,51 @@
 """Test module for the Attachment/AttachmentManager models."""
 import hashlib
 
-from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from hubuum.models.core import Attachment, AttachmentManager, get_model
-from hubuum.models.resources import Host
+from hubuum.exceptions import UnsupportedAttachmentModelError
+from hubuum.models.core import Attachment, AttachmentManager
+from hubuum.tests.base import HubuumModelTestCase
+from hubuum.tests.helpers.populators import BasePopulator
 
-from .base import HubuumModelTestCase
 
-
-class AttachmentTestCase(HubuumModelTestCase):
+class AttachmentTestCase(HubuumModelTestCase, BasePopulator):
     """Define the test suite for the Attachment model."""
 
     def setUp(self):
         """Set up defaults for the test object."""
         super().setUp()
-        self.host = Host.objects.create(name="test", namespace=self.namespace)
-        model = get_model("host")
-        content_type = ContentType.objects.get_for_model(model)
+        self.cls = self.create_class_direct(name="Host")
+        self.host = self.create_object_direct(
+            hubuum_class=self.cls,
+            namespace=self.namespace,
+            name="test",
+            json_data={},
+        )
 
         self.content = b"A bit of content."
         self.attributes = {
             "attachment": SimpleUploadedFile(
                 "test_file.txt", self.content, content_type="text/plain"
             ),
-            "content_type": content_type,
-            "object_id": self.host.id,
+            "hubuum_class": self.cls,
+            "hubuum_object": self.host,
             "namespace": self.namespace,
         }
+
+        # Enable attachments for the model. This is not required when creating the object
+        # directly as there is no validation to catch this case? We do need the class and the
+        # object to exist though.
+        self.attachment_manager = self._test_can_create_object(
+            model=AttachmentManager, **{"hubuum_class": self.cls, "enabled": True}
+        )
+
         self.obj = self._test_can_create_object(model=Attachment, **self.attributes)
 
     def tearDown(self):
         """Clean up after each test."""
-        self.host.delete()
+        self.host.delete()  # This should cascade to the attachment.
+        self.attachment_manager.delete()
         return super().tearDown()
 
     def test_create_has_correct_values(self):
@@ -47,15 +59,26 @@ class AttachmentTestCase(HubuumModelTestCase):
         """Test that stringifying objects works as expected."""
         self._test_str()
 
+    def test_objects_without_support_raises_exception(self):
+        """Objects without support for attachments should raise an exception."""
+        self.attachment_manager.enabled = False
+        self.attachment_manager.save()
 
-class AttachmentManagerTestCase(HubuumModelTestCase):
+        with self.assertRaisesMessage(
+            UnsupportedAttachmentModelError, "Attachments are not enabled for Host."
+        ):
+            self.host.attachments()
+
+
+class AttachmentManagerTestCase(HubuumModelTestCase, BasePopulator):
     """Define the test suite for the AttachmentManager model."""
 
     def setUp(self):
         """Set up defaults for the test object."""
         super().setUp()
+        self.cls = self.create_class_direct(name="Host")
         self.attributes = {
-            "model": "host",
+            "hubuum_class": self.cls,
             "enabled": True,
         }
         self.obj = AttachmentManager.objects.create(**self.attributes)

@@ -6,7 +6,6 @@ from typing import Any, Dict, List, cast
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
-from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import UploadedFile
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -16,28 +15,12 @@ from hubuum.exceptions import Conflict
 from hubuum.models.core import (
     Attachment,
     AttachmentManager,
-    Extension,
-    ExtensionData,
-    ExtensionsModel,
+    ClassLink,
+    HubuumClass,
+    HubuumObject,
+    ObjectLink,
 )
-from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
-from hubuum.models.iam import (
-    Namespace,
-    NamespacedHubuumModelWithExtensions,
-    Permission,
-    User,
-)
-from hubuum.models.resources import (
-    Host,
-    HostType,
-    Jack,
-    Person,
-    PurchaseOrder,
-    Room,
-    Vendor,
-)
-from hubuum.tools import get_model
-from hubuum.validators import url_interpolation_fields
+from hubuum.models.iam import Namespace, Permission, User
 
 
 class ErrorOnBadFieldMixin:  # pylint: disable=too-few-public-methods
@@ -98,7 +81,7 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  
     """General Hubuum Serializer."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """For methods that are subclasses of ExtensionsModel, enable relevant fields."""
+        """Catch some possible OpenAPI issues."""
         super().__init__(*args, **kwargs)
 
         if "request" not in self.context:
@@ -112,27 +95,7 @@ class HubuumMetaSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  
         if not self.context["request"].method == "GET":
             return
 
-        if issubclass(self.Meta.model, ExtensionsModel):
-            self.fields["extensions"] = serializers.SerializerMethodField()
-            self.fields["extension_data"] = serializers.SerializerMethodField()
-            self.fields["extension_urls"] = serializers.SerializerMethodField()
         return
-
-    def get_extension_urls(
-        self, obj: NamespacedHubuumModelWithExtensions
-    ) -> Dict[str, str]:
-        """Deliver the endpoint for the URL for this specific object."""
-        return obj.extension_urls()
-
-    def get_extension_data(
-        self, obj: NamespacedHubuumModelWithExtensions
-    ) -> Dict[str, Any]:
-        """Display extension data."""
-        return obj.extension_data()
-
-    def get_extensions(self, obj: NamespacedHubuumModelWithExtensions) -> List[str]:
-        """Display active extensions for the object."""
-        return sorted(o.name for o in obj.extensions())
 
     class Meta:
         """Meta class for HubuumMetaSerializer."""
@@ -170,93 +133,6 @@ class GroupSerializer(HubuumMetaSerializer):
         """How to serialize the object."""
 
         model = Group
-        fields = "__all__"
-
-
-class ExtensionSerializer(HubuumMetaSerializer):
-    """Serialize an Extension object."""
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate that the data offered applies to the correct model.
-
-        This doesn't even get triggered unless we have a working extension object.
-        """
-        require_interpolation = True  # This should fetch the default for the field
-
-        model = None
-        if self.partial and self.instance and isinstance(self.instance, Extension):
-            require_interpolation = self.instance.require_interpolation
-            url = self.instance.url
-            model = self.instance.model
-
-        url = ""
-        if "url" in attrs:
-            url = attrs["url"]
-
-        if "model" in attrs:
-            model = attrs["model"]
-
-        if "require_interpolation" in attrs:
-            require_interpolation = attrs["require_interpolation"]
-
-        fields = url_interpolation_fields(url)
-        if require_interpolation and not fields:
-            raise ValidationError({"url": "Interpolation required but none found."})
-
-        #            none model is already validated as existing via validate_model.
-        #            try:
-        #                cls = get_model(attrs["model"])
-        #            except ValueError as ex:
-        #                raise ValidationError({"model": "No such model."}) from ex
-
-        cls = get_model(model)
-        failed_fields = []
-        for field in fields:
-            if not hasattr(cls, field):
-                failed_fields.append(field)
-
-        if failed_fields:
-            errorstring = f"{model} does not support interpolating"
-            errorstring += f" on the field(s) {failed_fields}."
-            raise ValidationError({"url": errorstring})
-
-        return attrs
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Extension
-        fields = "__all__"
-
-
-class ExtensionDataSerializer(HubuumMetaSerializer):
-    """Serialize an ExtensionData object."""
-
-    content_type = serializers.SlugRelatedField(
-        queryset=ContentType.objects.all(),
-        slug_field="model",
-    )
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate that the data offered applies to the correct model.
-
-        This doesn't even get triggered unless we have a working extension object.
-        """
-        content_type = attrs["content_type"]
-        extension = attrs["extension"]
-        model_class = content_type.model_class()
-        model_name = model_class._meta.model_name  # pylint: disable=protected-access
-
-        if not extension.model == model_name:
-            raise ValidationError({"model": "Extension does not apply to this model."})
-
-        super().validate(self)
-        return attrs
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = ExtensionData
         fields = "__all__"
 
 
@@ -369,38 +245,24 @@ class HubuumClassSerializer(HubuumMetaSerializer):
 class HubuumObjectSerializer(HubuumMetaSerializer):
     """Serialize a HubuumObject object."""
 
-    # Make the dynamic_class field read-only so that it's not required during initial validation
-    # dynamic_class = serializers.PrimaryKeyRelatedField(read_only=True)
+    # Make the hubuum_class field read-only so that it's not required during initial validation
+    # hubuum_class = serializers.PrimaryKeyRelatedField(read_only=True)
 
-    dynamic_class = serializers.SlugRelatedField(slug_field="name", read_only=True)
+    hubuum_class = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         """How to serialize the object."""
 
         model = HubuumObject
         fields = [
+            "id",
             "name",
             "updated_at",
             "created_at",
             "json_data",
             "namespace",
-            "dynamic_class",
+            "hubuum_class",
         ]
-
-
-class HostSerializer(HubuumMetaSerializer):
-    """Serialize a Host object."""
-
-    # serializers.HyperlinkedModelSerializer
-    #    externals = serializers.SerializerMethodField()
-    #    _mod_dns = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Host
-        fields = "__all__"
-        # fields = ['id', 'name', '_mod_dns']
 
 
 class NamespaceSerializer(HubuumMetaSerializer):
@@ -421,66 +283,6 @@ class PermissionSerializer(ErrorOnBadFieldMixin, serializers.ModelSerializer):  
         """How to serialize the object."""
 
         model = Permission
-        fields = "__all__"
-
-
-class HostTypeSerializer(HubuumMetaSerializer):
-    """Serialize a HostType object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = HostType
-        fields = "__all__"
-
-
-class JackSerializer(HubuumMetaSerializer):
-    """Serialize a Jack object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Jack
-        fields = "__all__"
-
-
-class PersonSerializer(HubuumMetaSerializer):
-    """Serialize a Person object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Person
-        fields = "__all__"
-
-
-class RoomSerializer(HubuumMetaSerializer):
-    """Serialize a Room object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Room
-        fields = "__all__"
-
-
-class PurchaseOrderSerializer(HubuumMetaSerializer):
-    """Serialize a PurchaseOrder object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = PurchaseOrder
-        fields = "__all__"
-
-
-class VendorSerializer(HubuumMetaSerializer):
-    """Serialize a Vendor object."""
-
-    class Meta:
-        """How to serialize the object."""
-
-        model = Vendor
         fields = "__all__"
 
 

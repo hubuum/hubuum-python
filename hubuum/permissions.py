@@ -187,7 +187,21 @@ class NameSpace(IsSuperOrAdminOrReadOnly):
         # if request.user.is_anonymous:
         #    return False
 
+        auth_logger.debug(
+            "has_perm_o",
+            user=request.user.username,
+            view=view.__class__.__name__,
+            method=request.method,
+        )
+
         if is_super_or_admin(typed_user_from_request(request)):
+            auth_logger.debug(
+                "has_perm_o_S:OK",
+                user=request.user.username,
+                view=view.__class__.__name__,
+                method=request.method,
+                super_or_admin=True,
+            )
             return True
 
         perms_map = {

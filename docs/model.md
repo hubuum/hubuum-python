@@ -21,14 +21,3 @@ Models related to the identity management and permissions.
     :fields:
     :show-inheritance:
     :exclude-members: __str__
-
-## Resources models
-
-These are the main user-facing models. They are used to create the object one will work on day to day.
-
-::: hubuum.models.resources
-    :members:
-    :undoc-members:
-    :fields:
-    :show-inheritance:
-    :exclude-members: __str__

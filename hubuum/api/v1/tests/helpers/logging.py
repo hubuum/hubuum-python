@@ -7,7 +7,7 @@ from dateutil.parser import parse
 from django.db import models
 from structlog.types import EventDict
 
-from hubuum.tools import get_model
+from hubuum.models.core import HubuumClass, HubuumObject
 
 
 class LogAnalyzer:
@@ -53,7 +53,7 @@ class LogAnalyzer:
         self.expected_status_label = expected_status_label
 
         self.expected_response_content = None
-        self.expected_response_model = None
+        self.expected_response_class = None
         self.expected_response_model_string = ""
         self.expected_user = None
         self.expected_instance_id = None
@@ -74,6 +74,7 @@ class LogAnalyzer:
             "login": self.login,
             "logout": self.logout,
             "failure": self.failure,
+            "m_get_object": self.m_get_object,
         }
 
     #    def dummy(self, index: int) -> None:
@@ -108,8 +109,8 @@ class LogAnalyzer:
             print(f"  Status label: {self.expected_status_label}")
         if self.expected_response_content:
             print(f"  Response content: {self.expected_response_content}")
-        if self.expected_response_model:
-            print(f"  Response model: {self.expected_response_model}")
+        if self.expected_response_class:
+            print(f"  Response class: {self.expected_response_class}")
         if self.expected_user:
             print(f"  User: {self.expected_user}")
         if self.expected_instance_id:
@@ -139,11 +140,6 @@ class LogAnalyzer:
 
         """
         self.expected_response_model_string = model
-        if model:
-            model = get_model(model)
-            assert issubclass(model, models.Model), "model must be a Django model"
-
-        self.expected_response_model = model
         self.expected_response_content = content
 
     def get_log(self, index: int) -> EventDict:
@@ -366,6 +362,17 @@ class LogAnalyzer:
         self._check_log_entry_count(log, 3)
         self._check_log_values(log, expected_values)
 
+    def m_get_object(self, index: int) -> None:
+        """Check m_get_object entries."""
+        log = self.cap_logs[index]
+        expected_values = {
+            "event": "m_get_object",
+            "log_level": "debug",
+        }
+
+        self._check_log_entry_count(log, 6)
+        self._check_log_values(log, expected_values)
+
     def failure(self, index: int) -> None:
         """Check failure entries."""
         log = self.cap_logs[index]
@@ -391,8 +398,8 @@ class LogAnalyzer:
         if self.expected_response_content:
             self._check_content_equals_expected(content)
 
-        if self.expected_response_model:
-            self._check_content_against_model(content)
+        if self.expected_response_class:
+            self._check_content_against_class(content)
 
     def _check_content_equals_expected(self, content: List[Dict[str, Any]]) -> None:
         """Check the response content against the expected response content."""
@@ -409,11 +416,13 @@ class LogAnalyzer:
 
     def _check_instance_exists(self, obj_data: Dict[str, Any]) -> Any:
         """Check if a single instance exists based on provided data."""
-        instances = self.expected_response_model.objects.filter(**obj_data)
+        hubuum_class = HubuumClass.objects.get(name=self.expected_response_class)
+        obj_data["hubuum_class"] = hubuum_class
+        instances = HubuumObject.objects.filter(**obj_data)
 
         if len(instances) != 1:  # pragma: no cover
             raise AssertionError(
-                f"{obj_data} gave multiple instances of {self.expected_response_model}"
+                f"{obj_data} gave multiple instances of {self.expected_response_class}"
             )
 
         return instances[0]
@@ -439,7 +448,7 @@ class LogAnalyzer:
                     instance_value == value
                 ), f'Value mismatch on "{key}", expected "{value}", got "{instance_value}"'
 
-    def _check_content_against_model(self, content: List[Dict[str, Any]]) -> None:
+    def _check_content_against_class(self, content: List[Dict[str, Any]]) -> None:
         """Check the response content against the expected response model."""
         for obj_data in content:
             instance = self._check_instance_exists(obj_data)

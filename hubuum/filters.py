@@ -19,21 +19,11 @@ from rest_framework.exceptions import ValidationError
 from hubuum.models.core import (
     Attachment,
     AttachmentManager,
-    Extension,
-    ExtensionData,
+    HubuumClass,
+    HubuumObject,
     model_is_open,
 )
-from hubuum.models.dynamic import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace, Permission, User
-from hubuum.models.resources import (
-    Host,
-    HostType,
-    Jack,
-    Person,
-    PurchaseOrder,
-    Room,
-    Vendor,
-)
 from hubuum.typing import typed_user_from_request
 
 _key_lookups = ["exact"]  # in?
@@ -272,7 +262,8 @@ class HubuumObjectFilterSet(NamespacePermissionFilter):
 
         model = HubuumObject
         fields = {
-            "dynamic_class": _key_lookups,
+            "name": _textual_lookups,
+            "hubuum_class": _key_lookups,
         }
         fields.update(_hubuum_fields)
 
@@ -350,7 +341,7 @@ class AttachmentManagerFilterSet(RaiseBadRequestOnBadFilter):
 
         model = AttachmentManager
         fields = {
-            "model": _textual_lookups,
+            "hubuum_class": _key_lookups,
             "enabled": _boolean_lookups,
             "per_object_count_limit": _numeric_lookups,
             "per_object_individual_size_limit": _numeric_lookups,
@@ -366,145 +357,10 @@ class AttachmentFilterSet(NamespacePermissionFilter):
 
         model = Attachment
         fields = {
-            "object_id": _numeric_lookups,
+            "hubuum_class": _key_lookups,
+            "hubuum_object": _key_lookups,
             "sha256": _textual_lookups,
             "size": _numeric_lookups,
             "original_filename": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class ExtensionFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Extension."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Extension
-        fields = {
-            "name": _textual_lookups,
-            "model": _textual_lookups,
-            "url": _textual_lookups,
-            "require_interpolation": _boolean_lookups,
-            "header": _textual_lookups,
-            "cache_time": _numeric_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class ExtensionDataFilterSet(NamespacePermissionFilter):
-    """FilterSet for the ExtensionData model with a custom json_data_lookup filter."""
-
-    json_data_lookup = JSONFieldLookupFilter(field_name="json_data")
-
-    class Meta:
-        """Meta class for ExtensionDataFilterSet."""
-
-        model = ExtensionData
-        fields = ["extension", "content_type", "object_id", "namespace"]
-
-
-class HostFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Host."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Host
-        fields = {
-            "name": _textual_lookups,
-            "fqdn": _textual_lookups,
-            "serial": _textual_lookups,
-            "registration_date": _date_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class HostTypeFilterSet(NamespacePermissionFilter):
-    """FilterSet class for HostType."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = HostType
-        fields = {"name": _textual_lookups, "description": _textual_lookups}
-        fields.update(_hubuum_fields)
-
-
-class JackFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Jack."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Jack
-        fields = {
-            "name": _textual_lookups,
-            "building": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class PersonFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Person."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Person
-        fields = {
-            "username": _textual_lookups,
-            "section": _textual_lookups,
-            "department": _textual_lookups,
-            "email": _textual_lookups,
-            "office_phone": _textual_lookups,
-            "mobile_phone": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class PurchaseOrderFilterSet(NamespacePermissionFilter):
-    """FilterSet class for PurchaseOrder."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = PurchaseOrder
-        fields = {
-            "order_date": _date_lookups,
-            "po_number": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class RoomFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Room."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Room
-        fields = {
-            "room_id": _textual_lookups,
-            "building": _textual_lookups,
-            "floor": _textual_lookups,
-        }
-        fields.update(_hubuum_fields)
-
-
-class VendorFilterSet(NamespacePermissionFilter):
-    """FilterSet class for Vendor."""
-
-    class Meta:
-        """Metadata for the class."""
-
-        model = Vendor
-        fields = {
-            "vendor_name": _textual_lookups,
-            "vendor_url": _textual_lookups,
-            "vendor_credentials": _textual_lookups,
-            "contact_name": _textual_lookups,
-            "contact_email": _textual_lookups,
-            "contact_phone": _textual_lookups,
         }
         fields.update(_hubuum_fields)

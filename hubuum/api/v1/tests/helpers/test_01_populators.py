@@ -3,7 +3,7 @@
 import pytest
 
 from hubuum.api.v1.tests.helpers.populators import APIv1Objects
-from hubuum.models.dynamic import ClassLink, HubuumClass, HubuumObject, ObjectLink
+from hubuum.models.core import ClassLink, HubuumClass, HubuumObject, ObjectLink
 
 
 class TestPopulators(APIv1Objects):

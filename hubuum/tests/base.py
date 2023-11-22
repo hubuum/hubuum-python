@@ -7,9 +7,8 @@ from django.db.models import Model
 from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.core import Attachment, AttachmentManager, Extension
+from hubuum.models.core import Attachment, AttachmentManager
 from hubuum.models.iam import Namespace
-from hubuum.models.resources import Person, PurchaseOrder, Room, Vendor
 
 
 class HubuumModelTestCase(TestCase):
@@ -54,9 +53,6 @@ class HubuumModelTestCase(TestCase):
 
     def _test_can_create_object(self, model: Model = None, **kwargs: Any) -> object:
         """Create a generic object of any model."""
-        if "namespace" not in kwargs and model is not Namespace:
-            kwargs["namespace"] = self.namespace
-
         return self._create_object(model=model, **kwargs)
 
     def _test_has_identical_values(
@@ -74,10 +70,6 @@ class HubuumModelTestCase(TestCase):
         if not model:
             raise MissingParam
 
-        # Ick.
-        if model in (Extension, AttachmentManager):
-            kwargs["model"] = "host"
-
         obj, _ = model.objects.get_or_create(**kwargs)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, model)
@@ -86,15 +78,7 @@ class HubuumModelTestCase(TestCase):
     def _test_str(self):
         """Test that stringifying objects works as expected."""
         obj = self.obj
-        if isinstance(obj, Person):
-            self.assertEqual(str(obj), self.attribute("username"))
-        elif isinstance(obj, PurchaseOrder):
-            self.assertEqual(str(obj), self.attribute("po_number"))
-        elif isinstance(obj, Room):
-            self.assertEqual(str(obj), self.attribute("room_id"))
-        elif isinstance(obj, Vendor):
-            self.assertEqual(str(obj), self.attribute("vendor_name"))
-        elif isinstance(obj, (Attachment, AttachmentManager)):
+        if isinstance(obj, (Attachment, AttachmentManager)):
             self.assertEqual(str(obj), str(obj.id))
         else:
             self.assertEqual(str(obj), self.attribute("name"))

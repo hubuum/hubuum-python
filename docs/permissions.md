@@ -14,24 +14,25 @@ Groups are given access to namespaces based on one of five boolean permissions: 
 
 ## Example usage
 
-```bash
-# Create a new namespace
-POST /api/v1/namespaces/ -d '{
-    "name": "example_namespace"
-}'
+    ```bash
+    # Create a new namespace
+    POST /api/v1/namespaces/ -d '{
+        "name": "example_namespace"
+    }'
 
-# Create a new group
-POST /api/v1/groups/ -d '{
-    "name": "example_group"
-}'
+    # Create a new group
+    POST /api/v1/groups/ -d '{
+        "name": "example_group"
+    }'
 
-# Give the group read access to the namespace
-POST /api/v1/namespaces/example_namespace/groups/example_group -d '{
-    "read": true
-}'
-```
+    # Give the group read access to the namespace
+    POST /api/v1/namespaces/example_namespace/groups/example_group -d '{
+        "read": true
+    }'
+    ```
 
 !!! warning
-    Note that deleting a namespace deletes all objects in the namespace, and cannot be undone.
+    Note that deleting a namespace deletes all classes and objects in the namespace, and also their relations!
+    Deleting a namespace is a destructive act that **cannot be undone**.
     Deleting the namespace also deletes all permission objects for the namespace,
     but the groups themselves are not deleted.

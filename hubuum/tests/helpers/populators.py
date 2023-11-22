@@ -3,7 +3,7 @@
 from typing import Any, Dict, cast
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.dynamic import HubuumClass, HubuumObject
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
 from hubuum.tools import get_model
 
@@ -54,20 +54,28 @@ class BasePopulator:
 
     def create_object_direct(
         self,
-        dynamic_class: HubuumClass = None,
+        hubuum_class: HubuumClass = None,
         namespace: Namespace = None,
         json_data: Dict[str, Any] = None,
         **kwargs: Any,
     ) -> HubuumObject:
         """Create a dynamic object.
 
-        params: dynamic_class: HubuumClass (default: None)
+        params: hubuum_class: HubuumClass (default: None)
         params: namespace: Namespace (default: self.namespace if available)
         params: kwargs: Any
         """
         namespace = self._get_namespace(namespace)
+        name = kwargs.get("name", "Test")
 
-        json_data = json_data or {"key": "value", "listkey": [1, 2, 3]}
+        json_data = json_data or {
+            "key": "value",
+            "listkey": [1, 2, 3],
+            "dictkey": {"one": "valueone", "two": {"name": name}},
+            "name": name,
+            "namespace_name": namespace.name,
+            "namespace_id": namespace.id,
+        }
 
         attributes: Dict[str, Any] = {
             "json_data": json_data,
@@ -78,4 +86,4 @@ class BasePopulator:
         for key, value in kwargs.items():
             attributes[key] = value
 
-        return HubuumObject.objects.create(dynamic_class=dynamic_class, **attributes)
+        return HubuumObject.objects.create(hubuum_class=hubuum_class, **attributes)

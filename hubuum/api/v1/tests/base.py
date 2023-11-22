@@ -82,7 +82,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             staff=False, superuser=False, username=username, groupname=groupname
         )
 
-    def _create_namespace(self, namespacename: str = "namespace1") -> None:
+    def _create_namespace(self, namespacename: str = "namespace1") -> Namespace:
         """Get or create the given namespace directly."""
         namespace, _ = Namespace.objects.get_or_create(name=namespacename)
         return namespace
@@ -151,13 +151,26 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             group.user_set.add(self.user)
 
     def grant(self, group: str, namespace: str, permissions: List[str]) -> None:
-        """Grant a set of permissions to a given group for a namespace."""
+        """Grant a set of permissions to a given group for a namespace.
+
+        Temporarily assumes superuser rights for the client.
+        """
         oldclient = self.client
         self.client = self.get_superuser_client()
         perms = {}
         for perm in permissions:
             perms[perm] = True
         self.assert_post_and_204(f"/iam/namespaces/{namespace}/groups/{group}", perms)
+        self.client = oldclient
+
+    def revoke(self, group: str, namespace: str) -> None:
+        """Revoke all permissions from a given group for a namespace.
+
+        Temporarily assumes superuser rights for the client.
+        """
+        oldclient = self.client
+        self.client = self.get_superuser_client()
+        self.assert_delete(f"/iam/namespaces/{namespace}/groups/{group}")
         self.client = oldclient
 
     def basic_auth(self, username: str, password: str) -> str:

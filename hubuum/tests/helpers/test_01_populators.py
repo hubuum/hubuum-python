@@ -6,7 +6,7 @@ import pytest
 from django.test import TestCase
 
 from hubuum.exceptions import MissingParam
-from hubuum.models.dynamic import HubuumClass, HubuumObject
+from hubuum.models.core import HubuumClass, HubuumObject
 from hubuum.models.iam import Namespace
 from hubuum.tests.helpers.populators import BasePopulator
 
@@ -73,7 +73,7 @@ class TestPopulators(BasePopulator, TestCase):
         """Test creating an object with self.namespace."""
         self.namespace = self.create_namespace()
         class1 = self.create_class_direct(name="Class1")
-        object1 = self.create_object_direct(dynamic_class=class1, name="Object1")
+        object1 = self.create_object_direct(hubuum_class=class1, name="Object1")
 
         self.validate_object(object1, "Object1", self.namespace)
 
@@ -87,7 +87,7 @@ class TestPopulators(BasePopulator, TestCase):
         namespace = self.create_namespace()
         class1 = self.create_class_direct(name="Class1", namespace=namespace)
         object1 = self.create_object_direct(
-            dynamic_class=class1, name="Object1", namespace=namespace
+            hubuum_class=class1, name="Object1", namespace=namespace
         )
 
         self.validate_object(object1, "Object1", namespace)
@@ -104,7 +104,7 @@ class TestPopulators(BasePopulator, TestCase):
         class1 = self.create_class_direct(name="Class1", namespace=namespace)
 
         with pytest.raises(MissingParam):
-            self.create_object_direct(dynamic_class=class1, name="Object1")
+            self.create_object_direct(hubuum_class=class1, name="Object1")
 
     def test_create_in_model(self):
         """Test that create_in_model works."""
