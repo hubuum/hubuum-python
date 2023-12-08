@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/labeler.yml
       - uses: actions/labeler@v5
         with:
           sync-labels: true
