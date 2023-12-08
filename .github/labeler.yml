@@ -1,22 +1,29 @@
 documentation:
-  - "docs/*"
+- changed-files:
+  - any-glob-to-any-file: "docs/**"
 
 migrations:
-  - "hubuum/migrations/*"
+- changed-files:
+  - any-glob-to-any-file: "hubuum/migrations/*"
 
 models:
-  - "hubuum/models/*"
+- changed-files:
+  - any-glob-to-any-file: "hubuum/models/*"
 
 settings:
-  - "hubuumsite/settings.py"
+- changed-files:
+  - any-glob-to-any-file: "hubuumsite/settings.py"
 
 dependencies:
-  - "requirements*"
+- changed-files:
+  - any-glob-to-any-file: "poetry.lock"
 
 testing:
-  - "hubuum/tests/*"
-  - "hubuum/api/*/tests/*"
-  - "tox.ini"
+- changed-files:
+  - any-glob-to-any-file: "hubuum/tests/*"
+  - any-glob-to-any-file: "hubuum/api/*/tests/*"
+  - any-glob-to-any-file: "tox.ini"
 
 github_actions:
-  - ".github/workflows/*"
+- changed-files:
+  - any-glob-to-any-file: ".github/workflows/*"
