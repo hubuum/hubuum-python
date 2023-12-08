@@ -135,7 +135,7 @@ jobs:
         with:
           images: |
             terjekv/hubuum
-            ghcr.io/terjekv/hubuum
+            ghcr.io/hubuum/hubuum
           tags: |
             type=ref,event=branch
             type=ref,event=pr
