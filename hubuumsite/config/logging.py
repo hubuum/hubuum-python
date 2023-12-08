@@ -98,11 +98,7 @@ class HubuumLoggingConfig(HubuumAbstractConfig):
 
     def get_logging_output(
         self,
-    ) -> List[
-        Union[
-            Processor, structlog.dev.ConsoleRenderer, structlog.processors.JSONRenderer
-        ]
-    ]:
+    ) -> List[Union[Processor, structlog.dev.ConsoleRenderer, structlog.processors.JSONRenderer]]:
         """Get the logging output type and any additional processors."""
         if self.get("LOGGING_PRODUCTION"):
             return [structlog.processors.JSONRenderer()]

@@ -55,9 +55,7 @@ class HubuumModelTestCase(TestCase):
         """Create a generic object of any model."""
         return self._create_object(model=model, **kwargs)
 
-    def _test_has_identical_values(
-        self, obj: object = None, dictionary: Dict[str, Any] = None
-    ):
+    def _test_has_identical_values(self, obj: object = None, dictionary: Dict[str, Any] = None):
         """Compare the dictionary with the same attributes from the self."""
         if not (obj and dictionary):
             raise MissingParam

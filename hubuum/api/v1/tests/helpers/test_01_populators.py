@@ -20,9 +20,7 @@ class TestPopulators(APIv1Objects):
     def test_str_of_ClassLink_and_ObjectLink(self) -> None:
         """Test the str representation of link types and dynamic links."""
         self.create_class_link_via_api("Host", "Room", max_links=3)
-        class_link = ClassLink.objects.get(
-            source_class__name="Host", target_class__name="Room"
-        )
+        class_link = ClassLink.objects.get(source_class__name="Host", target_class__name="Room")
         self.assertEqual(str(class_link), "Host <-> Room (3)")
 
         self.create_object_link_via_api("Host.host1", "Room.room1")
@@ -42,9 +40,7 @@ class TestPopulators(APIv1Objects):
         """Test the get_object_from_cache method."""
         self.assertEqual(self.get_objects_from_cache("Host.host1").name, "host1")
         self.assertEqual(self.get_objects_from_cache("Room.room1").name, "room1")
-        self.assertEqual(
-            self.get_objects_from_cache("Building.building1").name, "building1"
-        )
+        self.assertEqual(self.get_objects_from_cache("Building.building1").name, "building1")
 
         self.assertEqual(len(self.get_objects_from_cache("Host")), 3)
         self.assertEqual(len(self.get_objects_from_cache("Room")), 2)

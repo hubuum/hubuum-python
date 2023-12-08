@@ -343,9 +343,7 @@ class NamespaceMembersGroup(
         group = get_group(kwargs["groupid"])
         instance = namespace.get_permissions_for_group(group, raise_exception=False)
 
-        if set(request.data.keys()).isdisjoint(
-            namespace_operations(fully_qualified=True)
-        ):
+        if set(request.data.keys()).isdisjoint(namespace_operations(fully_qualified=True)):
             raise ParseError(
                 detail=f"Missing at least one of '{namespace_operations(fully_qualified=True)}'"
             )

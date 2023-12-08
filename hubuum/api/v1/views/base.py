@@ -24,9 +24,7 @@ class LoggingMixin:
     Also logs the user who performed the action.
     """
 
-    def _log(
-        self, operation: str, model: str, user: AbstractUser, instance: Model
-    ) -> None:
+    def _log(self, operation: str, model: str, user: AbstractUser, instance: Model) -> None:
         """Write the log string."""
         object_logger.debug(
             operation,
@@ -87,9 +85,7 @@ class HubuumClassAndObjectMixin:
         hubuum_object = hubuum_class.get_object(object_identifier)
 
         if not hubuum_object:
-            raise NotFound(
-                detail=f"Object {hubuum_class.name}:{object_identifier} not found."
-            )
+            raise NotFound(detail=f"Object {hubuum_class.name}:{object_identifier} not found.")
 
         return hubuum_object
 
@@ -188,7 +184,5 @@ class HubuumDetail(
         """Return a HTTPresponse with the file in question."""
         with open(filename, "rb") as file:
             response = HttpResponse(file, content_type="application/octet-stream")
-            response[
-                "Content-Disposition"
-            ] = f"attachment; filename={original_filename}"
+            response["Content-Disposition"] = f"attachment; filename={original_filename}"
             return response

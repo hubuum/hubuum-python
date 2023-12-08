@@ -72,17 +72,13 @@ class HubuumAttachmentTestCase(APIv1Objects):
 
     def _enable_attachments(self, cls: str) -> HttpResponse:
         """Enable attachments for a model."""
-        return self.assert_post(
-            "/attachments/manager/", {"class": cls, "enabled": True}
-        )
+        return self.assert_post("/attachments/manager/", {"class": cls, "enabled": True})
 
     def _enable_attachments_for_hosts(self) -> HttpResponse:
         """Enable attachments for hosts."""
         return self._enable_attachments("Host")
 
-    def _add_attachment(
-        self, cls: str, obj: HubuumModel, content: bytes
-    ) -> HttpResponse:
+    def _add_attachment(self, cls: str, obj: HubuumModel, content: bytes) -> HttpResponse:
         """Add an attachment to an object."""
         file = self._create_test_file(content)
         return self.assert_post_and_201(
@@ -91,9 +87,7 @@ class HubuumAttachmentTestCase(APIv1Objects):
             format="multipart",
         )
 
-    def _create_test_file(
-        self, content: Union[bytes, None] = None
-    ) -> SimpleUploadedFile:
+    def _create_test_file(self, content: Union[bytes, None] = None) -> SimpleUploadedFile:
         """Create a test file."""
         if content is None:
             content = self.file_content
@@ -108,9 +102,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         self._enable_attachments_for_hosts()
         res = self.assert_get("/attachments/manager/Host")
 
-        self.assert_post_and_404(
-            "/attachments/manager/", {"class": "Hos", "enabled": True}
-        )
+        self.assert_post_and_404("/attachments/manager/", {"class": "Hos", "enabled": True})
 
         self.assertEqual(res.data["enabled"], True)
         self.assertTrue(res.data["enabled"])
@@ -144,12 +136,8 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
 
         # This will pass even though the per_object_total_size_limit is 0, as 0 is
         # considered unlimited.
-        self.assert_patch(
-            "/attachments/manager/Host", {"per_object_individual_size_limit": 20}
-        )
-        self.assert_patch(
-            "/attachments/manager/Host", {"per_object_total_size_limit": 100}
-        )
+        self.assert_patch("/attachments/manager/Host", {"per_object_individual_size_limit": 20})
+        self.assert_patch("/attachments/manager/Host", {"per_object_total_size_limit": 100})
 
         # Test that we can't set the total size limit to be smaller than the
         # individual size limit.
@@ -251,17 +239,13 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
 
         file_hash = hashlib.sha256(self.file_content).hexdigest()
 
-        file_meta = self.assert_get(
-            f"/attachments/data/Host/{host.id}/{res.data['id']}"
-        )
+        file_meta = self.assert_get(f"/attachments/data/Host/{host.id}/{res.data['id']}")
 
         self.assertEqual(file_meta.data["original_filename"], "test_file.txt")
         self.assertEqual(file_meta.data["size"], len(self.file_content))
         self.assertEqual(file_meta.data["sha256"], file_hash)
 
-        fileres = self.assert_get(
-            f"/attachments/data/Host/{host.id}/{res.data['id']}/download"
-        )
+        fileres = self.assert_get(f"/attachments/data/Host/{host.id}/{res.data['id']}/download")
 
         self.assertEqual(fileres.content, self.file_content)
 
@@ -289,9 +273,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         )
 
         new_host = self.hosts[1]
-        self.assert_get_and_404(
-            f"/attachments/data/Host/{new_host.id}/{att.data['id']}"
-        )
+        self.assert_get_and_404(f"/attachments/data/Host/{new_host.id}/{att.data['id']}")
 
     def test_attachment_filtering(self):
         """Test that filtering works."""
@@ -311,9 +293,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
 
         self.assert_get_elements("/attachments/data/", 4)
         self.assert_get_elements(f"/attachments/data/?sha256={sha256}", 1)
-        self.assert_get_elements(
-            f"/attachments/data/?sha256__endswith={sha256[-8:]}", 1
-        )
+        self.assert_get_elements(f"/attachments/data/?sha256__endswith={sha256[-8:]}", 1)
         self.assert_get_elements("/attachments/data/?sha256__contains=ee", 2)
 
         host_class_id = self.get_class_from_cache("Host").id
@@ -322,9 +302,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
 
         self.assert_get_elements(f"/attachments/data/?hubuum_class={host_class_id}", 1)
         self.assert_get_elements(f"/attachments/data/?hubuum_class={room_class_id}", 3)
-        self.assert_get_elements(
-            f"/attachments/data/?hubuum_class__name={room_class_name}", 3
-        )
+        self.assert_get_elements(f"/attachments/data/?hubuum_class__name={room_class_name}", 3)
 
         # No such class, no attachments
         self.assert_get_elements("/attachments/data/?hubuum_class=9999", 0)
@@ -350,9 +328,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         url = "/attachments/data/Room/?hubuum_object"
         self.assert_get_elements(f"{url}={room_one.id}", 1)
         self.assert_get_elements(f"{url}={room_two.id}", 2)
-        self.assert_get_elements(
-            f"/attachments/data/Room/?hubuum_object={room_two.id}", 2
-        )
+        self.assert_get_elements(f"/attachments/data/Room/?hubuum_object={room_two.id}", 2)
 
         name_url = "/attachments/data/Room/?hubuum_object__name"
 
@@ -362,9 +338,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
 
         self.assert_get_elements(f"{name_url}={room_two.name}&sha256__contains=e", 2)
         self.assert_get_elements(f"{name_url}={room_two.name}&sha256__endswith=ffff", 0)
-        self.assert_get_elements(
-            f"{name_url}={room_two.name}&sha256__endswith={sha256[-8:]}", 1
-        )
+        self.assert_get_elements(f"{name_url}={room_two.name}&sha256__endswith={sha256[-8:]}", 1)
 
         # Broken query string
         self.assert_get_and_400("/attachments/data/Room/?uname=room_two")
@@ -435,9 +409,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
         # Disable attachments for host, and try again
         host = self.hosts[0]
         self.assert_patch("/attachments/manager/Host", {"enabled": False})
-        self.assert_post_and_400(
-            f"/attachments/data/Host/{host.id}", format="multipart"
-        )
+        self.assert_post_and_400(f"/attachments/data/Host/{host.id}", format="multipart")
 
     def test_attachment_delete(self):
         """Test manually deleting an attachment."""
@@ -456,9 +428,7 @@ class HubuumAttachmentBasicTestCase(HubuumAttachmentTestCase):
 
         self.assert_delete(f"/attachments/data/Host/{host.id}/{att.data['id']}")
         self.assert_get_and_404(f"/attachments/data/Host/{host.id}/{att.data['id']}")
-        self.assert_get_and_404(
-            f"/attachments/data/Host/{host.id}/{att.data['id']}/download"
-        )
+        self.assert_get_and_404(f"/attachments/data/Host/{host.id}/{att.data['id']}/download")
 
     # TODO: patch.object?
     def _patch_path(self, cls: HubuumModel, function_name: str) -> str:

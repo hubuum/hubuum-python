@@ -93,8 +93,7 @@ def collapse_request_id(_: Any, __: Any, event_dict: EventDict) -> EventDict:
 def reorder_keys_processor(_: Any, __: Any, event_dict: EventDict) -> EventDict:
     """Reorder keys in a structlogs event_dict, ensuring that request_id is first."""
     event_dict = {
-        k: event_dict[k]
-        for k in sorted(event_dict.keys(), key=lambda k: k != "request_id")
+        k: event_dict[k] for k in sorted(event_dict.keys(), key=lambda k: k != "request_id")
     }
     return event_dict
 

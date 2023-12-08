@@ -427,9 +427,7 @@ class LogAnalyzer:
 
         return instances[0]
 
-    def _validate_response_content(
-        self, instance: Any, obj_data: Dict[str, Any]
-    ) -> None:
+    def _validate_response_content(self, instance: Any, obj_data: Dict[str, Any]) -> None:
         """Validate if a model instance matches the response content."""
         for key, value in obj_data.items():
             instance_value = getattr(instance, key)
@@ -470,9 +468,7 @@ class LogAnalyzer:
         )
         return {k: log[k] for k in ordered_keys}
 
-    def _check_log_values(
-        self, log: EventDict, expected_values: Dict[str, Any]
-    ) -> None:
+    def _check_log_values(self, log: EventDict, expected_values: Dict[str, Any]) -> None:
         """Check if the values in a log match the expected values.
 
         :param log: The log entry to check.

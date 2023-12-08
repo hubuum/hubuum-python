@@ -196,9 +196,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
             return f"/api/v1/{path[1:]}"
         return f"/api/v1/{path}"
 
-    def _assert_status_and_debug(
-        self, response: HttpResponse, expected_code: int
-    ) -> None:
+    def _assert_status_and_debug(self, response: HttpResponse, expected_code: int) -> None:
         """Print the response content if the status code is unexpected."""
         if not response.status_code == expected_code:
             path = f"{response.request['PATH_INFO']}{response.request['QUERY_STRING']}"
@@ -259,9 +257,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         self._assert_status_and_debug(response, status_code)
         return response
 
-    def assert_list_contains(
-        self, lst: List[Any], predicate: Callable[[Any], bool]
-    ) -> None:
+    def assert_list_contains(self, lst: List[Any], predicate: Callable[[Any], bool]) -> None:
         """Assert that a list contains at least one item matching a function."""
         for item in lst:
             if predicate(item):
@@ -296,9 +292,7 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
     #        """Delete and assert status as 409."""
     #        return self._assert_delete_and_status(path, 409, **kwargs)
 
-    def assert_get_elements(
-        self, path: str, element_count: int, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_get_elements(self, path: str, element_count: int, **kwargs: Any) -> HttpResponse:
         """Get and assert (status == 200 and element_count == elements)."""
         response = self.assert_get_and_200(path, **kwargs)
         self.assertEqual(len(response.data), element_count)
@@ -336,45 +330,31 @@ class HubuumAPITestCase(APITestCase):  # pylint: disable=too-many-public-methods
         """Patch and assert status as 200."""
         return self.assert_patch_and_200(path, *args, **kwargs)
 
-    def assert_patch_and_200(
-        self, path: str, *args: Any, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_patch_and_200(self, path: str, *args: Any, **kwargs: Any) -> HttpResponse:
         """Patch and assert status as 200."""
         return self._assert_patch_and_status(path, 200, *args, **kwargs)
 
-    def assert_patch_and_204(
-        self, path: str, *args: Any, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_patch_and_204(self, path: str, *args: Any, **kwargs: Any) -> HttpResponse:
         """Patch and assert status as 204."""
         return self._assert_patch_and_status(path, 204, *args, **kwargs)
 
-    def assert_patch_and_400(
-        self, path: str, *args: Any, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_patch_and_400(self, path: str, *args: Any, **kwargs: Any) -> HttpResponse:
         """Patch and assert status as 400."""
         return self._assert_patch_and_status(path, 400, *args, **kwargs)
 
-    def assert_patch_and_401(
-        self, path: str, *args: Any, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_patch_and_401(self, path: str, *args: Any, **kwargs: Any) -> HttpResponse:
         """Patch and assert status as 401."""
         return self._assert_patch_and_status(path, 401, *args, **kwargs)
 
-    def assert_patch_and_403(
-        self, path: str, *args: Any, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_patch_and_403(self, path: str, *args: Any, **kwargs: Any) -> HttpResponse:
         """Patch and assert status as 204."""
         return self._assert_patch_and_status(path, 403, *args, **kwargs)
 
-    def assert_patch_and_404(
-        self, path: str, *args: Any, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_patch_and_404(self, path: str, *args: Any, **kwargs: Any) -> HttpResponse:
         """Patch and assert status as 404."""
         return self._assert_patch_and_status(path, 404, *args, **kwargs)
 
-    def assert_patch_and_405(
-        self, path: str, *args: Any, **kwargs: Any
-    ) -> HttpResponse:
+    def assert_patch_and_405(self, path: str, *args: Any, **kwargs: Any) -> HttpResponse:
         """Patch and assert status as 405."""
         return self._assert_patch_and_status(path, 405, *args, **kwargs)
 

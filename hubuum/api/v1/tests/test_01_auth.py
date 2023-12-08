@@ -78,9 +78,7 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
         self.client = APIClient()
         # Using wrong credentials should result in a 401 unauthorized
         plaintext = "django"
-        User.objects.get_or_create(
-            username="testuser", password=make_password(plaintext)
-        )  # nosec
+        User.objects.get_or_create(username="testuser", password=make_password(plaintext))  # nosec
         auth = self.basic_auth("testuser", "almostdjango")
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=auth)

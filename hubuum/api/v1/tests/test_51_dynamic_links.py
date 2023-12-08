@@ -36,9 +36,7 @@ class HubuumObjectTestCase(APIv1Objects):
         # Sending {"namespace", foo} fails with an exception
         # namespace_id = request.data.get("namespace", None)
         # AttributeError: 'list' object has no attribute 'get'
-        nsret = self.assert_patch(
-            "/dynamic/Room/link/Host/", {"namespace": ns_create_ret.id}
-        )
+        nsret = self.assert_patch("/dynamic/Room/link/Host/", {"namespace": ns_create_ret.id})
         self.assertEqual(nsret.data["namespace"], ns_create_ret.id)
 
         # Try patching a non-existing namespace
@@ -358,9 +356,7 @@ class HubuumObjectTestCase(APIv1Objects):
             ],
         )
 
-        self.assert_get_and_404(
-            "/dynamic/Host/host1/links/Person/?transitive=true&max-depth=1"
-        )
+        self.assert_get_and_404("/dynamic/Host/host1/links/Person/?transitive=true&max-depth=1")
 
     def test_fetching_classes_and_objects(self) -> None:
         """Test fetching objects.

@@ -23,12 +23,8 @@ class APINamespace(HubuumAPITestCase):
     def test_field_validation(self):
         """Test that we can't write to read-only fields."""
         self.assert_post("/iam/namespaces/", {"name": "namespaceone"})
-        self.assert_patch_and_400(
-            "/iam/namespaces/namespaceone", {"created_at": "2022-01-01"}
-        )
-        self.assert_patch_and_400(
-            "/iam/namespaces/namespaceone", {"nosuchkey": "2022-01-01"}
-        )
+        self.assert_patch_and_400("/iam/namespaces/namespaceone", {"created_at": "2022-01-01"})
+        self.assert_patch_and_400("/iam/namespaces/namespaceone", {"nosuchkey": "2022-01-01"})
 
         # NOTICE: Comma, not colon. This leads to a set being serialized as a list...
         self.assert_patch_and_400("/iam/namespaces/namespaceone", {"not_a", "dict"})
@@ -62,15 +58,11 @@ class APINamespace(HubuumAPITestCase):
     def test_namespace_get_as_user(self):
         """Test get on namespaces as a normal user."""
         # This creates the user and the group in one go.
-        self.client = userclient = self.get_user_client(
-            username="tmp", groupname="tmpgroup"
-        )
+        self.client = userclient = self.get_user_client(username="tmp", groupname="tmpgroup")
         self.client = self.get_superuser_client()
         self.assert_post("/iam/namespaces/", {"name": "yes"})
         self.assert_post("/iam/namespaces/", {"name": "no"})
-        self.assert_post_and_204(
-            "/iam/namespaces/yes/groups/tmpgroup", {"has_read": True}
-        )
+        self.assert_post_and_204("/iam/namespaces/yes/groups/tmpgroup", {"has_read": True})
         self.assert_get_elements("/iam/namespaces/", 2)
 
         self.client = userclient
@@ -84,9 +76,7 @@ class APINamespace(HubuumAPITestCase):
     def test_namespace_patch_as_user(self):
         """Test patch on namespaces as a normal user."""
         # This creates the user and the group in one go.
-        self.client = userclient = self.get_user_client(
-            username="tmp", groupname="tmpgroup"
-        )
+        self.client = userclient = self.get_user_client(username="tmp", groupname="tmpgroup")
         self.client = self.get_superuser_client()
         self.assert_post("/iam/namespaces/", {"name": "yes"})
 
@@ -94,9 +84,7 @@ class APINamespace(HubuumAPITestCase):
         self.assert_patch_and_403("/iam/namespaces/yes", {"name": "maybe"})
 
         self.client = self.get_superuser_client()
-        self.assert_post_and_204(
-            "/iam/namespaces/yes/groups/tmpgroup", {"has_namespace": True}
-        )
+        self.assert_post_and_204("/iam/namespaces/yes/groups/tmpgroup", {"has_namespace": True})
 
         self.client = userclient
         self.assert_patch("/iam/namespaces/yes", {"name": "maybe"})
@@ -105,9 +93,7 @@ class APINamespace(HubuumAPITestCase):
     def test_namespace_delete_as_user(self):
         """Test delete on namespaces as a normal user."""
         # This creates the user and the group in one go.
-        self.client = userclient = self.get_user_client(
-            username="tmp", groupname="tmpgroup"
-        )
+        self.client = userclient = self.get_user_client(username="tmp", groupname="tmpgroup")
         self.client = self.get_superuser_client()
         self.assert_post("/iam/namespaces/", {"name": "yes"})
 
@@ -115,9 +101,7 @@ class APINamespace(HubuumAPITestCase):
         self.assert_delete_and_403("/iam/namespaces/yes")
 
         self.client = self.get_superuser_client()
-        self.assert_post_and_204(
-            "/iam/namespaces/yes/groups/tmpgroup", {"has_namespace": True}
-        )
+        self.assert_post_and_204("/iam/namespaces/yes/groups/tmpgroup", {"has_namespace": True})
 
         self.client = userclient
         self.assert_delete("/iam/namespaces/yes")
@@ -125,9 +109,7 @@ class APINamespace(HubuumAPITestCase):
 
     def test_namespace_has_namespace_as_user(self):
         """Test has_namespace on namespaces as a normal user."""
-        self.client = userclient = self.get_user_client(
-            username="tmp", groupname="tmpgroup"
-        )
+        self.client = userclient = self.get_user_client(username="tmp", groupname="tmpgroup")
         self.client = self.get_superuser_client()
         self.assert_post("/iam/namespaces/", {"name": "yes"})
 
@@ -135,9 +117,7 @@ class APINamespace(HubuumAPITestCase):
         self.assert_post_and_405("/iam/namespaces/yes", {"name": "subnamespace"})
 
         self.client = self.get_superuser_client()
-        self.assert_post_and_204(
-            "/iam/namespaces/yes/groups/tmpgroup", {"has_namespace": True}
-        )
+        self.assert_post_and_204("/iam/namespaces/yes/groups/tmpgroup", {"has_namespace": True})
 
         self.client = userclient
         self.assert_post_and_405("/iam/namespaces/yes", {"name": "subnamespace"})
@@ -161,9 +141,7 @@ class APINamespace(HubuumAPITestCase):
         grouptwo = self.assert_post("/iam/groups/", {"name": "grouptwo"})
         groupthree = self.assert_post("/iam/groups/", {"name": "groupthree"})
 
-        self.assert_post_and_204(
-            "/iam/namespaces/yes/groups/groupone", {"has_namespace": True}
-        )
+        self.assert_post_and_204("/iam/namespaces/yes/groups/groupone", {"has_namespace": True})
 
         self.assert_patch(
             "/iam/users/userone",

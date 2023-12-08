@@ -87,8 +87,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase, BasePopulator):
         return [
             d
             for d in cap_logs
-            if d.get("event")
-            not in {"has_perm_n", "has_perm", "m:get_object", "login_data"}
+            if d.get("event") not in {"has_perm_n", "has_perm", "m:get_object", "login_data"}
         ]
 
     def test_logging_of_namespace_get(self) -> None:
@@ -139,9 +138,7 @@ class HubuumLoggingTestCase(HubuumAPITestCase, BasePopulator):
 
     def test_logging_dynamic_object_creation(self) -> None:
         """Test logging of a dynamic object being created."""
-        self.assert_post(
-            "/dynamic/", {"name": "Testclass", "namespace": self.namespace.id}
-        )
+        self.assert_post("/dynamic/", {"name": "Testclass", "namespace": self.namespace.id})
         with capture_logs() as cap_logs:
             get_logger().bind()
             self.assert_post(

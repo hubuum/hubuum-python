@@ -34,9 +34,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
 
         self.namespaces: List[Namespace] = []
         for i in range(1, 4):
-            self.namespaces.append(
-                self._create_namespace(namespacename=f"namespace{i}")
-            )
+            self.namespaces.append(self._create_namespace(namespacename=f"namespace{i}"))
 
         self.namespace = self.namespaces[0]
 
@@ -65,9 +63,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
                 return cls
         raise ValueError(f"Class {name} not found")
 
-    def get_objects_from_cache(
-        self, cls_obj_str: str
-    ) -> Union[HubuumObject, List[HubuumObject]]:
+    def get_objects_from_cache(self, cls_obj_str: str) -> Union[HubuumObject, List[HubuumObject]]:
         """Get a list of dynamic objects from the internal cache.
 
         param cls_obj_str: A string of the form <class>.<object> or
@@ -159,9 +155,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
             {"max_links": max_links, "namespace": self.namespace.id},
         )
 
-    def create_object_link_via_api(
-        self, class1_obj1: str, class2_obj2: str
-    ) -> HttpResponse:
+    def create_object_link_via_api(self, class1_obj1: str, class2_obj2: str) -> HttpResponse:
         """Create a link between two objects.
 
         param class1_obj1: The class and object (class.object) of the source object
@@ -208,9 +202,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
                     pret: Dict[str, Any] = {
                         "name": returned["object"]["name"],
                         "class": returned["object"]["hubuum_class"],
-                        "path": [
-                            f"{d['hubuum_class']}.{d['name']}" for d in returned["path"]
-                        ],
+                        "path": [f"{d['hubuum_class']}.{d['name']}" for d in returned["path"]],
                     }
                     print(pret)
                 else:
@@ -226,9 +218,7 @@ class APIv1Empty(HubuumAPITestCase, BasePopulator):
             self.assertEqual(len(actual_data["path"]), len(expected_data["path"]))
 
             self.assertEqual(actual_data["object"]["name"], expected_data["name"])
-            self.assertEqual(
-                actual_data["object"]["hubuum_class"], expected_data["class"]
-            )
+            self.assertEqual(actual_data["object"]["hubuum_class"], expected_data["class"])
 
             # Check each path item against expected values
 

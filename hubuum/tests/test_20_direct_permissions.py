@@ -107,7 +107,5 @@ class PermissionsTestCase(TestCase):
             namespace=self.onehost.namespace, group=self.twogroup, has_read=True
         )
         self.assertTrue(self.two.has_perm(self.read_perm, self.onehost))
-        Permission.objects.filter(
-            namespace=self.onehost.namespace, group=self.twogroup
-        ).delete()
+        Permission.objects.filter(namespace=self.onehost.namespace, group=self.twogroup).delete()
         self.assertFalse(self.two.has_perm(self.read_perm, self.onehost))

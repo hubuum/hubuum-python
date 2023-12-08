@@ -28,9 +28,7 @@ class HubuumBaseConfig(HubuumAbstractConfig):
         "DEVELOPMENT_MODE": True,
     }
 
-    def __init__(
-        self, env: Dict[str, Any]
-    ) -> None:  # pylint: disable=super-init-not-called
+    def __init__(self, env: Dict[str, Any]) -> None:  # pylint: disable=super-init-not-called
         """Initialize the configuration class."""
         self._prefix = HubuumAbstractConfig.ROOT_PREFIX
         self._config = self.get_prefixed_pairs(self._prefix, env)
@@ -54,10 +52,7 @@ class HubuumBaseConfig(HubuumAbstractConfig):
     def create_secret_key(self) -> str:
         """Create a random secret key."""
         chars = (
-            "abcdefghijklmnopqrstuvwxyz"
-            "ABCDEFGHIJKLMNOPQRSTUVXYZ"
-            "0123456789"
-            "#()^[]-_*%&=+/"
+            "abcdefghijklmnopqrstuvwxyz" "ABCDEFGHIJKLMNOPQRSTUVXYZ" "0123456789" "#()^[]-_*%&=+/"
         )
         return "".join([random.SystemRandom().choice(chars) for _ in range(50)])
 

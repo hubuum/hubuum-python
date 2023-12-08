@@ -59,9 +59,7 @@ class HubuumBaseConfigTestCase(TestCase):
 
     def test_almost_empty_sqlite_configuration(self) -> None:
         """Test only setting the database engine to sqlite."""
-        config = self._create_config(
-            HUBUUM_DATABASE_ENGINE="django.db.backends.sqlite3"
-        )
+        config = self._create_config(HUBUUM_DATABASE_ENGINE="django.db.backends.sqlite3")
         self.assertIsNotNone(config)
         self.assertEqual(config.database.get("ENGINE"), "django.db.backends.sqlite3")
         self.assertEqual(config.database.get("NAME"), "hubuum")
