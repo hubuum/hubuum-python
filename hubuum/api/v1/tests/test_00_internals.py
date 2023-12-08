@@ -27,9 +27,7 @@ class APITokenAuthenticationTestCase(HubuumAPITestCase):
     def test_get_token_client_without_group(self):
         """_get_token_client raises an exception if no group is passed along with a username."""
         with pytest.raises(MissingParam):
-            self._get_token_client(
-                username="test_exceptions", superuser=False, staff=False
-            )
+            self._get_token_client(username="test_exceptions", superuser=False, staff=False)
 
 
 class InternalTestAPITestCase(HubuumAPITestCase):
@@ -58,9 +56,7 @@ class InternalTestAPITestCase(HubuumAPITestCase):
 
     def test_db_introspection(self):
         """Test that we have some semblance of consistency in our DB introspection."""
-        self.assertTrue(
-            True in [self.db_engine_is_postgresql(), self.db_engine_is_sqlite()]
-        )
+        self.assertTrue(True in [self.db_engine_is_postgresql(), self.db_engine_is_sqlite()])
         self.assertFalse(self.db_engine_is_postgresql() and self.db_engine_is_sqlite())
 
     def test_serializer_without_request(self):

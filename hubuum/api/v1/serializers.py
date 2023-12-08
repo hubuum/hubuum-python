@@ -153,9 +153,7 @@ class AttachmentManagerSerializer(HubuumMetaSerializer):
         if self.instance and isinstance(self.instance, AttachmentManager):
             obj = self.instance
             _per_object_total_size_limit = int(obj.per_object_total_size_limit)
-            _per_object_individual_size_limit = int(
-                obj.per_object_individual_size_limit
-            )
+            _per_object_individual_size_limit = int(obj.per_object_individual_size_limit)
 
         per_object_total_size_limit = attrs.get(
             "per_object_total_size_limit",
@@ -315,12 +313,8 @@ class ClassLinkSerializer(HubuumMetaSerializer):
 class ObjectLinkSerializer(serializers.ModelSerializer):  # type: ignore
     """Serializer for the ObjectLink model."""
 
-    source = serializers.SlugRelatedField(
-        slug_field="name", queryset=HubuumObject.objects.all()
-    )
-    target = serializers.SlugRelatedField(
-        slug_field="name", queryset=HubuumObject.objects.all()
-    )
+    source = serializers.SlugRelatedField(slug_field="name", queryset=HubuumObject.objects.all())
+    target = serializers.SlugRelatedField(slug_field="name", queryset=HubuumObject.objects.all())
 
     path = serializers.SerializerMethodField(required=False)
 

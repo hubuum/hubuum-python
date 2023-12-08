@@ -60,9 +60,7 @@ class Permission(HubuumModel):
         "Namespace", related_name="p_namespace", on_delete=models.CASCADE
     )
     # If the group the permission uses goes away, clear the entry.
-    group: int = models.ForeignKey(
-        "auth.Group", related_name="p_group", on_delete=models.CASCADE
-    )
+    group: int = models.ForeignKey("auth.Group", related_name="p_group", on_delete=models.CASCADE)
 
     has_create = models.BooleanField(null=False, default=False)
     has_read = models.BooleanField(null=False, default=False)
@@ -87,9 +85,7 @@ class Namespace(HubuumModel):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
 
-    def get_permissions_for_group(
-        self, group: Group, raise_exception: bool = True
-    ) -> Permission:
+    def get_permissions_for_group(self, group: Group, raise_exception: bool = True) -> Permission:
         """Try to find a permission object for the given group.
 
         param: group (Group instance)
@@ -129,9 +125,7 @@ class Namespace(HubuumModel):
         param: perm (permission string, 'has_[read|create|update|delete|namespace])
         return [group objects] (may be empty)
         """
-        qs = Permission.objects.filter(namespace=self.id, **{perm: True}).values(
-            "group"
-        )
+        qs = Permission.objects.filter(namespace=self.id, **{perm: True}).values("group")
         groups = Group.objects.filter(id__in=qs)
         return groups
 
@@ -148,9 +142,7 @@ class Namespace(HubuumModel):
 class User(AbstractUser):
     """Extension to the default User class."""
 
-    model_permissions_pattern = re.compile(
-        r"^hubuum.(create|read|update|delete|namespace)$"
-    )
+    model_permissions_pattern = re.compile(r"^hubuum.(create|read|update|delete|namespace)$")
     lookup_fields = ["id", "username", "email"]
 
     _group_list = None

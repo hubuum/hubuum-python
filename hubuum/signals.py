@@ -27,7 +27,7 @@ def _log_user_event(
     user: User,
     event: Dict[str, Any],
     level: int = logging.INFO,
-    **kwargs: Dict[str, Any]
+    **kwargs: Dict[str, Any],
 ) -> None:
     """Log user events."""
     user_label = None
@@ -70,29 +70,23 @@ def log_object_creation(
 
     if created:
         if model_name == "Migration":
-            migration_logger.bind(
-                model=model_name, id=identifier, **extra_fields
-            ).debug("created")
-        else:
-            object_logger.bind(model=model_name, id=identifier, **extra_fields).info(
+            migration_logger.bind(model=model_name, id=identifier, **extra_fields).debug(
                 "created"
             )
+        else:
+            object_logger.bind(model=model_name, id=identifier, **extra_fields).info("created")
     else:
-        object_logger.bind(model=model_name, id=identifier, **extra_fields).info(
-            "updated"
-        )
+        object_logger.bind(model=model_name, id=identifier, **extra_fields).info("updated")
 
 
 @receiver(post_delete)
-def log_object_deletion(
-    sender: Model, instance: object, **kwargs: Dict[str, Any]
-) -> None:
+def log_object_deletion(sender: Model, instance: object, **kwargs: Dict[str, Any]) -> None:
     """Log object deletion."""
     extra_fields = _extra_fields(sender, instance)
 
-    object_logger.bind(
-        model=sender.__name__, id=_identifier(instance), **extra_fields
-    ).info("deleted")
+    object_logger.bind(model=sender.__name__, id=_identifier(instance), **extra_fields).info(
+        "deleted"
+    )
 
 
 @receiver(user_logged_in)
@@ -102,9 +96,7 @@ def log_user_login(sender: Model, user: User, **kwargs: Dict[str, Any]) -> None:
 
 
 @receiver(user_login_failed)
-def log_user_login_failed(
-    sender: Model, user: User = None, **kwargs: Dict[str, Any]
-) -> None:
+def log_user_login_failed(sender: Model, user: User = None, **kwargs: Dict[str, Any]) -> None:
     """Log user login failures."""
     _log_user_event(sender, user, "failure", level=logging.ERROR)
 

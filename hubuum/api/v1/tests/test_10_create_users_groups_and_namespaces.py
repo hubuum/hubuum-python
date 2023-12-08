@@ -9,18 +9,14 @@ class APIUsersAndGroupsTestCase(HubuumAPITestCase):
     def test_staff_create_user(self):
         """Test authenticated user creation."""
         self.client = self.get_staff_client()
-        response = self.assert_post(
-            "/iam/users/", {"username": "userone", "password": "test"}
-        )
+        response = self.assert_post("/iam/users/", {"username": "userone", "password": "test"})
         data = response.json()
         self.assertEqual(data["username"], "userone")
 
     def test_user_create_user(self):
         """Test normal users ability to create users."""
         self.client = self.get_user_client()
-        self.assert_post_and_403(
-            "/iam/users/", {"username": "userone", "password": "test"}
-        )
+        self.assert_post_and_403("/iam/users/", {"username": "userone", "password": "test"})
 
     def test_list_users(self):
         """Test listing of users."""
@@ -188,9 +184,7 @@ class APIPreliminaryPermissionTestCase(HubuumAPITestCase):
         self.assert_post("/iam/groups/", {"name": "groupone"})
         self.assert_post("/iam/groups/", {"name": "grouptwo"})
 
-        self.assert_post_and_404(
-            "/iam/namespaces/namespacedoesnotexist/groups/groupone"
-        )
+        self.assert_post_and_404("/iam/namespaces/namespacedoesnotexist/groups/groupone")
         self.assert_post_and_204(
             "/iam/namespaces/namespaceone/groups/groupone",
             {"has_read": True},

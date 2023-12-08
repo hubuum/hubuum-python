@@ -104,9 +104,7 @@ class AttachmentManagerDetail(HubuumClassAndObjectMixin, HubuumDetail):
         try:
             return AttachmentManager.objects.get(hubuum_class=hubuum_class)
         except AttachmentManager.DoesNotExist as exc:
-            raise NotFound(
-                detail="No attachment manager found for {hubuum_class}."
-            ) from exc
+            raise NotFound(detail="No attachment manager found for {hubuum_class}.") from exc
 
 
 class AttachmentList(HubuumClassAndObjectMixin, generics.CreateAPIView, LoggingMixin):
@@ -164,9 +162,7 @@ class AttachmentDetail(HubuumClassAndObjectMixin, HubuumDetail):
         """Ensure adding the attachment won't exceed size limits."""
         attachment = cast(
             Attachment,
-            request.data.get(
-                "attachment", ParseError(detail="No attachment provided.")
-            ),
+            request.data.get("attachment", ParseError(detail="No attachment provided.")),
         )
         size = len(cast(bytes, attachment.read()))
         attachment.seek(0)
@@ -187,9 +183,7 @@ class AttachmentDetail(HubuumClassAndObjectMixin, HubuumDetail):
 
         return True
 
-    def _get_attachment(
-        self, request: Request, *args: Any, **kwargs: Any
-    ) -> Attachment:
+    def _get_attachment(self, request: Request, *args: Any, **kwargs: Any) -> Attachment:
         """Get an attachment object, or raise 404."""
         # This view is called by the URL pattern that includes the part:
         # /data/<class>/... as such there is now way to get here and have

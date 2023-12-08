@@ -43,10 +43,7 @@ class HubuumAbstractConfig:
         if not key.startswith(HubuumAbstractConfig.ROOT_PREFIX):
             fq_key = f"{HubuumAbstractConfig.ROOT_PREFIX}_"
 
-        if (
-            self._prefix not in key
-            and not self._prefix == HubuumAbstractConfig.ROOT_PREFIX
-        ):
+        if self._prefix not in key and not self._prefix == HubuumAbstractConfig.ROOT_PREFIX:
             fq_key = f"{fq_key}{self._prefix.upper()}_"
 
         return f"{fq_key}{key.upper()}"

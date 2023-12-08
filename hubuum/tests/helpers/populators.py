@@ -39,9 +39,7 @@ class BasePopulator:
         else:
             raise MissingParam(f"Model {model_name} not found.")
 
-    def create_class_direct(
-        self, name: str = "Test", namespace: Namespace = None
-    ) -> HubuumClass:
+    def create_class_direct(self, name: str = "Test", namespace: Namespace = None) -> HubuumClass:
         """Create a dynamic class.
 
         params: name: str (default: "Test")

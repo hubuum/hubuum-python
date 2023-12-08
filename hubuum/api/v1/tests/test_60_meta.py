@@ -40,9 +40,7 @@ class TestVersion(HubuumAPITestCase):
         self.assertEqual(response.json()["python"], sys.version)
         self.assertEqual(response.json()["django"], django.get_version())
         self.assertEqual(response.json()["rest_framework"], rest_framework.VERSION)
-        self.assertEqual(
-            response.json()["django-rest-knox"], module_versions["django-rest-knox"]
-        )
+        self.assertEqual(response.json()["django-rest-knox"], module_versions["django-rest-knox"])
 
     def test_runtimes_no_auth(self):
         """Test the runtimes endpoint without auth."""

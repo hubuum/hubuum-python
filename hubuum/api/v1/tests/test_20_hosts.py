@@ -11,9 +11,7 @@ class APIHostClean(APIv1Classes):
         """Create a host."""
         host_class = self.get_class_from_cache("Host")
         ns = namespace or self.namespace
-        return self.create_object_direct(
-            hubuum_class=host_class, namespace=ns, name=name
-        )
+        return self.create_object_direct(hubuum_class=host_class, namespace=ns, name=name)
 
     def test_host_listing_clean(self):
         """Test that a user sees the correct number of hosts."""
@@ -40,9 +38,7 @@ class APIHostClean(APIv1Classes):
         self.assert_get_elements("/dynamic/Host/", 0)
         self.assert_post_and_403("/dynamic/Host/", {"name": "yes", "namespace": ns.id})
         self.grant("tmpgroup", ns.name, ["has_create", "has_read"])
-        self.assert_post(
-            "/dynamic/Host/", {"name": "yes", "namespace": ns.id, "json_data": {}}
-        )
+        self.assert_post("/dynamic/Host/", {"name": "yes", "namespace": ns.id, "json_data": {}})
         self.assert_get("/dynamic/Host/yes")
 
     def test_user_delete_host(self):
@@ -51,9 +47,7 @@ class APIHostClean(APIv1Classes):
         self.client = self.get_user_client(username="tmp", groupname="tmpgroup")
         self.assert_get_elements("/dynamic/Host/", 0)
         self.assert_delete_and_403("/dynamic/Host/one")
-        self.grant(
-            "tmpgroup", self.namespace.name, ["has_create", "has_read", "has_delete"]
-        )
+        self.grant("tmpgroup", self.namespace.name, ["has_create", "has_read", "has_delete"])
         self.assert_get_elements("/dynamic/Host/", 1)
         self.assert_delete("/dynamic/Host/one")
         self.assert_get_and_404("/dynamic/Host/one")

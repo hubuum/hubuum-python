@@ -9,17 +9,13 @@ class HubuumFilterTestCase(APIv1Objects):
 
     def host_json_data_lookup(self, lookup: str, expected_results: int) -> None:
         """Test a JSON lookup on the Host model."""
-        self.assert_get_elements(
-            f"/dynamic/Host/?json_data_lookup={lookup}", expected_results
-        )
+        self.assert_get_elements(f"/dynamic/Host/?json_data_lookup={lookup}", expected_results)
 
     # These tests will differ on different database engines, but each coverage
     # pass only uses one engine, so we can't get 100% coverage.
     def test_database_specific_filtering(self):  # pragma: no cover
         """Test filters that differ between database engines."""
-        User.objects.create(
-            username="stafftestuser", email="staff@domain.COM", is_staff=True
-        )
+        User.objects.create(username="stafftestuser", email="staff@domain.COM", is_staff=True)
         # SQLite doesn't support case-sensitive lookup operators, so results may differ.
         # Here, on SQLite, we will match the user with staff@domain.COM, but on postgres,
         # we will NOT match due to case sensitivity.
@@ -33,9 +29,7 @@ class HubuumFilterTestCase(APIv1Objects):
 
     def test_user_filtering(self):
         """Test that filtering on fields in users works."""
-        test = User.objects.create(
-            username="testuser", email="test@domain.tld", is_staff=False
-        )
+        test = User.objects.create(username="testuser", email="test@domain.tld", is_staff=False)
         staff = User.objects.create(
             username="stafftestuser", email="staff@domain.COM", is_staff=True
         )
@@ -143,6 +137,4 @@ class HubuumFilterTestCase(APIv1Objects):
         # Here we have "weird": {"exact": "value"}, so weird__exact is valid,
         # but tests against the list, so we get zero hits.
         # See #76.
-        self.assert_get_elements(
-            "/dynamic/Host/?json_data_lookup=weird__exact=value", 0
-        )
+        self.assert_get_elements("/dynamic/Host/?json_data_lookup=weird__exact=value", 0)

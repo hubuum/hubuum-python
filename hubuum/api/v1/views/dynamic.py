@@ -122,9 +122,7 @@ class HubuumObjectList(DynamicListView):
             return HubuumObject.objects.none()
 
         classname = self.kwargs["classname"]
-        return HubuumObject.objects.filter(hubuum_class__name=classname).order_by(
-            "name"
-        )
+        return HubuumObject.objects.filter(hubuum_class__name=classname).order_by("name")
 
     def perform_create(self, serializer) -> None:  # type: ignore
         """Perform the create operation.
@@ -205,9 +203,7 @@ class HubuumObjectDetail(DynamicDetailView):
 class LinkAbstractView:
     """Abstract link class with shared utilities."""
 
-    def get_object_from_model(
-        self, model: str, error_message: str, **filter_args: Any
-    ) -> object:
+    def get_object_from_model(self, model: str, error_message: str, **filter_args: Any) -> object:
         """Retrieve an object from the given model."""
         try:
             return model.objects.get(**filter_args)

@@ -62,9 +62,7 @@ class IsSuperOrAdminOrReadOnly(IsAuthenticatedAndReadOnly):
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if we're super/admin otherwise authenticated readonly."""
         if is_super_or_admin(typed_user_from_request(request)):
-            auth_logger.debug(
-                "has_perm", role="superuser or admin", user=request.user.username
-            )
+            auth_logger.debug("has_perm", role="superuser or admin", user=request.user.username)
             return True
         return super().has_permission(request, view)
 
@@ -89,9 +87,7 @@ class IsSuperOrAdmin(IsAuthenticated):
     def has_permission(self, request: Request, view: APIView) -> bool:
         """Check if we're super/admin."""
         if is_super_or_admin(typed_user_from_request(request)):
-            auth_logger.debug(
-                "has_perm", role="superuser or admin", user=request.user.username
-            )
+            auth_logger.debug("has_perm", role="superuser or admin", user=request.user.username)
             return True
         return False
 

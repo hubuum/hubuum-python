@@ -5,14 +5,7 @@
 from typing import List, Tuple
 
 from django.contrib.auth.models import Group
-from django.db.models import (
-    ForeignKey,
-    ManyToManyField,
-    Model,
-    OneToOneField,
-    Q,
-    QuerySet,
-)
+from django.db.models import ForeignKey, ManyToManyField, Model, OneToOneField, Q, QuerySet
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
@@ -193,9 +186,7 @@ class JSONFieldLookupFilter(filters.CharFilter):
         if lookup_type not in allowed_lookups:
             valid_lookups = ", ".join(allowed_lookups)
             allowed_string = f"Allowed types for {val_type} are {valid_lookups}."
-            raise ValidationError(
-                f"Invalid lookup type '{lookup_type}'. {allowed_string}"
-            )
+            raise ValidationError(f"Invalid lookup type '{lookup_type}'. {allowed_string}")
 
         json_lookup = Q(**{f"{self.field_name}__{key}": val})
         return qs.filter(json_lookup)
@@ -224,9 +215,9 @@ class NamespacePermissionFilter(RaiseBadRequestOnBadFilter):
         if user.is_admin() or model_is_open(model_name):
             return queryset
 
-        res = Permission.objects.filter(
-            has_read=True, group__in=user.groups.all()
-        ).values_list("namespace", flat=True)
+        res = Permission.objects.filter(has_read=True, group__in=user.groups.all()).values_list(
+            "namespace", flat=True
+        )
         # print(res)
         # print(queryset)
         if model_name == "namespace":

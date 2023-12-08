@@ -10,9 +10,7 @@ from hubuum.tests.base import HubuumModelTestCase
 class DynamicBaseTestCase(HubuumModelTestCase):
     """Base class for testing dynamic structures."""
 
-    def create_class_direct(
-        self, name: str = "Test", namespace: Namespace = None
-    ) -> HubuumClass:
+    def create_class_direct(self, name: str = "Test", namespace: Namespace = None) -> HubuumClass:
         """Create a dynamic class."""
         if not namespace:
             namespace = self.namespace
@@ -33,9 +31,7 @@ class DynamicBaseTestCase(HubuumModelTestCase):
         }
         return cast(
             HubuumObject,
-            self._create_object(
-                model=HubuumObject, hubuum_class=hubuum_class, **attributes
-            ),
+            self._create_object(model=HubuumObject, hubuum_class=hubuum_class, **attributes),
         )
 
 
@@ -52,6 +48,4 @@ class HubuumClassTestCase(DynamicBaseTestCase):
         """Test creating a dynamic object."""
         hubuum_class = self.create_class_direct()
         dynamic_object = self.create_object_direct(hubuum_class=hubuum_class)
-        self.assertEqual(
-            dynamic_object.__str__(), f"{dynamic_object.name} [{hubuum_class.name}]"
-        )
+        self.assertEqual(dynamic_object.__str__(), f"{dynamic_object.name} [{hubuum_class.name}]")

@@ -79,9 +79,7 @@ class AttachmentManager(HubuumModel):
     hubuum_class = models.ForeignKey("HubuumClass", on_delete=models.CASCADE)
     enabled = models.BooleanField(default=False, null=False)
     per_object_count_limit = models.PositiveIntegerField(default=0, null=False)
-    per_object_individual_size_limit = models.PositiveIntegerField(
-        default=0, null=False
-    )
+    per_object_individual_size_limit = models.PositiveIntegerField(default=0, null=False)
     per_object_total_size_limit = models.PositiveIntegerField(default=0, null=False)
 
     class Meta:
@@ -148,9 +146,7 @@ class AttachmentModel(models.Model):
                 f"Attachments are not enabled for {self.hubuum_class.name}."
             )
 
-        return Attachment.objects.filter(
-            hubuum_class=self.hubuum_class, hubuum_object=self
-        )
+        return Attachment.objects.filter(hubuum_class=self.hubuum_class, hubuum_object=self)
 
     def attachment_count(self) -> int:
         """Return the number of attachments registered to the object."""
@@ -232,9 +228,7 @@ class HubuumClass(NamespacedHubuumModel):
         try:
             Draft7Validator.check_schema(schema)
         except SchemaError as e:
-            raise DRFValidationError(
-                f"The proposed schema is not valid: {str(e)}"
-            ) from e
+            raise DRFValidationError(f"The proposed schema is not valid: {str(e)}") from e
 
     def validate_additive_schema_change(self, new_schema: Dict[str, Any]) -> bool:
         """Validate that a proposed schema change is additive.
@@ -377,9 +371,7 @@ class HubuumObject(NamespacedHubuumModel, AttachmentModel):
     ) -> List[Dict[str, Union["HubuumObject", List["ObjectLink"]]]]:
         """Find all paths from self to any object of target_class."""
         # Get the possible paths and early exit if there's no possible link to the target_class.
-        possible_paths = self.hubuum_class.get_transitive_paths(
-            target_class, max_depth=max_depth
-        )
+        possible_paths = self.hubuum_class.get_transitive_paths(target_class, max_depth=max_depth)
         if not possible_paths:
             return []
 
@@ -394,9 +386,7 @@ class HubuumObject(NamespacedHubuumModel, AttachmentModel):
                 return [current_path]
 
             for link_type in possible_path:
-                object_links = current_path[-1].outbound_links.filter(
-                    link_type=link_type
-                )
+                object_links = current_path[-1].outbound_links.filter(link_type=link_type)
                 for link in object_links:
                     traversed_path.extend(
                         traverse(possible_path[1:], current_path + [link.target])
@@ -443,9 +433,7 @@ class ClassLink(NamespacedHubuumModel):
 
     def __str__(self) -> str:
         """Return a string representation of the ClassLink instance."""
-        return (
-            f"{self.source_class.name} <-> {self.target_class.name} ({self.max_links})"
-        )
+        return f"{self.source_class.name} <-> {self.target_class.name} ({self.max_links})"
 
 
 class ObjectLink(NamespacedHubuumModel):
