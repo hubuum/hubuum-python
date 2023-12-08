@@ -51,7 +51,6 @@ cryptography = "41.0.7"
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
 coverage = { version = "*", extras = ["toml"] }
-black = "*"
 pytest = "*"
 pytest-django = "*"
 pytest-xdist = "*"
@@ -68,10 +67,6 @@ mkdocstrings = { version = "0.22.0", extras = ["python"] }
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-max-line-length = 99
-exclude = "hubuum/migrations"
-
 [tool.coverage.run]
 source = ["hubuum", "hubuumsite"]
 # concurrency = multiprocessing
@@ -81,11 +76,6 @@ omit = ["hubuumsite/asgi.py", "hubuumsite/wsgi.py"]
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-
-[tool.isort]
-profile = "black"
-line_length = 99
-skip = "hubuum/migrations"
 
 [tool.ruff]
 select = [
@@ -120,6 +110,25 @@ ignore = [
     # to raise a ValueError if the arguments are exhausted at differing lengths. Added in python 3.10
     # and we support 3.7+.
     "B905",
+
+    # Rules disabled due to using ruff as a formatter. Most of these rules
+    # will thus be enforced by the formatter.
+    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191",   # Indentation contains tabs
+    "E111",   # Indentation is not a multiple of four
+    "E114",   # Indentation is not a multiple of four (comment)
+    "E117",   # Over-indented
+    "D206",   # Docstring should be indented with spaces, not tabs
+    "D300",   # Use """triple double quotes""" (found '''-quotes)
+    "Q000",   # Remove bad quotes (inlined)
+    "Q001",   # Remove bad quotes (multiline)
+    "Q002",   # Remove bad quotes (docstring)
+    "Q003",   # Avoidable escape quote
+    "COM812", # Missing trailing comma in Python 3.6+
+    "COM819", # Prohibited trailing comma    
+    "ISC001", # Implicit string concatenation (single line)
+    "ISC002", # Implicit string concatenation (multiline)
+
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
