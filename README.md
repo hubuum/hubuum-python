@@ -4,7 +4,7 @@
 ![Tests](https://github.com/terjekv/hubuum/actions/workflows/tox.yml/badge.svg)
 ![Lint](https://github.com/terjekv/hubuum/actions/workflows/lint.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/terjekv/hubuum/badge.svg?branch=main)](https://coveralls.io/github/terjekv/hubuum?branch=main)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3d9b2b09dbd6412fadc58c2e49f43c36)](https://app.codacy.com/gh/terjekv/hubuum?utm_source=github.com&utm_medium=referral&utm_content=terjekv/hubuum&utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/523425f94c274abe8d6d5528c51acab6)](https://app.codacy.com/gh/hubuum/hubuum/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-lightgrey.svg)](http://creativecommons.org/publicdomain/zero/1.0/)
 
 `Hubuum` (𒄷𒁍𒌝) in Sumerian translates as “axle” or “wheel assembly”,
