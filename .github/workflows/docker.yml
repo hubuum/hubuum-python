@@ -100,13 +100,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Download Docker image artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hubuum-linux-amd64
           path: hubuum_artifact/linux-amd64
 
       - name: Download Docker image artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hubuum-linux-arm64
           path: hubuum_artifact/linux-arm64
