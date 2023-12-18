@@ -81,7 +81,7 @@ jobs:
           docker save hubuum:${{ env.PLATFORM_TAG }} | gzip > hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
 
       - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hubuum-${{ env.PLATFORM_TAG }}
           path: hubuum_artifact/hubuum-${{ env.PLATFORM_TAG }}.tar.gz
