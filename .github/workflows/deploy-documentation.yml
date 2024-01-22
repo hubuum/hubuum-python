@@ -20,7 +20,7 @@ jobs:
           python-version: 3.x
 
       - name: Set up cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: mkdocs-material-${{ github.ref }} 
           path: .cache
