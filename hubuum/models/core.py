@@ -107,9 +107,9 @@ class Attachment(NamespacedHubuumModel):
 
         ordering = ["id"]
 
-    def generate_sha256_filename(self, sha256_hash: str):
-        """Generate a custom filename for the uploaded file using its sha256 hash."""
-        return f"attachments/file/{sha256_hash}"
+    def __str__(self) -> str:
+        """Stringify the object, used to represent the object towards users."""
+        return str(self.get_auto_id())
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Override the save method to compute the sha256 hash and size of the uploaded file."""
@@ -120,9 +120,9 @@ class Attachment(NamespacedHubuumModel):
         self.attachment.name = self.generate_sha256_filename(self.sha256)
         super().save(*args, **kwargs)
 
-    def __str__(self) -> str:
-        """Stringify the object, used to represent the object towards users."""
-        return str(self.get_auto_id())
+    def generate_sha256_filename(self, sha256_hash: str):
+        """Generate a custom filename for the uploaded file using its sha256 hash."""
+        return f"attachments/file/{sha256_hash}"
 
 
 class AttachmentModel(models.Model):
@@ -332,6 +332,14 @@ class HubuumObject(NamespacedHubuumModel, AttachmentModel):
         """
         return f"{self.name} [{self.hubuum_class.name}]"
 
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        """Save the HubuumObject instance.
+
+        Validates the instance data if validation is required.
+        """
+        self.validate_json()
+        super().save(*args, **kwargs)
+
     def has_schema(self) -> bool:
         """Determine if a JSON schema exists for the HubuumObject instance.
 
@@ -405,14 +413,6 @@ class HubuumObject(NamespacedHubuumModel, AttachmentModel):
                 paths.append({"object": objects[-1], "path": objects})
 
         return paths
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        """Save the HubuumObject instance.
-
-        Validates the instance data if validation is required.
-        """
-        self.validate_json()
-        super().save(*args, **kwargs)
 
 
 class ClassLink(NamespacedHubuumModel):
