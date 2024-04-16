@@ -99,6 +99,7 @@ class Namespace(HubuumModel):
         Raises
         ------
             exception: NotFound if raise_exception is True and no permission object is found
+
         """
         try:
             obj = Permission.objects.get(namespace=self, group=group)

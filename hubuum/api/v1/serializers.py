@@ -1,6 +1,7 @@
 # Meta is a bit bugged: https://github.com/microsoft/pylance-release/issues/3814
 # pyright: reportIncompatibleVariableOverride=false
 """Versioned (v1) serializers of the hubuum models."""
+
 import hashlib
 from typing import Any, Dict, List, cast
 

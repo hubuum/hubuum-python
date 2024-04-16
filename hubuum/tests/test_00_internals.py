@@ -1,4 +1,5 @@
 """Test module: Users and Groups."""
+
 from typing import List
 
 import pytest

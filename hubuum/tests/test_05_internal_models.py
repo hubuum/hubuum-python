@@ -1,4 +1,5 @@
 """Test module for the internal models."""
+
 from hubuum.models.iam import Namespace
 
 from .base import HubuumModelTestCase

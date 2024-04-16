@@ -1,4 +1,5 @@
 """Test module for the Attachment/AttachmentManager models."""
+
 import hashlib
 
 from django.core.files.uploadedfile import SimpleUploadedFile

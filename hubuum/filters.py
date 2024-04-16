@@ -2,6 +2,7 @@
 # pyright: reportIncompatibleVariableOverride=false
 
 """Filters for hubuum permissions."""
+
 from typing import List, Tuple
 
 from django.contrib.auth.models import Group

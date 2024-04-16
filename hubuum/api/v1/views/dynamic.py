@@ -375,6 +375,7 @@ class ObjectLinkListView(LinkAbstractView, ListCreateAPIView):  # type: ignore
     Methods
     -------
     - get_queryset: retrieves the queryset based on class name and object name/id
+
     """
 
     schema = DynamicAutoSchema(
