@@ -423,6 +423,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
@@ -842,6 +846,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
@@ -1671,6 +1679,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
@@ -2351,6 +2363,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
@@ -3072,6 +3088,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
@@ -3824,6 +3844,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
@@ -6190,6 +6214,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
@@ -7333,6 +7361,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "count",
+                    "results"
+                  ],
                   "properties": {
                     "count": {
                       "type": "integer",
