@@ -2,6 +2,7 @@
 
 This package is NOT allowed to import anything from internally in hubuum.
 """
+
 from typing import List, Union, cast
 
 from dateutil.parser import isoparse

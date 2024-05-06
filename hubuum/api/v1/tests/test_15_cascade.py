@@ -1,4 +1,5 @@
 """Test cascading effects on models."""
+
 from hubuum.models.iam import Namespace
 
 from .base import HubuumAPITestCase

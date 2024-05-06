@@ -1,4 +1,5 @@
 """Provide a base class for testing model behaviour."""
+
 from typing import Any, Dict
 
 from django.contrib.auth import get_user_model

@@ -1,4 +1,5 @@
 """IAM views for the API v1."""
+
 from typing import Any, Dict, cast
 
 from django.contrib.auth.models import Group

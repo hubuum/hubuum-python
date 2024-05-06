@@ -1,4 +1,5 @@
 """Permissions module for hubuum."""
+
 from typing import Dict, List, cast
 
 from django.contrib.auth.models import AbstractUser

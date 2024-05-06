@@ -1,4 +1,5 @@
 """Test namespaces."""
+
 from rest_framework.test import APIClient
 
 from .base import HubuumAPITestCase

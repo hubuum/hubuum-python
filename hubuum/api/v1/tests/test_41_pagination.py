@@ -1,4 +1,5 @@
 """Test the pagination in hubuum."""
+
 from typing import Dict, Union
 from urllib.parse import parse_qs, urlparse
 
