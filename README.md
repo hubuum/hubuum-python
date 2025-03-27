@@ -26,3 +26,8 @@ from all other systems and presents it in ways that are useful.
 
 Hubuum aims to have a small core of data models that track information gathered
 from Hubuum modules.
+
+## Archived
+
+This python version of Hubuum is being replaced by a Rust implementation and with slightly
+different semantics. As such, this code base is archived.
